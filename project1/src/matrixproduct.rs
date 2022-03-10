@@ -1,16 +1,16 @@
-use std::{thread,cmp,time::{Duration,Instant}};
+use std::{cmp,time::Instant};
 
 fn on_mult(m_ar:i32, m_br:i32) -> () {
     let mut temp:f64;
 
     let size:usize = (m_ar*m_ar) as usize;
 
-    let mut pha: Vec<f64> = vec![1.0;size];
+    let pha: Vec<f64> = vec![1.0;size];
     let mut phb: Vec<f64> = Vec::with_capacity(size);
     let mut phc: Vec<f64> = Vec::with_capacity(size);
 
-    for i in 0..m_br {
-        for j in 0..m_br {
+    for i in 0..size {
+        for _j in 0..m_br {
             phb.push((i+1) as f64);
         }
     }
