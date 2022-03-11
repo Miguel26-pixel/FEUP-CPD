@@ -42,9 +42,13 @@ fn on_mult(m_ar:i32, m_br:i32) -> () {
     println!();
 }
 
+fn on_mult_line(_m_ar:i32, _m_br:i32) -> () {
+
+}
+
 fn main() {
     let mut ret:i32;
-    let mut EventSet:i32 = PAPI_NULL;
+    let mut event_set:i32 = PAPI_NULL;
     let mut a:[i64;2] = [0,0];
     let values: *mut i64 = &mut a as *mut i64;
 
@@ -52,13 +56,13 @@ fn main() {
         ret = PAPI_library_init(PAPI_VER_CURRENT);
         assert_eq!(ret, PAPI_VER_CURRENT);
 
-        ret = PAPI_create_eventset(&mut EventSet);
+        ret = PAPI_create_eventset(&mut event_set);
         assert_eq!(ret as u32, PAPI_OK);
 
-        ret = PAPI_add_event(EventSet,PAPI_L1_DCM);
+        ret = PAPI_add_event(event_set,PAPI_L1_DCM);
         assert_eq!(ret as u32, PAPI_OK);
 
-        ret = PAPI_add_event(EventSet,PAPI_L2_DCM);
+        ret = PAPI_add_event(event_set,PAPI_L2_DCM);
         assert_eq!(ret as u32, PAPI_OK);
     }
 
@@ -91,14 +95,19 @@ fn main() {
         };
 
         unsafe {
-            ret = PAPI_start(EventSet);
+            ret = PAPI_start(event_set);
             assert_eq!(ret as u32, PAPI_OK);
         }
+
         if option == "1\n" {
             on_mult(size, size);
         }
+        if option == "2\n" {
+            on_mult_line(size, size);
+        }
+
         unsafe {
-            ret = PAPI_stop(EventSet, values);
+            ret = PAPI_stop(event_set, values);
             assert_eq!(ret as u32, PAPI_OK);
         }
 
@@ -107,13 +116,13 @@ fn main() {
     }
 
     unsafe {
-        ret = PAPI_remove_event( EventSet, PAPI_L1_DCM );
+        ret = PAPI_remove_event( event_set, PAPI_L1_DCM );
         assert_eq!(ret as u32, PAPI_OK);
 
-        ret = PAPI_remove_event( EventSet, PAPI_L2_DCM );
+        ret = PAPI_remove_event( event_set, PAPI_L2_DCM );
         assert_eq!(ret as u32, PAPI_OK);
 
-        ret = PAPI_destroy_eventset( &mut EventSet );
+        ret = PAPI_destroy_eventset( &mut event_set );
         assert_eq!(ret as u32, PAPI_OK);
     }
 }
