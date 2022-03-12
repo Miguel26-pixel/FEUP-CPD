@@ -107,12 +107,10 @@ void init_papi() {
 
 int main (int argc, char *argv[])
 {
-
-	char c;
-	int lin, col, blockSize;
-	int op;
+	int matrixSize, blockSize;
+	int operation;
 	
-	int EventSet = PAPI_NULL;
+	int PAPIEvents = PAPI_NULL;
   	long long values[2];
   	int ret;
 	
@@ -122,73 +120,78 @@ int main (int argc, char *argv[])
 		std::cout << "FAIL" << std::endl;
 
 
-	ret = PAPI_create_eventset(&EventSet);
+	ret = PAPI_create_eventset(&PAPIEvents);
 		if (ret != PAPI_OK) std::cout << "ERROR: create eventset" << std::endl;
 
 
-	ret = PAPI_add_event(EventSet,PAPI_L1_DCM );
+	ret = PAPI_add_event(PAPIEvents,PAPI_L1_DCM );
 	if (ret != PAPI_OK) std::cout << "ERROR: PAPI_L1_DCM" << std::endl;
 
 
-	ret = PAPI_add_event(EventSet,PAPI_L2_DCM);
+	ret = PAPI_add_event(PAPIEvents,PAPI_L2_DCM);
 	if (ret != PAPI_OK) std::cout << "ERROR: PAPI_L2_DCM" << std::endl;
 
 
-	op=1;
+	operation=1;
 	do {
-		std::cout << std::endl << "1. Multiplication" << std::endl;
-		std::cout << "2. Line Multiplication" << std::endl;
-		std::cout << "3. Block Multiplication" << std::endl;
-		std::cout << "Selection?: ";
-		std::cin >>op;
-		if (op == 0)
+		std::cout << std::endl << "1. Multiplication" << std::endl 
+			<< "2. Line Multiplication" << std::endl
+			<< "3. Block Multiplication" << std::endl
+			<< "Selection?: ";
+		
+		std::cin >>operation;
+		
+		if (operation == 0)
 			break;
-		printf("Dimensions: lins=cols ? ");
-   		std::cin >> lin;
-   		col = lin;
+		
+		
+		std::cout << "Matrix Size: ";
+   		std::cin >> matrixSize;
 
+		
+		ret = PAPI_start(PAPIEvents);
+		if (ret != PAPI_OK)
+			std::cout << "ERROR: Start PAPI" << std::endl;
 
-		// Start counting
-		ret = PAPI_start(EventSet);
-		if (ret != PAPI_OK) std::cout << "ERROR: Start PAPI" << std::endl;
-
-		switch (op){
-			case 1: 
-				OnMult(lin, col);
+		switch (operation){
+			case 1:
+				OnMult(matrixSize, matrixSize);
 				break;
 			case 2:
-				OnMultLine(lin, col);  
+				OnMultLine(matrixSize, matrixSize);  
 				break;
 			case 3:
 				std::cout << "Block Size? ";
 				std::cin >> blockSize;
-				OnMultBlock(lin, col, blockSize);  
+				
+				OnMultBlock(matrixSize, matrixSize, blockSize);  
 				break;
 
 		}
 
-  		ret = PAPI_stop(EventSet, values);
+  		ret = PAPI_stop(PAPIEvents, values);
   		if (ret != PAPI_OK) std::cout << "ERROR: Stop PAPI" << std::endl;
-  		printf("L1 DCM: %lld \n",values[0]);
-  		printf("L2 DCM: %lld \n",values[1]);
 
-		ret = PAPI_reset( EventSet );
-		if ( ret != PAPI_OK )
+		std::cout << "L1 Cache Misses: " << values[0] << std::endl 
+			<< "L2 Cache Misses: " << values[1] << std::endl; 
+
+		ret = PAPI_reset(PAPIEvents);
+		if (ret != PAPI_OK)
 			std::cout << "FAIL reset" << std::endl; 
 
 
 
-	}while (op != 0);
+	}while (operation != 0);
 
-	ret = PAPI_remove_event( EventSet, PAPI_L1_DCM );
+	ret = PAPI_remove_event( PAPIEvents, PAPI_L1_DCM );
 	if ( ret != PAPI_OK )
 		std::cout << "FAIL remove event" << std::endl; 
 
-	ret = PAPI_remove_event( EventSet, PAPI_L2_DCM );
+	ret = PAPI_remove_event( PAPIEvents, PAPI_L2_DCM );
 	if ( ret != PAPI_OK )
 		std::cout << "FAIL remove event" << std::endl; 
 
-	ret = PAPI_destroy_eventset( &EventSet );
+	ret = PAPI_destroy_eventset( &PAPIEvents );
 	if ( ret != PAPI_OK )
 		std::cout << "FAIL destroy" << std::endl;
 
