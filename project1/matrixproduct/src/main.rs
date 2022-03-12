@@ -49,8 +49,8 @@ fn on_mult_line(_m_ar:i32, _m_br:i32) -> () {
 fn main() {
     let mut ret:i32;
     let mut event_set:i32 = PAPI_NULL;
-    let mut a:[i64;2] = [0,0];
-    let values: *mut i64 = &mut a as *mut i64;
+    let mut cache_miss_count:[i64;2] = [0,0];
+    let values: *mut i64 = &mut cache_miss_count as *mut i64;
 
     unsafe {
         ret = PAPI_library_init(PAPI_VER_CURRENT);
@@ -111,8 +111,8 @@ fn main() {
             assert_eq!(ret as u32, PAPI_OK);
         }
 
-        println!("L1 DCM: {}",a[0]);
-        println!("L2 DCM: {}",a[1]);
+        println!("L1 Cache Misses: {}",cache_miss_count[0]);
+        println!("L2 Cache Misses: {}",cache_miss_count[1]);
     }
 
     unsafe {
