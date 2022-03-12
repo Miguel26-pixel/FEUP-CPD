@@ -7,9 +7,9 @@ const PAPI_L2_DCM: i32 = -2147483646;
 fn matrix_multiplication(matrix_size: i32) -> () {
     let mut dot_product:f64;
 
-    let first_factor: Vec<f64> = vec![1.0;matrix_size as usize];
-    let mut second_factor: Vec<f64> = Vec::with_capacity(matrix_size as usize);
-    let mut result_matrix: Vec<f64> = Vec::with_capacity(matrix_size as usize);
+    let first_factor: Vec<f64> = vec![1.0;(matrix_size*matrix_size) as usize];
+    let mut second_factor: Vec<f64> = Vec::with_capacity((matrix_size*matrix_size) as usize);
+    let mut result_matrix: Vec<f64> = Vec::with_capacity((matrix_size*matrix_size) as usize);
 
     for i in 0..matrix_size {
         for _j in 0..matrix_size {
