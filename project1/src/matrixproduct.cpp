@@ -65,10 +65,61 @@ void matrixMultiplication(int matrixSize)
 }
 
 // add code here for line x line matriz multiplication
-void OnMultLine(int m_ar, int m_br)
-{
-    
-    
+void matrixLineMultiplication(int matrixSize) {
+    SYSTEMTIME Time1, Time2;
+		
+	double dotProduct;
+	int i, j, k;
+
+	double *firstFactor, *secondFactor, *resultMatrix;
+
+    firstFactor = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+	secondFactor = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+	resultMatrix = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+
+	for(i = 0; i < matrixSize; i++)
+		for(j = 0; j < matrixSize; j++)
+			firstFactor[i * matrixSize + j] = (double) 1.0;
+
+
+
+	for(i = 0; i < matrixSize; i++)
+		for(j = 0; j < matrixSize; j++)
+			secondFactor[i * matrixSize + j] = (double) (i+1);
+
+	for(i = 0; i < matrixSize; i++)
+		for(j = 0; j < matrixSize; j++)
+			resultMatrix[i * matrixSize + j] = (double) 0.0;
+
+	
+
+    Time1 = clock();
+
+	for (i = 0; i < matrixSize; i++) {
+		for (j = 0; j < matrixSize; j++) {
+			for (k = 0; k < matrixSize; k++) {
+				resultMatrix[i * matrixSize + k] += firstFactor[i * matrixSize + j] * secondFactor[j * matrixSize + k];
+			}
+		}
+	}
+
+
+    Time2 = clock();
+
+	std::cout << "Elapsed time: " << (double)(Time2 - Time1) / CLOCKS_PER_SEC << "s" << std::endl;
+
+	// display 10 elements of the result matrix tto verify correctness
+	std::cout << "First 10 elements of the result matrix: " << std::endl;
+	
+	for(i = 0; i < 1; i++) {	
+		for(j = 0; j < std::min(10, matrixSize); j++)
+			std::cout << resultMatrix[j] << " ";
+	}
+	std::cout << std::endl;
+
+    free(firstFactor);
+    free(secondFactor);
+    free(resultMatrix);
 }
 
 // add code here for block x block matriz multiplication
@@ -153,7 +204,7 @@ int main (int argc, char *argv[])
 				matrixMultiplication(matrixSize);
 				break;
 			case 2:
-				OnMultLine(matrixSize, matrixSize);  
+				matrixLineMultiplication(matrixSize);  
 				break;
 			case 3:
 				std::cout << "Block Size? ";
