@@ -40,8 +40,36 @@ fn matrix_multiplication(matrix_size: i32) -> () {
     println!();
 }
 
-fn on_mult_line(_m_ar:i32, _m_br:i32) -> () {
+fn matrix_line_multiplication(matrix_size: i32) -> () {
+    let first_factor: Vec<f64> = vec![1.0;(matrix_size*matrix_size) as usize];
+    let mut second_factor: Vec<f64> = Vec::with_capacity((matrix_size*matrix_size) as usize);
+    let mut result_matrix: Vec<f64> = vec![0.0;(matrix_size*matrix_size) as usize];
 
+    for i in 0..matrix_size {
+        for _j in 0..matrix_size {
+            second_factor.push((i+1) as f64);
+        }
+    }
+
+    let now = Instant::now();
+
+    for i in 0..matrix_size {
+        for j in 0..matrix_size {
+            for k in 0..matrix_size {
+                result_matrix[(i * matrix_size + k) as usize] += first_factor[(i * matrix_size + j) as usize] * second_factor[(j * matrix_size + k) as usize];
+            }
+        }
+    }
+
+    let elapsed_time = now.elapsed();
+
+    println!("Time: {} seconds", elapsed_time.as_millis());
+
+    for j in 0..cmp::min(10,matrix_size) {
+        print!("{} ",result_matrix[j as usize]);
+    }
+
+    println!();
 }
 
 fn main() {
@@ -102,7 +130,7 @@ fn main() {
             matrix_multiplication(matrix_size);
         }
         if option == "2\n" {
-            on_mult_line(matrix_size, matrix_size);
+            matrix_line_multiplication(matrix_size);
         }
 
         unsafe {
