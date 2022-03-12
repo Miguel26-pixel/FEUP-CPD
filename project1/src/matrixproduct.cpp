@@ -68,7 +68,6 @@ void matrixMultiplication(int matrixSize)
 void matrixLineMultiplication(int matrixSize) {
     SYSTEMTIME Time1, Time2;
 		
-	double dotProduct;
 	int i, j, k;
 
 	double *firstFactor, *secondFactor, *resultMatrix;
