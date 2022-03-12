@@ -7,66 +7,61 @@
 
 #define SYSTEMTIME clock_t
  
-void OnMult(int m_ar, int m_br) 
+void matrixMultiplication(int matrixSize) 
 {
 	
 	SYSTEMTIME Time1, Time2;
-	
-	char st[100];
-	double temp;
+		
+	double dotProduct;
 	int i, j, k;
 
-	double *pha, *phb, *phc;
-	
+	double *firstFactor, *secondFactor, *resultMatrix;
 
-		
-    pha = (double *)malloc((m_ar * m_ar) * sizeof(double));
-	phb = (double *)malloc((m_ar * m_ar) * sizeof(double));
-	phc = (double *)malloc((m_ar * m_ar) * sizeof(double));
+    firstFactor = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+	secondFactor = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+	resultMatrix = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
 
-	for(i=0; i<m_ar; i++)
-		for(j=0; j<m_ar; j++)
-			pha[i*m_ar + j] = (double)1.0;
+	for(i = 0; i < matrixSize; i++)
+		for(j = 0; j < matrixSize; j++)
+			firstFactor[i * matrixSize + j] = (double) 1.0;
 
 
 
-	for(i=0; i<m_br; i++)
-		for(j=0; j<m_br; j++)
-			phb[i*m_br + j] = (double)(i+1);
+	for(i = 0; i < matrixSize; i++)
+		for(j = 0; j < matrixSize; j++)
+			secondFactor[i * matrixSize + j] = (double) (i+1);
 
 
 
     Time1 = clock();
 
-	for(i=0; i<m_ar; i++)
-	{	for( j=0; j<m_br; j++)
-		{	temp = 0;
-			for( k=0; k<m_ar; k++)
-			{	
-				temp += pha[i*m_ar+k] * phb[k*m_br+j];
+	for(i = 0; i < matrixSize; i++) {
+		for(j = 0; j < matrixSize; j++) {	
+			dotProduct = 0;
+			for(k= 0; k < matrixSize; k++) {	
+				dotProduct += firstFactor[i * matrixSize + k] * secondFactor[k * matrixSize + j];
 			}
-			phc[i*m_ar+j]=temp;
+			resultMatrix[i * matrixSize + j] = dotProduct;
 		}
 	}
 
 
     Time2 = clock();
-	sprintf(st, "Time: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
-	std::cout << st;
+
+	std::cout << "Elapsed time: " << (double)(Time2 - Time1) / CLOCKS_PER_SEC << "s" << std::endl;
 
 	// display 10 elements of the result matrix tto verify correctness
-	std::cout << "Result matrix: " << std::endl;
-	for(i=0; i<1; i++)
-	{	for(j=0; j<std::min(10,m_br); j++)
-			std::cout << phc[j] << " ";
+	std::cout << "First 10 elements of the result matrix: " << std::endl;
+	
+	for(i = 0; i < 1; i++) {	
+		for(j = 0; j < std::min(10, matrixSize); j++)
+			std::cout << resultMatrix[j] << " ";
 	}
 	std::cout << std::endl;
 
-    free(pha);
-    free(phb);
-    free(phc);
-	
-	
+    free(firstFactor);
+    free(secondFactor);
+    free(resultMatrix);
 }
 
 // add code here for line x line matriz multiplication
@@ -155,7 +150,7 @@ int main (int argc, char *argv[])
 
 		switch (operation){
 			case 1:
-				OnMult(matrixSize, matrixSize);
+				matrixMultiplication(matrixSize);
 				break;
 			case 2:
 				OnMultLine(matrixSize, matrixSize);  
