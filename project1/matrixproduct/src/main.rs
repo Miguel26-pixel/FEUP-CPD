@@ -4,30 +4,28 @@ use std::{io,cmp,time::Instant};
 const PAPI_L1_DCM: i32 = -2147483648;
 const PAPI_L2_DCM: i32 = -2147483646;
 
-fn on_mult(m_ar:i32, m_br:i32) -> () {
-    let mut temp:f64;
+fn matrix_multiplication(matrix_size: i32) -> () {
+    let mut dot_product:f64;
 
-    let size:usize = (m_ar*m_ar) as usize;
+    let first_factor: Vec<f64> = vec![1.0;matrix_size as usize];
+    let mut second_factor: Vec<f64> = Vec::with_capacity(matrix_size as usize);
+    let mut result_matrix: Vec<f64> = Vec::with_capacity(matrix_size as usize);
 
-    let pha: Vec<f64> = vec![1.0;size];
-    let mut phb: Vec<f64> = Vec::with_capacity(size);
-    let mut phc: Vec<f64> = Vec::with_capacity(size);
-
-    for i in 0..size {
-        for _j in 0..m_br {
-            phb.push((i+1) as f64);
+    for i in 0..matrix_size {
+        for _j in 0..matrix_size {
+            second_factor.push((i+1) as f64);
         }
     }
 
     let now = Instant::now();
 
-    for i in 0..m_ar {
-        for j in 0..m_br {
-            temp = 0.0;
-            for k in 0..m_ar {
-                temp += pha[(i*m_ar+k) as usize] * phb[(k*m_br+j) as usize];
+    for i in 0..matrix_size {
+        for j in 0..matrix_size {
+            dot_product = 0.0;
+            for k in 0..matrix_size {
+                dot_product += first_factor[(i*matrix_size+k) as usize] * second_factor[(k*matrix_size+j) as usize];
             }
-            phc.push(temp);
+            result_matrix.push(dot_product);
         }
     }
 
@@ -35,8 +33,8 @@ fn on_mult(m_ar:i32, m_br:i32) -> () {
 
     println!("Time: {} seconds", elapsed_time.as_millis());
 
-    for j in 0..cmp::min(10,m_br) {
-        print!("{} ",phc[j as usize]);
+    for j in 0..cmp::min(10,matrix_size) {
+        print!("{} ",result_matrix[j as usize]);
     }
 
     println!();
@@ -49,8 +47,8 @@ fn on_mult_line(_m_ar:i32, _m_br:i32) -> () {
 fn main() {
     let mut ret:i32;
     let mut event_set:i32 = PAPI_NULL;
-    let mut a:[i64;2] = [0,0];
-    let values: *mut i64 = &mut a as *mut i64;
+    let mut cache_miss_count:[i64;2] = [0,0];
+    let values: *mut i64 = &mut cache_miss_count as *mut i64;
 
     unsafe {
         ret = PAPI_library_init(PAPI_VER_CURRENT);
@@ -87,10 +85,11 @@ fn main() {
         let stdin = io::stdin(); // We get `Stdin` here.
         stdin.read_line(&mut buffer).unwrap();
 
-        let size:i32;
+        let matrix_size: i32;
         let trimmed = buffer.trim();
+        
         match trimmed.parse::<i32>() {
-            Ok(i) => size = i,
+            Ok(i) => matrix_size = i,
             Err(..) => continue,
         };
 
@@ -100,10 +99,10 @@ fn main() {
         }
 
         if option == "1\n" {
-            on_mult(size, size);
+            matrix_multiplication(matrix_size);
         }
         if option == "2\n" {
-            on_mult_line(size, size);
+            on_mult_line(matrix_size, matrix_size);
         }
 
         unsafe {
@@ -111,8 +110,8 @@ fn main() {
             assert_eq!(ret as u32, PAPI_OK);
         }
 
-        println!("L1 DCM: {}",a[0]);
-        println!("L2 DCM: {}",a[1]);
+        println!("L1 Cache Misses: {}",cache_miss_count[0]);
+        println!("L2 Cache Misses: {}",cache_miss_count[1]);
     }
 
     unsafe {
