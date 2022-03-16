@@ -77,20 +77,11 @@ void matrixLineMultiplication(int matrixSize) {
 	resultMatrix = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
 
 	for(i = 0; i < matrixSize; i++)
-		for(j = 0; j < matrixSize; j++)
-			firstFactor[i * matrixSize + j] = (double) 1.0;
-
-
-
-	for(i = 0; i < matrixSize; i++)
-		for(j = 0; j < matrixSize; j++)
+		for(j = 0; j < matrixSize; j++) {
+			firstFactor[i * matrixSize + j]  = (double) 1.0;
 			secondFactor[i * matrixSize + j] = (double) (i+1);
-
-	for(i = 0; i < matrixSize; i++)
-		for(j = 0; j < matrixSize; j++)
 			resultMatrix[i * matrixSize + j] = (double) 0.0;
-
-	
+		}
 
     Time1 = clock();
 
