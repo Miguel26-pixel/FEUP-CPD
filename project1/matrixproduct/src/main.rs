@@ -31,7 +31,7 @@ fn matrix_multiplication(matrix_size: i32) -> () {
 
     let elapsed_time = now.elapsed();
 
-    println!("Time: {} seconds", elapsed_time.as_millis());
+    println!("Time: {} miliseconds", elapsed_time.as_millis());
 
     for j in 0..cmp::min(10,matrix_size) {
         print!("{} ",result_matrix[j as usize]);
