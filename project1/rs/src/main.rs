@@ -1,6 +1,5 @@
 use papi_sys::*;
-use std::{time::Instant};
-use std::os::raw::c_longlong;
+use std::{time::Instant, fs::File, os::raw::c_longlong, io::prelude::Write};
 
 const PAPI_L1_DCM: i32 = -2147483648;
 const PAPI_L2_DCM: i32 = -2147483646;
@@ -137,21 +136,69 @@ fn main() {
 
     let event_set = papi_init();
 
-    let results = match algorithm.as_str() {
-        "dot" => dot_product(1024, event_set),
-        "line" => line_multiplication(1024, event_set),
-        "block" => [0, 0, 0],
+    let mut results: [u128; 3];
+
+    match algorithm.as_str() {
+        "dot" => {
+            let mut file: File = File::create("rs_dot_product_metrics.txt").unwrap();
+            for size in (600..=3000).step_by(400) {
+                results = dot_product(size, event_set);
+
+                file.write(size.to_string().as_bytes()).expect("Unable to write to file.");
+                file.write(";".as_bytes()).expect("Unable to write to file");
+                
+                file.write(results[0].to_string().as_bytes()).expect("Unable to write to file.");
+                file.write(";".as_bytes()).expect("Unable to write to file");
+                
+                file.write(results[1].to_string().as_bytes()).expect("Unable to write to file.");
+                file.write(";".as_bytes()).expect("Unable to write to file");
+                
+                file.write(results[2].to_string().as_bytes()).expect("Unable to write to file.");
+                file.write("\n".as_bytes()).expect("Unable to write to file");
+            }
+        },
+        "line" => {
+            let mut file: File = File::create("rs_line_multiplication_metrics.txt").unwrap();
+            for size in (600..=3000).step_by(400) {
+                results = line_multiplication(size, event_set);
+
+                file.write(size.to_string().as_bytes()).expect("Unable to write to file.");
+                file.write(";".as_bytes()).expect("Unable to write to file");
+                
+                file.write(results[0].to_string().as_bytes()).expect("Unable to write to file.");
+                file.write(";".as_bytes()).expect("Unable to write to file");
+                
+                file.write(results[1].to_string().as_bytes()).expect("Unable to write to file.");
+                file.write(";".as_bytes()).expect("Unable to write to file");
+                
+                file.write(results[2].to_string().as_bytes()).expect("Unable to write to file.");
+                file.write("\n".as_bytes()).expect("Unable to write to file");
+            }
+
+            file = File::create("rs_line_multiplication_extended_metrics.txt").unwrap();
+            for size in (4096..=10240).step_by(2048) {
+                results = line_multiplication(size, event_set);
+
+                file.write(size.to_string().as_bytes()).expect("Unable to write to file.");
+                file.write(";".as_bytes()).expect("Unable to write to file");
+                
+                file.write(results[0].to_string().as_bytes()).expect("Unable to write to file.");
+                file.write(";".as_bytes()).expect("Unable to write to file");
+                
+                file.write(results[1].to_string().as_bytes()).expect("Unable to write to file.");
+                file.write(";".as_bytes()).expect("Unable to write to file");
+                
+                file.write(results[2].to_string().as_bytes()).expect("Unable to write to file.");
+                file.write("\n".as_bytes()).expect("Unable to write to file");
+            }
+        },
+        "block" => {
+
+        },
         _ => {
             println!("Invalid argument. Correct usage: ./matrixproduct <dot | line | block>");
-            [0, 0, 0]
         }
     };
 
     papi_destroy(event_set);
-    
-    if results == [0, 0, 0] {
-        return ();
-    }
-
-    println!("{:?}", results);
 }
