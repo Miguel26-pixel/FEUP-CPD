@@ -134,21 +134,16 @@ void OnMultBlock(int m_ar, int m_br, int bkSize)
 
 	Time1 = clock();
 
-	int k, I, J, K;
+	int k, ii, jj, kk;
 	double block;
-	for (J=0 ; J<m_ar ; J+=bkSize) {
-		for (K=0 ; K<m_ar ; K+=bkSize) {
-			for (I=0 ; I<m_ar ; I+=bkSize) {
-				for (j=J ; j<J+bkSize-1 && j<m_ar ; j++) {
-					for (k=K; k<K+bkSize-1 && k<m_ar ; k++) {
-						block = firstFactor[j*m_ar+k];
-						for (i=I ; i<I+bkSize-1 && i<m_ar ; i++)
-							resultMatrix[j*m_ar+i] += secondFactor[k*m_ar+i]*block;
-					}
-			}
-			}
-		}
-	}
+	int numberOfBlocks = m_ar/bkSize;
+	for(i=0; i<m_ar; i+=bkSize)
+        for(j=0; j<m_ar; j+=bkSize)
+            for(k=0; k<m_ar; k+=bkSize)
+                for(ii=0; ii<m_ar; ii++)
+                    for(jj=0; jj<bkSize; jj++)
+                        for(kk=0; kk<bkSize; kk++)
+                            resultMatrix[jj*m_ar+ii] += firstFactor[kk*m_ar+ii]*secondFactor[jj*m_ar+kk];
 
 	Time2 = clock();
 
