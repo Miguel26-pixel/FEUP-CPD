@@ -134,7 +134,7 @@ void OnMultBlock(int m_ar, int m_br, int bkSize)
 
 	Time1 = clock();
 
-	int i, j, k, I, J, K;
+	int k, I, J, K;
 	double block;
 	for (J=0 ; J<m_ar ; J+=bkSize) {
 		for (K=0 ; K<m_ar ; K+=bkSize) {
@@ -248,9 +248,6 @@ int main (int argc, char *argv[])
 				break;
 			case 3:
 				std::cout << "Block Size? ";
-				std::cout << std::endl << "1. 128 blocks" << std::endl 
-					<< "2. 256 blocks" << std::endl
-					<< "3. 512 blocks" << std::endl;
 				std::cin >> blockSize;
 				
 				OnMultBlock(matrixSize, matrixSize, blockSize);  
