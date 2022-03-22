@@ -156,20 +156,20 @@ int main (int argc, char* argv[]) {
     std::ofstream file;
 
     if (operation == "dot") {
-        file.open("dot_product_metrics.txt");
+        file.open("cpp_dot_product_metrics.txt");
         for (int size = 600; size <= 3000; size += 400) {
             ret = dotMultiplication(size, eventSet);
             file << size << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << std::endl;
         }
         file.close();
     } else if (operation == "line") {
-        file.open("line_product_metrics.txt");
+        file.open("cpp_line_product_metrics.txt");
         for (int size = 600; size <= 3000; size += 400) {
             ret = lineMultiplication(size, eventSet);
             file << size << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << std::endl;
         }
         file.close();
-        file.open("line_extended_metrics.txt");
+        file.open("cpp_line_extended_metrics.txt");
         for (int size = 4096; size <= 10240; size += 2048) {
             ret = lineMultiplication(size, eventSet);
             file << size << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << std::endl;
