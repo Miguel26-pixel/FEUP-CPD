@@ -115,7 +115,57 @@ void matrixLineMultiplication(int matrixSize) {
 // add code here for block x block matriz multiplication
 void OnMultBlock(int m_ar, int m_br, int bkSize)
 {
-    
+    SYSTEMTIME Time1, Time2;
+		
+	int i, j;
+
+	double *firstFactor, *secondFactor, *resultMatrix;
+
+    firstFactor = (double *)malloc((m_ar * m_ar) * sizeof(double));
+	secondFactor = (double *)malloc((m_br * m_br) * sizeof(double));
+	resultMatrix = (double *)malloc((m_ar * m_ar) * sizeof(double));
+
+	for(i = 0; i < m_ar; i++)
+		for(j = 0; j < m_ar; j++){
+			firstFactor[i * m_ar + j]  = (double) 1.0;
+			secondFactor[i * m_ar + j] = (double) (i+1);
+			resultMatrix[i * m_ar + j] = (double) 0.0;
+		}
+
+	Time1 = clock();
+
+	int i, j, k, I, J, K;
+	double block;
+	for (J=0 ; J<m_ar ; J+=bkSize) {
+		for (K=0 ; K<m_ar ; K+=bkSize) {
+			for (I=0 ; I<m_ar ; I+=bkSize) {
+				for (j=J ; j<J+bkSize-1 && j<m_ar ; j++) {
+					for (k=K; k<K+bkSize-1 && k<m_ar ; k++) {
+						block = firstFactor[j*m_ar+k];
+						for (i=I ; i<I+bkSize-1 && i<m_ar ; i++)
+							resultMatrix[j*m_ar+i] += secondFactor[k*m_ar+i]*block;
+					}
+			}
+			}
+		}
+	}
+
+	Time2 = clock();
+
+	std::cout << "Elapsed time: " << (double)(Time2 - Time1) / CLOCKS_PER_SEC << "s" << std::endl;
+
+	// display 10 elements of the result matrix tto verify correctness
+	std::cout << "First 10 elements of the result matrix: " << std::endl;
+	
+	for(i = 0; i < 1; i++) {	
+		for(j = 0; j < std::min(10, m_ar); j++)
+			std::cout << resultMatrix[j] << " ";
+	}
+	std::cout << std::endl;
+
+    free(firstFactor);
+    free(secondFactor);
+    free(resultMatrix);
     
 }
 
@@ -198,6 +248,9 @@ int main (int argc, char *argv[])
 				break;
 			case 3:
 				std::cout << "Block Size? ";
+				std::cout << std::endl << "1. 128 blocks" << std::endl 
+					<< "2. 256 blocks" << std::endl
+					<< "3. 512 blocks" << std::endl;
 				std::cin >> blockSize;
 				
 				OnMultBlock(matrixSize, matrixSize, blockSize);  
