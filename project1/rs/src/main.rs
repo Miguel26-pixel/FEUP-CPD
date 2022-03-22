@@ -128,13 +128,18 @@ fn line_multiplication(matrix_size: i32, event_set: i32) -> [u128; 3] {
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
+    if args.len() != 2 {
+        println!("Invalid argument. Correct usage: ./matrixproduct <dot | line | block>");
+        return;
+    }
+
     let algorithm = &args[1];
 
     let event_set = papi_init();
 
     let results = match algorithm.as_str() {
-        "dot" => dot_product(1000, event_set),
-        "line" => line_multiplication(1000, event_set),
+        "dot" => dot_product(1024, event_set),
+        "line" => line_multiplication(1024, event_set),
         "block" => [0, 0, 0],
         _ => {
             println!("Invalid argument. Correct usage: ./matrixproduct <dot | line | block>");

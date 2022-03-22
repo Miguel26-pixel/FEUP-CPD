@@ -58,17 +58,17 @@ std::vector<double> dotMultiplication(int matrixSize, int& eventSet) {
     double dotProduct;
     long long cache_miss_count[2];
 
-    std::vector<double> firstFactor(matrixSize*matrixSize, 1);
-    
-    std::vector<double> secondFactor;
-    secondFactor.reserve(matrixSize*matrixSize);
-	
-    std::vector<double> resultMatrix;
-    resultMatrix.reserve(matrixSize*matrixSize);
+    double *firstFactor, *secondFactor, *resultMatrix;
+
+    firstFactor = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+	secondFactor = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+	resultMatrix = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
 
     for(int i = 0; i < matrixSize; i++)
-		for(int j = 0; j < matrixSize; j++)
-			secondFactor.push_back(i + 1.0);
+		for(int j = 0; j < matrixSize; j++) {
+            firstFactor[i*matrixSize + j] = 1.0;
+			secondFactor[i*matrixSize + j] = i + 1.0;
+        }
 
     if (PAPI_start(eventSet) != PAPI_OK) {
         std::cout << "Unable to start PAPI. Cache miss count should be ignored." << std::endl;
@@ -78,7 +78,7 @@ std::vector<double> dotMultiplication(int matrixSize, int& eventSet) {
 
     for(int i = 0; i < matrixSize; i++) {
 		for(int j = 0; j < matrixSize; j++) {
-			dotProduct = 0;
+			dotProduct = 0.0;
 			for(int k= 0; k < matrixSize; k++) {
 				dotProduct += firstFactor[i * matrixSize + k] * secondFactor[k * matrixSize + j];
 			}
@@ -101,18 +101,17 @@ std::vector<double> lineMultiplication(int matrixSize, int& eventSet) {
     clock_t start, end;
     long long cache_miss_count[2];
 
-    std::vector<double> firstFactor(matrixSize*matrixSize, 1);
-    
-    std::vector<double> secondFactor;
-    secondFactor.reserve(matrixSize*matrixSize);
-	
-    std::vector<double> resultMatrix;
-    resultMatrix.reserve(matrixSize*matrixSize);
+    double *firstFactor, *secondFactor, *resultMatrix;
+
+    firstFactor = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+	secondFactor = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+	resultMatrix = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
 
     for(int i = 0; i < matrixSize; i++)
 		for(int j = 0; j < matrixSize; j++) {
-			secondFactor.push_back((double) i + 1.0);
-			resultMatrix.push_back(0.0);
+			firstFactor[i*matrixSize + j] = 1.0;
+			secondFactor[i*matrixSize + j] = i + 1.0;
+			resultMatrix[i*matrixSize + j] = 0.0;
 		}
 
     if (PAPI_start(eventSet) != PAPI_OK) {
