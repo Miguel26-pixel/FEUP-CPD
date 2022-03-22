@@ -54,7 +54,7 @@ int papiDestroy(int& eventSet) {
 
 std::vector<double> dotMultiplication(int matrixSize, int& eventSet) {
     clock_t start, end;
-    int dotProduct;
+    double dotProduct;
     long long cache_miss_count[2];
 
     std::vector<double> firstFactor(matrixSize*matrixSize, 1);
