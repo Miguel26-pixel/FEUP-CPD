@@ -98,7 +98,6 @@ std::vector<double> dotMultiplication(int matrixSize, int& eventSet) {
 
 std::vector<double> lineMultiplication(int matrixSize, int& eventSet) {
     clock_t start, end;
-    int dotProduct;
     long long cache_miss_count[2];
 
     std::vector<double> firstFactor(matrixSize*matrixSize, 1);
