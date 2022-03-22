@@ -1,5 +1,6 @@
 #include <papi.h>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -153,11 +154,28 @@ int main (int argc, char* argv[]) {
 
     std::string operation = argv[1];
     std::vector<double> ret;
+    std::ofstream file;
 
     if (operation == "dot") {
-        ret = dotMultiplication(1024, eventSet);
+        file.open("dot_product_metrics.txt");
+        for (int size = 600; size <= 3000; size += 400) {
+            ret = dotMultiplication(size, eventSet);
+            file << size << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << std::endl;
+        }
+        file.close();
     } else if (operation == "line") {
-        ret = lineMultiplication(1024, eventSet);
+        file.open("line_product_metrics.txt");
+        for (int size = 600; size <= 3000; size += 400) {
+            ret = lineMultiplication(size, eventSet);
+            file << size << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << std::endl;
+        }
+        file.close();
+        file.open("line_extended_metrics");
+        for (int size = 4096; size <= 10240; size += 2048) {
+            ret = lineMultiplication(size, eventSet);
+            file << size << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << std::endl;
+        }
+        file.close();
     } else if (operation == "block") {
 
     } else {
@@ -166,10 +184,6 @@ int main (int argc, char* argv[]) {
             << std::endl;
         return ERROR;
     }
-    
-    std::cout << "Elapsed time: " << ret[0] << std::endl;
-    std::cout << "L1 Cache miss count: " << ret[1] << std::endl;
-    std::cout << "L2 Cache miss count: " << ret[2] << std::endl;
 
     if (papiDestroy(eventSet) != SUCCESS) {
         return ERROR;
