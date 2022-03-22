@@ -113,37 +113,35 @@ void matrixLineMultiplication(int matrixSize) {
 }
 
 // add code here for block x block matriz multiplication
-void OnMultBlock(int m_ar, int m_br, int bkSize)
+void OnMultBlock(int matrixSize, int blockSize)
 {
     SYSTEMTIME Time1, Time2;
 		
-	int i, j;
+	int i, ii, j, jj, k, kk;
+	double block;
 
-	double *firstFactor, *secondFactor, *resultMatrix;
+    double *firstFactor, *secondFactor, *resultMatrix;
 
-    firstFactor = (double *)malloc((m_ar * m_ar) * sizeof(double));
-	secondFactor = (double *)malloc((m_br * m_br) * sizeof(double));
-	resultMatrix = (double *)malloc((m_ar * m_ar) * sizeof(double));
+    firstFactor = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+	secondFactor = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+	resultMatrix = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
 
-	for(i = 0; i < m_ar; i++)
-		for(j = 0; j < m_ar; j++){
-			firstFactor[i * m_ar + j]  = (double) 1.0;
-			secondFactor[i * m_ar + j] = (double) (i+1);
-			resultMatrix[i * m_ar + j] = (double) 0.0;
+	for(int i = 0; i < matrixSize; i++)
+		for(int j = 0; j < matrixSize; j++) {
+			firstFactor[i*matrixSize + j] = 1.0;
+			secondFactor[i*matrixSize + j] = i + 1.0;
+			resultMatrix[i*matrixSize + j] = 0.0;
 		}
 
 	Time1 = clock();
 
-	int k, ii, jj, kk;
-	double block;
-	int numberOfBlocks = m_ar/bkSize;
-	for(i=0; i<m_ar; i+=bkSize)
-        for(j=0; j<m_ar; j+=bkSize)
-            for(k=0; k<m_ar; k+=bkSize)
-                for(ii=0; ii<m_ar; ii++)
-                    for(jj=0; jj<bkSize; jj++)
-                        for(kk=0; kk<bkSize; kk++)
-                            resultMatrix[jj*m_ar+ii] += firstFactor[kk*m_ar+ii]*secondFactor[jj*m_ar+kk];
+	for (ii = 0 ; ii < matrixSize ; ii += blockSize)
+		for (jj = 0 ; jj < matrixSize ; jj += blockSize)
+			for (kk = 0 ; kk < matrixSize ; kk += blockSize)
+				for (i = ii ; i < ii + blockSize ; i++)
+					for (j = jj; j < jj + blockSize; j++)
+						for (k = kk ; k < kk + blockSize ; k++)
+							resultMatrix[i * matrixSize + k] += firstFactor[i * matrixSize + j] * secondFactor[j * matrixSize + k];
 
 	Time2 = clock();
 
@@ -153,7 +151,7 @@ void OnMultBlock(int m_ar, int m_br, int bkSize)
 	std::cout << "First 10 elements of the result matrix: " << std::endl;
 	
 	for(i = 0; i < 1; i++) {	
-		for(j = 0; j < std::min(10, m_ar); j++)
+		for(j = 0; j < std::min(10, matrixSize); j++)
 			std::cout << resultMatrix[j] << " ";
 	}
 	std::cout << std::endl;
@@ -245,7 +243,7 @@ int main (int argc, char *argv[])
 				std::cout << "Block Size? ";
 				std::cin >> blockSize;
 				
-				OnMultBlock(matrixSize, matrixSize, blockSize);  
+				OnMultBlock(matrixSize, blockSize);  
 				break;
 
 		}
