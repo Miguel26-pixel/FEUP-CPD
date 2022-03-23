@@ -150,6 +150,52 @@ std::vector<double> lineMultiplication(int matrixSize, int& eventSet) {
 
 }
 
+std::vector<double> blockMultiplication(int matrixSize, int blockSize, int& eventSet) {
+    clock_t start, end;
+    long long cache_miss_count[2];
+
+    int i, ii, j, jj, k, kk;
+    double block;
+
+    double *firstFactor, *secondFactor, *resultMatrix;
+
+    firstFactor = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+	secondFactor = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+	resultMatrix = (double *)malloc((matrixSize * matrixSize) * sizeof(double));
+
+    for(i = 0; i < matrixSize; i++)
+		for(j = 0; j < matrixSize; j++) {
+			firstFactor[i*matrixSize + j] = 1.0;
+			secondFactor[i*matrixSize + j] = i + 1.0;
+			resultMatrix[i*matrixSize + j] = 0.0;
+		}
+
+    if (PAPI_start(eventSet) != PAPI_OK) {
+        std::cout << "Unable to start PAPI. Cache miss count should be ignored." << std::endl;
+    }
+
+    start = clock();
+
+    for (ii = 0 ; ii < matrixSize ; ii += blockSize)
+		for (jj = 0 ; jj < matrixSize ; jj += blockSize)
+			for (kk = 0 ; kk < matrixSize ; kk += blockSize)
+				for (i = ii ; i < ii + blockSize ; i++)
+					for (j = jj; j < jj + blockSize; j++)
+						for (k = kk ; k < kk + blockSize ; k++)
+							resultMatrix[i * matrixSize + k] += firstFactor[i * matrixSize + j] * secondFactor[j * matrixSize + k];
+
+    end = clock();
+
+    if (PAPI_stop(eventSet, cache_miss_count) != PAPI_OK) {
+        std::cout << "Unable to stop PAPI. Cache miss count should be ignored." << std::endl;
+    }
+
+    double elapsedTime = (double) (end - start) / CLOCKS_PER_SEC;
+
+    return std::vector<double>({elapsedTime, (double)cache_miss_count[0], (double)cache_miss_count[1]});
+
+}
+
 int main (int argc, char* argv[]) {
     if (argc < 2) {
         std::cout << "Correct usage: ./matrixMult <dot | line | block>" << std::endl;
@@ -186,7 +232,7 @@ int main (int argc, char* argv[]) {
         }
         file.close();
     } else if (operation == "block") {
-
+        ret = blockMultiplication(2048, 512, eventSet);
     } else {
         std::cout << "Invalid argument." << std::endl 
             << "Correct usage: ./matrixMult <dot | line | block>" 
