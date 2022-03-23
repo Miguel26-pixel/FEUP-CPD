@@ -152,7 +152,7 @@ std::vector<double> lineMultiplication(int matrixSize, int& eventSet) {
 
 std::vector<double> blockMultiplication(int matrixSize, int blockSize, int& eventSet) {
     clock_t start, end;
-    long long cache_miss_count[2];
+    long long cache_miss_count[3];
 
     int i, ii, j, jj, k, kk;
     double block;
@@ -192,7 +192,7 @@ std::vector<double> blockMultiplication(int matrixSize, int blockSize, int& even
 
     double elapsedTime = (double) (end - start) / CLOCKS_PER_SEC;
 
-    return std::vector<double>({elapsedTime, (double)cache_miss_count[0], (double)cache_miss_count[1]});
+    return std::vector<double>({elapsedTime, (double)cache_miss_count[0], (double)cache_miss_count[1], (double)cache_miss_count[1]});
 
 }
 
@@ -232,7 +232,13 @@ int main (int argc, char* argv[]) {
         }
         file.close();
     } else if (operation == "block") {
-        ret = blockMultiplication(2048, 512, eventSet);
+        file.open("cpp_block_multiplication_metrics.txt");
+        for (int matrixSize = 4096; matrixSize <= 10240; matrixSize+= 2048) {
+            for (int blockSize = 128; blockSize <= 1024; blockSize *= 2) {
+                ret = blockMultiplication(matrixSize, blockSize, eventSet);
+                file << matrixSize << ";" << blockSize << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << ";" << ret[3] << std::endl;
+            }
+        }
     } else {
         std::cout << "Invalid argument." << std::endl 
             << "Correct usage: ./matrixMult <dot | line | block>" 
