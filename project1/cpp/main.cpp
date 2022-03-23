@@ -30,6 +30,11 @@ int papiInit(int& eventSet) {
         return ERROR;
     }
 
+    if (PAPI_add_event(eventSet, PAPI_L2_DCA) != PAPI_OK) {
+        std::cout << "Unable to add L2 cache accesses to set of PAPI events." << std::endl;
+        return ERROR;
+    }
+
     return SUCCESS;
 }
 
@@ -45,6 +50,11 @@ int papiDestroy(int& eventSet) {
         return ERROR;
     }
 
+    if (PAPI_remove_event(eventSet, PAPI_L2_DCA) != PAPI_OK) {
+        std::cout << "Unable to remove L2 cache accesses from set of PAPI events." << std::endl;
+        return ERROR;
+    }
+
     if (PAPI_destroy_eventset(&eventSet) != PAPI_OK) {
         std::cout << "Unable to destroy set of PAPI events." << std::endl;
         return ERROR;
@@ -56,7 +66,7 @@ int papiDestroy(int& eventSet) {
 std::vector<double> dotMultiplication(int matrixSize, int& eventSet) {
     clock_t start, end;
     double dotProduct;
-    long long cache_miss_count[2];
+    long long cache_miss_count[4];
 
     double *firstFactor, *secondFactor, *resultMatrix;
 
@@ -94,7 +104,7 @@ std::vector<double> dotMultiplication(int matrixSize, int& eventSet) {
 
     double elapsedTime = (double)(end - start) / CLOCKS_PER_SEC;
 
-    return std::vector<double>({elapsedTime, (double)cache_miss_count[0], (double)cache_miss_count[1]});
+    return std::vector<double>({elapsedTime, (double)cache_miss_count[0], (double)cache_miss_count[1], (double)cache_miss_count[2]});
 }
 
 std::vector<double> lineMultiplication(int matrixSize, int& eventSet) {
@@ -136,7 +146,7 @@ std::vector<double> lineMultiplication(int matrixSize, int& eventSet) {
 
     double elapsedTime = (double) (end - start) / CLOCKS_PER_SEC;
 
-    return std::vector<double>({elapsedTime, (double)cache_miss_count[0], (double)cache_miss_count[1]});
+    return std::vector<double>({elapsedTime, (double)cache_miss_count[0], (double)cache_miss_count[1], (double)cache_miss_count[2]});
 
 }
 
@@ -159,20 +169,20 @@ int main (int argc, char* argv[]) {
         file.open("cpp_dot_product_metrics.txt");
         for (int size = 600; size <= 3000; size += 400) {
             ret = dotMultiplication(size, eventSet);
-            file << size << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << std::endl;
+            file << size << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << ";" << ret[3] << std::endl;
         }
         file.close();
     } else if (operation == "line") {
         file.open("cpp_line_product_metrics.txt");
         for (int size = 600; size <= 3000; size += 400) {
             ret = lineMultiplication(size, eventSet);
-            file << size << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << std::endl;
+            file << size << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << ";" << ret[3] << std::endl;
         }
         file.close();
         file.open("cpp_line_extended_metrics.txt");
         for (int size = 4096; size <= 10240; size += 2048) {
             ret = lineMultiplication(size, eventSet);
-            file << size << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << std::endl;
+            file << size << ";" << ret[0] << ";" << ret[1] << ";" << ret[2] << ";" << ret[3] << std::endl;
         }
         file.close();
     } else if (operation == "block") {
