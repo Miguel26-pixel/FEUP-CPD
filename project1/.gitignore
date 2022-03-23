@@ -1,3 +1,8 @@
 matrixmul_cpp
 matrixmul_rust
 *metrics.txt
+docs/*.aux
+docs/*.log
+docs/*.synctex.gz
+docs/*.toc
+docs/*.pdf
