@@ -3,7 +3,6 @@ use std::{time::Instant, fs::File, os::raw::c_longlong, io::prelude::Write};
 
 const PAPI_L1_DCM: i32 = -2147483648;
 const PAPI_L2_DCM: i32 = -2147483646;
-const PAPI_L2_DCA: i32 = -2147483547;
 
 fn papi_init() -> i32 {
     let mut ret:i32;
@@ -21,9 +20,6 @@ fn papi_init() -> i32 {
 
         ret = PAPI_add_event(event_set,PAPI_L2_DCM);
         assert_eq!(ret as u32, PAPI_OK);
-
-        ret = PAPI_add_event(event_set,PAPI_L2_DCA);
-        assert_eq!(ret as u32, PAPI_OK);
     }
 
     return event_set;
@@ -38,17 +34,14 @@ fn papi_destroy(mut event_set: i32) -> () {
         ret = PAPI_remove_event( event_set, PAPI_L2_DCM );
         assert_eq!(ret as u32, PAPI_OK);
 
-        ret = PAPI_remove_event( event_set, PAPI_L2_DCA );
-        assert_eq!(ret as u32, PAPI_OK);
-
         ret = PAPI_destroy_eventset( &mut event_set );
         assert_eq!(ret as u32, PAPI_OK);
     }
 }
 
-fn dot_product(matrix_size: i32, event_set: i32) -> [u128; 4] {
+fn dot_product(matrix_size: i32, event_set: i32) -> [u128; 3] {
     let mut dot_product: f64;
-    let mut cache_miss_count: [c_longlong; 3] = [0, 0, 0];
+    let mut cache_miss_count: [c_longlong; 2] = [0, 0];
     let cache_miss_count_ptr: *mut c_longlong = &mut cache_miss_count as *mut c_longlong;
 
     let first_factor: Vec<f64> = vec![1.0;(matrix_size*matrix_size) as usize];
@@ -87,11 +80,11 @@ fn dot_product(matrix_size: i32, event_set: i32) -> [u128; 4] {
 
     let elapsed_time = starting_time.elapsed();
 
-    [elapsed_time.as_millis(), cache_miss_count[0] as u128, cache_miss_count[1] as u128, cache_miss_count[2] as u128]
+    [elapsed_time.as_millis(), cache_miss_count[0] as u128, cache_miss_count[1] as u128]
 }
 
-fn line_multiplication(matrix_size: i32, event_set: i32) -> [u128; 4] {
-    let mut cache_miss_count: [c_longlong; 3] = [0, 0, 0];
+fn line_multiplication(matrix_size: i32, event_set: i32) -> [u128; 3] {
+    let mut cache_miss_count: [c_longlong; 2] = [0, 0];
     let cache_miss_count_ptr: *mut c_longlong = &mut cache_miss_count as *mut c_longlong;
 
     let first_factor: Vec<f64> = vec![1.0;(matrix_size*matrix_size) as usize];
@@ -128,7 +121,7 @@ fn line_multiplication(matrix_size: i32, event_set: i32) -> [u128; 4] {
 
     let elapsed_time = starting_time.elapsed();
 
-    [elapsed_time.as_millis(), cache_miss_count[0] as u128, cache_miss_count[1] as u128, cache_miss_count[2] as u128]
+    [elapsed_time.as_millis(), cache_miss_count[0] as u128, cache_miss_count[1] as u128]
 }
 
 fn main() {
@@ -143,7 +136,7 @@ fn main() {
 
     let event_set = papi_init();
 
-    let mut results: [u128; 4];
+    let mut results: [u128; 3];
 
     match algorithm.as_str() {
         "dot" => {
@@ -161,9 +154,6 @@ fn main() {
                 file.write(";".as_bytes()).expect("Unable to write to file");
                 
                 file.write(results[2].to_string().as_bytes()).expect("Unable to write to file.");
-                file.write(";".as_bytes()).expect("Unable to write to file");
-                
-                file.write(results[3].to_string().as_bytes()).expect("Unable to write to file.");
                 file.write("\n".as_bytes()).expect("Unable to write to file");
             }
         },
@@ -182,9 +172,6 @@ fn main() {
                 file.write(";".as_bytes()).expect("Unable to write to file");
                 
                 file.write(results[2].to_string().as_bytes()).expect("Unable to write to file.");
-                file.write(";".as_bytes()).expect("Unable to write to file");
-                
-                file.write(results[3].to_string().as_bytes()).expect("Unable to write to file.");
                 file.write("\n".as_bytes()).expect("Unable to write to file");
             }
 
@@ -202,9 +189,6 @@ fn main() {
                 file.write(";".as_bytes()).expect("Unable to write to file");
                 
                 file.write(results[2].to_string().as_bytes()).expect("Unable to write to file.");
-                file.write(";".as_bytes()).expect("Unable to write to file");
-                
-                file.write(results[3].to_string().as_bytes()).expect("Unable to write to file.");
                 file.write("\n".as_bytes()).expect("Unable to write to file");
             }
         },
