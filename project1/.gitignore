@@ -1,12 +1,9 @@
 matrixmul_cpp
 matrixmul_rust
 *metrics.txt
-<<<<<<< HEAD
 docs/*.aux
 docs/*.log
 docs/*.synctex.gz
 docs/*.toc
 docs/*.pdf
-=======
 *.png
->>>>>>> main
