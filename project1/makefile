@@ -8,4 +8,4 @@ rust:
 	$(shell cp rs/target/release/matrixproduct matrixmul_rust)
 
 clean:
-	-rm -f matrixmul_cpp matrixmul_rust *metrics.txt
+	-rm -f matrixmul_cpp matrixmul_rust *metrics.txt *.png
