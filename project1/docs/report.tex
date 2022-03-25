@@ -1,6 +1,9 @@
 \documentclass{report}
 
 \usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float}
 \graphicspath{{graphics/}}
 
 
@@ -35,8 +38,67 @@
 	\tableofcontents
 	
 	\chapter{Problem Description}
-	
+			\paragraph{} The memory system is a hierarchy of storage devices with different capacities, costs, and access times. We can think at this hierarchy as an triangle, where the bottom of the triangle represents the cheaper storage devices with the large amount of memory but the access to memory of this device is extremely slow. On the other hand, the higher top levels of the triangle represents storage devices with small capacities but with an access time much faster then the lower levels storage devices.
+			
+			\paragraph{} Memory hierarchies work because the memory that tends to be accessed more often is present at the higher levels of the hierarchy causing programs/actions to access more frequently the fastest part of the memory. So the storage at an lower level can be slower, and thus larger and cheaper per bit.
+			
+			\paragraph{} This project aims to study the effect on the processor performance of the memory hierarchy when accessing large amounts of data. The problem that will be used for this study is the multiplication of two matrices since that this operation with large matrices implies many memory accesses. In parallel, the Performance API (\emph{PAPI}) will be used to collect relevant performance indicators of the program execution.
+			
+			
 	\chapter{Algorithms Explanation}
+	
+		\paragraph{} In the development of this project, it was used \emph{C++} as the main programming language and three algorithms were developed and optimized to get the best possible results. For the first two algorithms was created a version in the programming language \emph{Rust} to compare the differences, such as duration of execution and memory access, between \emph{Rust} and \emph{C++}.
+		
+		\section{Matrix Multiplication}
+		
+			\paragraph{} This is the most basic matrix multiplication' algorithm, which multiplies one line of the first matrix by each column of the second matrix. Directly from the math definition of matrix multiplication $C = A \cdot B$ we obtain:
+			
+			\begin{center}
+				$C_{ij} = \sum_{k=1}^{m} A_{ik} \cdot B_{kj}$
+			\end{center}
+		
+			\paragraph{} From the aforementioned, a simple algorithm can be developed using nested loops over the indices \emph{i}, \emph{j} and \emph{k} to make the necessary operations to obtain the final matrix.
+			
+			\begin{algorithm}[H]
+				\caption{Matrix Multiplication} 
+				\begin{algorithmic}[1]
+					\State$A\gets $ First Matrix; $B\gets $ Second Matrix;
+					\For {$i=0,1,\ldots,size(A)$}
+						\For {$j=0,1,\ldots,size(B)$}
+							\State $temp\gets $ 0;
+							\For {$k=0,1,\ldots,size(A)$}
+								\State $temp += A_{ik} \cdot B_{kj}$
+							\EndFor
+							\State $C_{ij} += temp$
+						\EndFor
+					\EndFor
+					\State\Return $C$;
+				\end{algorithmic} 
+			\end{algorithm}
+		
+		\section{Line Matrix Multiplication}
+		
+			\paragraph{} The line matrix multiplication algorithm is very similar to the first algorithm, The only difference is that instead of multiply one line of the first matrix by each column of the second matrix, this version multiply one single element from the first matrix by the correspondent line of the second matrix. 
+			
+			\paragraph{} Programmatically speaking this algorithm is obtained from the previous, where the only modifications necessaries is the order of the nested loops as we can see in the pseudocode below:
+			
+			\begin{algorithm}[H]
+				\caption{Line Matrix Multiplication} 
+				\begin{algorithmic}[1]
+					\State$A\gets $ First Matrix; $B\gets $ Second Matrix;
+					\State$C\gets $ Matrix initialized with 0's;
+					\For {$i=0,1,\ldots,size(A)$}
+						\For {$k=0,1,\ldots,size(A)$}
+							\For {$j=0,1,\ldots,size(B)$}
+								\State $C_{ij} += A_{ik} \cdot B_{kj}$
+							\EndFor
+						\EndFor
+					\EndFor
+					\State\Return $C$;
+				\end{algorithmic} 
+			\end{algorithm}
+		
+		\section{Block Matrix Multiplication}
 	
 	\chapter{Performance Metrics}
 	
