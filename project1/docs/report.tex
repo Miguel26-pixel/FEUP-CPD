@@ -115,6 +115,8 @@
 			
 			\paragraph{}Regardless, the execution time for each of the algorithms was also registered, without the use of any external API.
 			
+		\section{Testing Hardware}
+			
 		\section{Algorithm Comparison}
 		
 			\paragraph{}As a way of avoiding any possible misunderstanding, the reader should consider that whenever \emph{cache} is mentioned, the authors mean, specifically, the data cache. Whenever another type of cache, such as the instructions cache, is being mentioned, it should be explicitly clarified.
@@ -128,7 +130,7 @@
 						\includegraphics[scale=0.4]{cpp_dot_line_l1.png}
 						\includegraphics[scale=0.4]{rs_l1_misses.png}
 					\end{adjustbox}
-					\caption{Comparison of the number of L1 data cache misses of the dot product and line multiplication algorithms for matrices of increasing size. To the left: C++ implementation; to the right: Rust implementation}
+					\caption{Comparison of the number of L1 data cache misses of the dot product and line multiplication algorithms for matrices of increasing size. To the left: C++ implementation; to the right: Rust implementation.}
 				\end{figure}
 			
 				\begin{figure}[H]
@@ -136,7 +138,7 @@
 						\includegraphics[scale=0.4]{cpp_dot_line_l2.png}
 						\includegraphics[scale=0.4]{rs_l2_misses.png}
 					\end{adjustbox}
-					\caption{Comparison of the number of L2 data cache misses of the dot product and line multiplication algorithms for matrices of increasing size. To the left: C++ implementation; to the right: Rust implementation}
+					\caption{Comparison of the number of L2 data cache misses of the dot product and line multiplication algorithms for matrices of increasing size. To the left: C++ implementation; to the right: Rust implementation.}
 				\end{figure}
 			
 				\paragraph{}As it is pretty straightforward to see, at both level of caches there is a significant reduction on the number of cache misses from the dot product to the line multiplication algorithm.
@@ -150,7 +152,7 @@
 						\includegraphics[scale=0.4]{cpp_dot_line_comparison.png}
 						\includegraphics[scale=0.4]{rs_algorithm_comparison.png}
 					\end{adjustbox}
-					\caption{Comparison of execution time of the dot product and line multiplication algorithms for matrices of increasing size. To the left: C++ implementation; to the right: Rust implementation}
+					\caption{Comparison of execution time of the dot product and line multiplication algorithms for matrices of increasing size. To the left: C++ implementation; to the right: Rust implementation.}
 				\end{figure}
 			
 				\paragraph{}As expected, the line multiplication algorithm is able to perform all of its operations in a much smaller time, going from 134.34 seconds to only 18.27 seconds for 3000x3000 matrices.
@@ -176,7 +178,7 @@
 						\includegraphics[scale=0.4]{cpp_block_l1_misses.png}
 						\includegraphics[scale=0.4]{cpp_block_l2_misses.png}
 					\end{adjustbox}
-					\caption{Comparison of data cache misses of the block multiplication for increasing block and matrix sizes. To the left: L1 cache misses per millisecond; to the right: L2 cache misses per millisecond}
+					\caption{Comparison of data cache misses of the block multiplication for increasing block and matrix sizes. To the left: L1 cache misses per millisecond; to the right: L2 cache misses per millisecond.}
 				\end{figure}
 			
 				\paragraph{}Contrary to the expected, the 512 block size version does not have a lower cache miss per millisecond rate. Therefore, it is not possible to relate the better performance with the accesses to memory.
@@ -184,8 +186,39 @@
 				\paragraph{}However, after some research, the authors concluded that the better performance could be related to computational intensity. Bundling together arithmetic operations can lead to faster performance, depending on the cache size of the underlying hardware and the load of the operations. \cite{1}
 		
 			\subsection{Line Multiplication vs Block Multiplication}
+				
+				\paragraph{}Finally, let us compare the line multiplication algorithm with block multiplication algorithm. As it performed better, the 512 block size version will be the one used to represent the block approach.
+				
+				\paragraph{}As in the first comparison, let's first verify how both algorithms behave cache-wise:
+				
+				\begin{figure}[H]
+					\begin{adjustbox}{center}
+						\includegraphics[scale=0.4]{cpp_line_block_l1.png}
+						\includegraphics[scale=0.4]{cpp_line_block_l2.png}
+					\end{adjustbox}
+					\caption{Comparison of data cache misses between the line multiplication algorithm and the block multiplication algorithm for increasing matrices. To the left: Total L1 data cache misses; to the right: Total L2 data cache misses.}
+				\end{figure}
+			
+				\paragraph{}The total L1 data cache misses are drastically smaller for the block multiplication algorithm. However, they are almost on par at the L2 cache level, with the line multiplication having less misses.
+				
+				\paragraph{}Let us now see how if there is any correlation with the execution time:
+				
+				\begin{figure}[H]
+					\begin{adjustbox}{center}
+						\includegraphics[scale=0.4]{cpp_line_block_comparison.png}
+					\end{adjustbox}
+					\caption{Comparison of execution time between the line multiplication algorithm and block multiplication algorithm for increasing matrices.}
+				\end{figure}
+			
+				\paragraph{}The block multiplication algorithm, as the matrices increase in size, starts to take less and less time, when comparing it with the line multiplication algorithm. This difference is analogous to what is seen on the graph comparing the L1 data cache misses between the two algorithms.
+				
+				\paragraph{}We, therefore, conclude that the block approach leads to a better performance due to being less heavy on higher-level memory access.
 			
 		\section{Language Comparison}
+		
+		\paragraph{}Finally, a comparison between both languages is now due. The line multiplication algorithm will be used as the basis for this comparison, as it is the best performing one that is implemented in both language. 
+		
+		\paragraph{}Let us start by comparing data cache misses: 
 	
 	\chapter{Conclusions}
 	
