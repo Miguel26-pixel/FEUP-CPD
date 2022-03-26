@@ -205,7 +205,7 @@
 				
 				\begin{figure}[H]
 					\begin{adjustbox}{center}
-						\includegraphics[scale=0.4]{cpp_line_block_comparison.png}
+						\includegraphics[scale=0.5]{cpp_line_block_comparison.png}
 					\end{adjustbox}
 					\caption{Comparison of execution time between the line multiplication algorithm and block multiplication algorithm for increasing matrices.}
 				\end{figure}
@@ -216,9 +216,30 @@
 			
 		\section{Language Comparison}
 		
-		\paragraph{}Finally, a comparison between both languages is now due. The line multiplication algorithm will be used as the basis for this comparison, as it is the best performing one that is implemented in both language. 
+			\paragraph{}Finally, a comparison between both languages is now due. The line multiplication algorithm will be used as the basis for this comparison, as it is the best performing one that is implemented in both language. 
+			
+			\paragraph{}Let us start by comparing data cache misses: 
+			
+			\begin{figure}[H]
+				\begin{adjustbox}{center}
+					\includegraphics[scale=0.4]{line_l1_cache_misses.png}
+					\includegraphics[scale=0.4]{line_l2_cache_misses.png}
+				\end{adjustbox}
+				\caption{Comparison of data cache misses of the line multiplication algorithm between the Rust and C++ implementations for increasing matrices. To the left: Total L1 data cache misses; to the right: Total L2 data cache misses.}
+			\end{figure}
 		
-		\paragraph{}Let us start by comparing data cache misses: 
+			\paragraph{}For the L1 level, the languages are essentially tied. However, Rust performs slightly worse at the L2 level.
+			
+			\paragraph{}The graph below shows that this slight difference translates into a better performance for the C++ implementation. However, it should also be taken into consideration that the implementations are not entirely similar, with structures with more overhead being used on the Rust implementation.
+			
+			\begin{figure}[H]
+				\begin{adjustbox}{center}
+					\includegraphics[scale=0.5]{line_algorithm_comparison.png}
+				\end{adjustbox}
+				\caption{Comparison of the execution time of the line multiplication algorithm between the Rust and C++ implementations for increasing matrices.}
+			\end{figure}
+		
+			\paragraph{}It can be concluded that C++ performed better, even though this wasn't the fairest of comparisons.
 	
 	\chapter{Conclusions}
 	
