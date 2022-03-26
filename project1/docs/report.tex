@@ -4,6 +4,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{float}
+\usepackage{adjustbox}
 \graphicspath{{graphics/}}
 
 
@@ -80,7 +81,7 @@
 		
 			\paragraph{} The line matrix multiplication algorithm is very similar to the first algorithm. The only difference is that, instead of multiply one line of the first matrix by each column of the second matrix, this version multiplies one single element from the first matrix by the correspondent line of the second matrix. 
 			
-			\paragraph{} To program this algorithm, we can depart from the previous one and change the order of the nested for loops. The following pseudocode makes this more explicit:
+			\paragraph{} To program this algorithm, it is possible to depart from the previous one and change the order of the nested for loops. The following pseudocode makes this more explicit:
 			
 			\begin{algorithm}[H]
 				\caption{Line Matrix Multiplication} 
@@ -102,7 +103,97 @@
 	
 	\chapter{Results and Analysis}
 	
-		\section{Performance }
+		\paragraph{}As requested for this project, the dot product and the line multiplication algorithms were implemented in two languages - C++ and Rust. The block multiplication algorithm was only implemented in C++.
+		
+		\paragraph{}It is worth noting that the Rust version is using a slightly less efficient implementation than in the C++ one. However, given that the aim of the project is to analyse the effects of memory access on the performance of a single core and not the direct comparison of both languages, the authors believe that this is not a major issue.
+	
+		\section{Performance Metrics}
+		
+			\paragraph{}In order to correctly evaluate performance and the correlation between memory access and execution time,  the \emph{Performance Application Programming Interface} (or \emph{PAPI}, for short) was used to collect the number of data cache misses on the L1 and L2 cache level.
+			
+			\paragraph{}The authors original intention was to measure the percentage of data cache misses relative to the total of data cache accesses. However, due to hardware limitations, \emph{PAPI} wasn't able to register these values. Although this metric could have been of more value to the study, but, sadly, it was not possible to present them.
+			
+			\paragraph{}Regardless, the execution time for each of the algorithms was also registered, without the use of any external API.
+			
+		\section{Algorithm Comparison}
+		
+			\paragraph{}As a way of avoiding any possible misunderstanding, the reader should consider that whenever \emph{cache} is mentioned, the authors mean, specifically, the data cache. Whenever another type of cache, such as the instructions cache, is being mentioned, it should be explicitly clarified.
+		
+			\subsection{Dot Product vs Line Multiplication}
+			
+				\paragraph{}Let us start our analysis by comparing the cache misses at both the L1 and L2 levels.
+			
+				\begin{figure}[H]
+					\begin{adjustbox}{center}
+						\includegraphics[scale=0.4]{cpp_dot_line_l1.png}
+						\includegraphics[scale=0.4]{rs_l1_misses.png}
+					\end{adjustbox}
+					\caption{Comparison of the number of L1 data cache misses of the dot product and line multiplication algorithms for matrices of increasing size. To the left: C++ implementation; to the right: Rust implementation}
+				\end{figure}
+			
+				\begin{figure}[H]
+					\begin{adjustbox}{center}
+						\includegraphics[scale=0.4]{cpp_dot_line_l2.png}
+						\includegraphics[scale=0.4]{rs_l2_misses.png}
+					\end{adjustbox}
+					\caption{Comparison of the number of L2 data cache misses of the dot product and line multiplication algorithms for matrices of increasing size. To the left: C++ implementation; to the right: Rust implementation}
+				\end{figure}
+			
+				\paragraph{}As it is pretty straightforward to see, at both level of caches there is a significant reduction on the number of cache misses from the dot product to the line multiplication algorithm.
+				
+				\paragraph{}In theory, this should mean a reduced execution time for the line multiplication algorithm, given that it does not have to go through the overhead of higher-level memory access as often as the dot product algorithm.
+				
+				\paragraph{}Let us now compare the execution time of both algorithms:
+			
+				\begin{figure}[H]
+					\begin{adjustbox}{center}
+						\includegraphics[scale=0.4]{cpp_dot_line_comparison.png}
+						\includegraphics[scale=0.4]{rs_algorithm_comparison.png}
+					\end{adjustbox}
+					\caption{Comparison of execution time of the dot product and line multiplication algorithms for matrices of increasing size. To the left: C++ implementation; to the right: Rust implementation}
+				\end{figure}
+			
+				\paragraph{}As expected, the line multiplication algorithm is able to perform all of its operations in a much smaller time, going from 134.34 seconds to only 18.27 seconds for 3000x3000 matrices.
+			
+			\subsection{Block Multiplication with Different Sizes}
+			
+				\paragraph{}For the block multiplication algorithm, let us now analyse the metrics inversely - starting with the execution time:
+				
+				\begin{figure}[H]
+					\begin{adjustbox}{center}
+						\includegraphics[scale=0.5]{cpp_block_comparison.png}
+					\end{adjustbox}
+					\caption{Execution time of the block multiplication algorithm for increasing block and matrix sizes.}
+				\end{figure}
+			
+			
+				\paragraph{}From the figure, one can conclude that, on average, the 512 block size version of the algorithm performs better than the others.
+				
+				\paragraph{}With this in mind, let us now analyse the cache misses per millisecond:
+				
+				\begin{figure}[H]
+					\begin{adjustbox}{center}
+						\includegraphics[scale=0.4]{cpp_block_l1_misses.png}
+						\includegraphics[scale=0.4]{cpp_block_l2_misses.png}
+					\end{adjustbox}
+					\caption{Comparison of data cache misses of the block multiplication for increasing block and matrix sizes. To the left: L1 cache misses per millisecond; to the right: L2 cache misses per millisecond}
+				\end{figure}
+			
+				\paragraph{}Contrary to the expected, the 512 block size version does not have a lower cache miss per millisecond rate. Therefore, it is not possible to relate the better performance with the accesses to memory.
+				
+				\paragraph{}However, after some research, the authors concluded that the better performance could be related to computational intensity. Bundling together arithmetic operations can lead to faster performance, depending on the cache size of the underlying hardware and the load of the operations. \cite{1}
+		
+			\subsection{Line Multiplication vs Block Multiplication}
+			
+		\section{Language Comparison}
 	
 	\chapter{Conclusions}
+	
+	\addcontentsline{toc}{chapter}{Bibliography}
+	\begin{thebibliography}{1}
+		\bibitem{1}
+		JAYAWEERA, Malith \textit{Blocked Matrix Multiplication}
+		\\\texttt{https://malithjayaweera.com/2020/07/blocked-matrix-multiplication/}
+	\end{thebibliography}
+	
 \end{document}
