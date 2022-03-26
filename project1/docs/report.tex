@@ -100,6 +100,29 @@
 			\end{algorithm}
 		
 		\section{Block Matrix Multiplication}
+		
+		\begin{algorithm}[H]
+			\caption{Line Matrix Multiplication} 
+			\begin{algorithmic}[1]
+				\State$A\gets $ First Matrix; $B\gets $ Second Matrix;
+				\State$C\gets $ Matrix initialized with 0's;
+				\State$N\gets size(A)$;
+				\For {$ii=0,1,\ldots,N$}
+					\For {$jj=0,1,\ldots,N$}
+						\For {$kk=0,1,\ldots,N$}
+							\For {$i=0,1,\ldots,N$}
+								\For {$k=0,1,\ldots,N$}
+									\For {$j=0,1,\ldots,N$}
+										\State $C_{ij} += A_{ik} \cdot B_{kj}$
+									\EndFor
+								\EndFor
+							\EndFor
+						\EndFor
+					\EndFor
+				\EndFor
+				\State\Return $C$;
+			\end{algorithmic} 
+		\end{algorithm}
 	
 	\chapter{Results and Analysis}
 	
