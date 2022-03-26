@@ -39,26 +39,28 @@
 	\tableofcontents
 	
 	\chapter{Problem Description}
-			\paragraph{} The memory system is a hierarchy of storage devices with different capacities, costs, and access times. We can think at this hierarchy as an triangle, where the bottom of the triangle represents the cheaper storage devices with the large amount of memory but the access to memory of this device is extremely slow. On the other hand, the higher top levels of the triangle represents storage devices with small capacities but with an access time much faster then the lower levels storage devices.
+			\paragraph{} The memory system is a hierarchy of storage devices with different capacities, costs, and access times. This hierarchy can be abstracted as a triangle, where the bottom represents the cheaper storage devices with a larger but slower amount of memory. On the other hand, the higher levels of the triangle represent storage devices with small capacities but with a much faster access time.
 			
-			\paragraph{} Memory hierarchies work because the memory that tends to be accessed more often is present at the higher levels of the hierarchy causing programs/actions to access more frequently the fastest part of the memory. So the storage at an lower level can be slower, and thus larger and cheaper per bit.
+			\paragraph{}Memory hierarchies perform as well as they due to caching. The faster levels of memory keep recently used values in order to enable faster access to them, which drastically decreases the time spent fetching data from memory. On top of this, this organization pattern allows to diminish costs, as the larger part of memory can keep being slower with much less impact on performance.
 			
-			\paragraph{} This project aims to study the effect on the processor performance of the memory hierarchy when accessing large amounts of data. The problem that will be used for this study is the multiplication of two matrices since that this operation with large matrices implies many memory accesses. In parallel, the Performance API (\emph{PAPI}) will be used to collect relevant performance indicators of the program execution.
+			\paragraph{} This project aims to study the effect of the memory hierarchy on the processor performance when accessing large amounts of data. Three different algorithms for the product of two matrices will be approached, given that this problem usually deals with many memory accesses. 
+			
+			\paragraph{}Finally, during the execution of each of the algorithms, several metrics will be collected, so conclusions can be made at the end of this report.
 			
 			
 	\chapter{Algorithms Explanation}
 	
-		\paragraph{} In the development of this project, it was used \emph{C++} as the main programming language and three algorithms were developed and optimized to get the best possible results. For the first two algorithms was created a version in the programming language \emph{Rust} to compare the differences, such as duration of execution and memory access, between \emph{Rust} and \emph{C++}.
+		\paragraph{}The following algorithms all solve the problem of multiplying two matrices. However, each algorithm presented is intended to have memory access have a lesser effect on performance than the previous ones. 
+	
+		\section{Dot Product Algorithm}
 		
-		\section{Matrix Multiplication}
-		
-			\paragraph{} This is the most basic matrix multiplication' algorithm, which multiplies one line of the first matrix by each column of the second matrix. Directly from the math definition of matrix multiplication $C = A \cdot B$ we obtain:
+			\paragraph{}The simplest algorith comes directly from the math definition of matrix multiplication, $C = A \cdot B$. Each line of the first matrix is multiplied by each column of the second matrix. Extending the math definition, we can obtain:
 			
 			\begin{center}
 				$C_{ij} = \sum_{k=1}^{m} A_{ik} \cdot B_{kj}$
 			\end{center}
 		
-			\paragraph{} From the aforementioned, a simple algorithm can be developed using nested loops over the indices \emph{i}, \emph{j} and \emph{k} to make the necessary operations to obtain the final matrix.
+			\paragraph{} From the aforementioned, a simple algorithm can be developed using nested loops over the indices \emph{i}, \emph{j} and \emph{k} to attain the product matrix:
 			
 			\begin{algorithm}[H]
 				\caption{Matrix Multiplication} 
