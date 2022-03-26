@@ -101,19 +101,24 @@
 		
 		\section{Block Matrix Multiplication}
 		
+		\paragraph{} The block matrix multiplication algorithm consists in partitioning the initial matrix into blocks or sub-matrices of a given size. Finally with the partitioned matrix, we can perform the multiplication of the two initial matrix by multiplying the sub-matrices of smaller size.
+		
+		\paragraph{} After dividing the matrices in blocks there is two possible approaches. The first approach consist in the dot product, used in the matrix multiplication algorithm, and the second in the line product, used in the line matrix multiplication algorithm. Our team opted to use the line product since this approach have substantial gains when compared to the first. The algorithm can be represented with the following pseudocode:
+		
 		\begin{algorithm}[H]
 			\caption{Line Matrix Multiplication} 
 			\begin{algorithmic}[1]
 				\State$A\gets $ First Matrix; $B\gets $ Second Matrix;
 				\State$C\gets $ Matrix initialized with 0's;
 				\State$N\gets size(A)$;
-				\For {$ii=0,1,\ldots,N$}
-					\For {$jj=0,1,\ldots,N$}
-						\For {$kk=0,1,\ldots,N$}
-							\For {$i=0,1,\ldots,N$}
-								\For {$k=0,1,\ldots,N$}
-									\For {$j=0,1,\ldots,N$}
-										\State $C_{ij} += A_{ik} \cdot B_{kj}$
+				\State$b\gets $ Block size;
+				\For {$ii=0,b,\ldots,N$}
+					\For {$jj=0,b,\ldots,N$}
+						\For {$kk=0,b,\ldots,N$}
+							\For {$i=ii,ii+1,\ldots,N$}
+								\For {$j=jj,jj+1,\ldots,N$}
+									\For {$k=kk,kk+1,\ldots,N$}
+										\State $C_{ik} += A_{ij} \cdot B_{jk}$
 									\EndFor
 								\EndFor
 							\EndFor
