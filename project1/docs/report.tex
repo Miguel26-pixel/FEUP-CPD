@@ -117,9 +117,9 @@
 				\For {$ii=0,b,\ldots,N$}
 					\For {$jj=0,b,\ldots,N$}
 						\For {$kk=0,b,\ldots,N$}
-							\For {$i=ii,ii+1,\ldots,N$}
-								\For {$j=jj,jj+1,\ldots,N$}
-									\For {$k=kk,kk+1,\ldots,N$}
+							\For {$i=ii,ii+1,\ldots,ii+b$}
+								\For {$j=jj,jj+1,\ldots,jj+b$}
+									\For {$k=kk,kk+1,\ldots,kk+b$}
 										\State $C_{ik} += A_{ij} \cdot B_{jk}$
 									\EndFor
 								\EndFor
