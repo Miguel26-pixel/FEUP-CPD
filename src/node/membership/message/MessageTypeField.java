@@ -21,11 +21,8 @@ public class MessageTypeField extends MessageField {
 
     @Override
     public List<char> assemble() {
-        List<char> field = new ArrayList<char>();
-
+        List<char> field = super.assemble();
         field.add(translateType());
-        field.add(translateFieldHeader());
-
         return field;
     }
 }

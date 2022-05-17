@@ -1,5 +1,6 @@
 package node.membership.message;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class MessageField {
@@ -18,5 +19,11 @@ public abstract class MessageField {
         };
     }
 
-    public abstract List<char> assemble();
+    public List<char> assemble() {
+        List<char> field = new ArrayList<char>();
+
+        field.add(translateFieldHeader());
+        field.add(' ');
+        return field;
+    }
 }
