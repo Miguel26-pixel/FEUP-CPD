@@ -5,5 +5,4 @@ public enum FieldType {
     ORIGINID,
     DESTID,
     COUNTER,
-    BODY,
 }
