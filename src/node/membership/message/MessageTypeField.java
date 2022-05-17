@@ -11,7 +11,7 @@ public class MessageTypeField extends MessageField {
         this.messageType = messageType;
     }
 
-    private char translateType() {
+    private byte translateType() {
         return switch (messageType) {
             case JOIN -> 0x00;
             case LEAVE -> 0x01;
@@ -20,8 +20,8 @@ public class MessageTypeField extends MessageField {
     }
 
     @Override
-    public List<char> assemble() {
-        List<char> field = super.assemble();
+    public List<byte> assemble() {
+        List<byte> field = super.assemble();
         field.add(translateType());
         return field;
     }

@@ -10,7 +10,7 @@ public abstract class MessageField {
         this.fieldType = fieldType;
     }
 
-    protected char translateFieldHeader() {
+    protected byte translateFieldHeader() {
         return switch (fieldType) {
             case MESSAGETYPE -> 0x00;
             case ORIGINID -> 0x01;
@@ -19,11 +19,11 @@ public abstract class MessageField {
         };
     }
 
-    public List<char> assemble() {
-        List<char> field = new ArrayList<char>();
+    public List<byte> assemble() {
+        List<byte> field = new ArrayList<byte>();
 
         field.add(translateFieldHeader());
-        field.add(' ');
+        field.add((byte) ' ');
         return field;
     }
 }
