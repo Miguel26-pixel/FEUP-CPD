@@ -1,13 +1,11 @@
 package node.membership.log;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Log {
     private final Map<String, LogEntry> entries;
+    private final static int RECENTSUBSETSIZE = 32;
 
     public Log() {
         this.entries = new HashMap<String, LogEntry>();
@@ -47,5 +45,33 @@ public class Log {
         }
 
         return asBytes;
+    }
+
+    public void addEntry(String nodeId, LogEntry logEntry) {
+        if (entries.containsKey(nodeId)) {
+            LogEntry currentEntry = entries.get(nodeId);
+
+            if (currentEntry.getEpoch() < logEntry.getEpoch() || currentEntry.getCounter() < logEntry.getCounter()) {
+                return;
+            }
+        }
+
+        entries.put(nodeId, logEntry);
+    }
+
+    public Map<String, LogEntry> getMostRecentMemberships() {
+        List<Map.Entry<String, LogEntry>> entryList = entries.entrySet().stream().toList();
+
+        entryList.sort(Comparator.comparing(entry -> entry.getValue().getEpoch()));
+
+        entryList.subList(0, RECENTSUBSETSIZE);
+
+        Map<String, LogEntry> recentEntries = new HashMap<>();
+
+        for (Map.Entry<String, LogEntry> entry: entryList) {
+            recentEntries.put(entry.getKey(), entry.getValue());
+        }
+
+        return recentEntries;
     }
 }
