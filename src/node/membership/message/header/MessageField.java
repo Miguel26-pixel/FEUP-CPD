@@ -1,4 +1,4 @@
-package node.membership.message;
+package node.membership.message.header;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,6 @@ public abstract class MessageField {
             case MESSAGETYPE -> 0x00;
             case ORIGINID -> 0x01;
             case DESTID -> 0x02;
-            case COUNTER -> 0x03;
         };
     }
 

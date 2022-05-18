@@ -1,5 +1,9 @@
 package node.membership.message;
 
+import node.membership.message.header.FieldType;
+import node.membership.message.header.MessageField;
+import node.membership.message.header.MessageTypeField;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +18,7 @@ public abstract class Message {
         this.messageFields = new ArrayList<>();
         this.body = new ArrayList<Byte>();
 
-        this.messageFields.add(new MessageTypeField(FieldType.MESSAGETYPE, messageType));
+        this.messageFields.add(new MessageTypeField(messageType));
     }
 
     protected void addMessageField(MessageField messageField) {
