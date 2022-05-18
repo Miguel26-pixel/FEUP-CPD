@@ -7,8 +7,8 @@ import java.util.List;
 public class MessageTypeField extends MessageField {
     public MessageType messageType;
 
-    public MessageTypeField(FieldType fieldType, MessageType messageType) {
-        super(fieldType);
+    public MessageTypeField(MessageType messageType) {
+        super(FieldType.MESSAGETYPE);
         this.messageType = messageType;
     }
 

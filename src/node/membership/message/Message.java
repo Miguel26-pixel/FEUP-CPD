@@ -18,7 +18,7 @@ public abstract class Message {
         this.messageFields = new ArrayList<>();
         this.body = new ArrayList<Byte>();
 
-        this.messageFields.add(new MessageTypeField(FieldType.MESSAGETYPE, messageType));
+        this.messageFields.add(new MessageTypeField(messageType));
     }
 
     protected void addMessageField(MessageField messageField) {
