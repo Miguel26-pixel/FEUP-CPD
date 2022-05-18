@@ -5,7 +5,6 @@ import java.util.*;
 
 public class Log {
     private final Map<String, LogEntry> entries;
-    private final static int RECENTSUBSETSIZE = 32;
 
     public Log() {
         this.entries = new HashMap<String, LogEntry>();
@@ -59,12 +58,12 @@ public class Log {
         entries.put(nodeId, logEntry);
     }
 
-    public Map<String, LogEntry> getMostRecentMemberships() {
+    public Map<String, LogEntry> getMostRecentEntries(int subsetSize) {
         List<Map.Entry<String, LogEntry>> entryList = entries.entrySet().stream().toList();
 
         entryList.sort(Comparator.comparing(entry -> entry.getValue().getEpoch()));
 
-        entryList.subList(0, RECENTSUBSETSIZE);
+        entryList.subList(0, subsetSize);
 
         Map<String, LogEntry> recentEntries = new HashMap<>();
 
