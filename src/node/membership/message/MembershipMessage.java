@@ -9,6 +9,7 @@ public class MembershipMessage extends Message {
     public MembershipMessage(Log log) {
         super(MessageType.MEMBERSHIP);
         this.log = log;
+        this.buildBody();
     }
 
     private void buildBody() {
