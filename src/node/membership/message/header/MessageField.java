@@ -1,4 +1,4 @@
-package node.membership.message;
+package node.membership.message.header;
 
 import java.util.ArrayList;
 import java.util.List;

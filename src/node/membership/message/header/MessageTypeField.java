@@ -1,6 +1,7 @@
-package node.membership.message;
+package node.membership.message.header;
 
-import java.util.ArrayList;
+import node.membership.message.MessageType;
+
 import java.util.List;
 
 public class MessageTypeField extends MessageField {

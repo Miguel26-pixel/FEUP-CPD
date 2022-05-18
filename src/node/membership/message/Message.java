@@ -1,5 +1,9 @@
 package node.membership.message;
 
+import node.membership.message.header.FieldType;
+import node.membership.message.header.MessageField;
+import node.membership.message.header.MessageTypeField;
+
 import java.util.ArrayList;
 import java.util.List;
 
