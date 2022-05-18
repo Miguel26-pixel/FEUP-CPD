@@ -58,19 +58,18 @@ public class Log {
         entries.put(nodeId, logEntry);
     }
 
-    public Map<String, LogEntry> getMostRecentEntries(int subsetSize) {
+    public Log getMostRecentEntries(int subsetSize) {
         List<Map.Entry<String, LogEntry>> entryList = entries.entrySet().stream().toList();
 
         entryList.sort(Comparator.comparing(entry -> entry.getValue().getEpoch()));
 
         entryList.subList(0, subsetSize);
 
-        Map<String, LogEntry> recentEntries = new HashMap<>();
-
+        Log recentLog = new Log();
         for (Map.Entry<String, LogEntry> entry: entryList) {
-            recentEntries.put(entry.getKey(), entry.getValue());
+            recentLog.addEntry(entry.getKey(), entry.getValue());
         }
 
-        return recentEntries;
+        return recentLog;
     }
 }
