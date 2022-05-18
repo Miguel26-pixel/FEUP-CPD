@@ -12,7 +12,7 @@ import java.util.Map;
 public class MembershipMessage extends Message {
     Log log;
 
-    public MembershipMessage(Log log, List<Node> nodes) {
+    public MembershipMessage(Log log) {
         super(MessageType.MEMBERSHIP);
         this.log = log;
     }
