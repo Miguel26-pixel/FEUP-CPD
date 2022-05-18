@@ -4,9 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Log {
-    private final Map<int, LogEntry> entries;
+    private final Map<String, LogEntry> entries;
 
     public Log() {
-        this.entries = new HashMap<int, LogEntry>();
+        this.entries = new HashMap<String, LogEntry>();
+    }
+
+    public Map<String, LogEntry> getEntries() {
+        return entries;
     }
 }

@@ -20,15 +20,15 @@ public class JoinMessage extends Message {
         byte[] bytes = ByteBuffer.allocate(4).putInt(counter).array();
 
         for (byte b : bytes) {
-            body.add(b);
+            this.body.add(b);
         }
 
-        body.add((byte) ' ');
+        this.body.add((byte) ' ');
 
         bytes = ByteBuffer.allocate(4).putInt(port).array();
 
         for (byte b : bytes) {
-            body.add(b);
+            this.body.add(b);
         }
     }
 }

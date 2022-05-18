@@ -19,8 +19,8 @@ public abstract class MessageField {
         };
     }
 
-    public List<byte> assemble() {
-        List<byte> field = new ArrayList<byte>();
+    public List<Byte> assemble() {
+        List<Byte> field = new ArrayList<Byte>();
 
         field.add(translateFieldHeader());
         field.add((byte) ' ');

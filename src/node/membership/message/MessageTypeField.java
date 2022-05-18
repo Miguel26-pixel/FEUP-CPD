@@ -20,8 +20,8 @@ public class MessageTypeField extends MessageField {
     }
 
     @Override
-    public List<byte> assemble() {
-        List<byte> field = super.assemble();
+    public List<Byte> assemble() {
+        List<Byte> field = super.assemble();
         field.add(translateType());
         return field;
     }
