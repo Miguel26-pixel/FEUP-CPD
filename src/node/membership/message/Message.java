@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Message {
-    private static final byte CR = 0x0d;
-    private static final byte LF = 0x0a;
+    private static final Byte CR = 0x0d;
+    private static final Byte LF = 0x0a;
 
     private final List<MessageField> messageFields;
-    protected List<byte> body;
+    protected List<Byte> body;
 
     protected Message(MessageType messageType) {
         this.messageFields = new ArrayList<>();
-        this.body = new ArrayList<byte>();
+        this.body = new ArrayList<Byte>();
 
         this.messageFields.add(new MessageTypeField(FieldType.MESSAGETYPE, messageType));
     }
@@ -21,12 +21,12 @@ public abstract class Message {
         messageFields.add(messageField);
     }
 
-    public List<byte> getBody() {
+    public List<Byte> getBody() {
         return body;
     }
 
-    public List<byte> assemble() {
-        List<byte> message = new ArrayList<byte>();
+    public List<Byte> assemble() {
+        List<Byte> message = new ArrayList<Byte>();
 
         for (MessageField field: messageFields) {
             message.addAll(field.assemble());

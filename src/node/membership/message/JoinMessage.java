@@ -16,7 +16,7 @@ public class JoinMessage extends Message {
     }
 
     private void buildBody() {
-        this.body = new ArrayList<byte>();
+        this.body = new ArrayList<>();
         byte[] bytes = ByteBuffer.allocate(4).putInt(counter).array();
 
         for (byte b : bytes) {
