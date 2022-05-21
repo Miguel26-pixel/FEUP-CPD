@@ -17,15 +17,15 @@ public class View {
     public List<Byte> toBytes() {
         List<Byte> asBytes = new ArrayList<>();
 
-        for (Map.Entry<String, ViewEntry> logEntry : entries.entrySet()) {
-            byte[] key = logEntry.getKey().getBytes();
+        for (Map.Entry<String, ViewEntry> viewEntry : entries.entrySet()) {
+            byte[] key = viewEntry.getKey().getBytes();
             for (byte b: key) {
                 asBytes.add(b);
             }
 
             asBytes.add((byte) ';');
 
-            byte[] counter = ByteBuffer.allocate(4).putInt(logEntry.getValue().getCounter()).array();
+            byte[] counter = ByteBuffer.allocate(4).putInt(viewEntry.getValue().getCounter()).array();
 
             for (byte b : counter) {
                 asBytes.add(b);
@@ -33,7 +33,7 @@ public class View {
 
             asBytes.add((byte) ';');
 
-            byte[] epoch = ByteBuffer.allocate(4).putInt(logEntry.getValue().getEpoch()).array();
+            byte[] epoch = ByteBuffer.allocate(4).putInt(viewEntry.getValue().getEpoch()).array();
 
             for (byte b : epoch) {
                 asBytes.add(b);
@@ -46,8 +46,8 @@ public class View {
         return asBytes;
     }
 
-    public void copyLog(View log) {
-        for(Map.Entry<String, ViewEntry> entry: log.getEntries().entrySet()) {
+    public void copyView(View view) {
+        for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
             this.addEntry(entry.getKey(), entry.getValue());
         }
     }
@@ -71,11 +71,11 @@ public class View {
 
         entryList.subList(0, subsetSize);
 
-        View recentLog = new View();
+        View recentView = new View();
         for (Map.Entry<String, ViewEntry> entry: entryList) {
-            recentLog.addEntry(entry.getKey(), entry.getValue());
+            recentView.addEntry(entry.getKey(), entry.getValue());
         }
 
-        return recentLog;
+        return recentView;
     }
 }
