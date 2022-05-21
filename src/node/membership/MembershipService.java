@@ -1,6 +1,6 @@
 package node.membership;
 
-import node.membership.log.Log;
+import node.membership.view.View;
 import node.membership.message.JoinMessage;
 
 import java.io.IOException;
@@ -15,13 +15,13 @@ public class MembershipService {
     private final String mcastIP;
     private final String mcastPort;
     private int membership_counter;
-    private Log log;
+    private View log;
 
     public MembershipService(String mcastIP, String mcastPort) {
         this.mcastIP = mcastIP;
         this.mcastPort = mcastPort;
         this.membership_counter = 0;
-        this.log = new Log();
+        this.log = new View();
     }
 
     private boolean joinMulticastGroup() throws IOException {

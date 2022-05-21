@@ -1,12 +1,12 @@
 package node.membership.message;
 
-import node.membership.log.Log;
+import node.membership.view.View;
 
 public class MembershipMessage extends Message {
     private final static int RECENTENTRIESSIZE = 32;
-    Log log;
+    View log;
 
-    public MembershipMessage(Log log) {
+    public MembershipMessage(View log) {
         super(MessageType.MEMBERSHIP);
         this.log = log;
         this.buildBody();

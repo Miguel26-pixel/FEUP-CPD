@@ -1,10 +1,10 @@
-package node.membership.log;
+package node.membership.view;
 
-public class LogEntry {
+public class ViewEntry {
     private final int counter;
     private final int epoch;
 
-    public LogEntry(int counter, int epoch) {
+    public ViewEntry(int counter, int epoch) {
         this.counter = counter;
         this.epoch = epoch;
     }

@@ -1,7 +1,6 @@
 package node;
 
 import node.membership.MembershipService;
-import node.membership.log.Log;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;

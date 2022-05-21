@@ -1,23 +1,23 @@
-package node.membership.log;
+package node.membership.view;
 
 import java.nio.ByteBuffer;
 import java.util.*;
 
-public class Log {
-    private final Map<String, LogEntry> entries;
+public class View {
+    private final Map<String, ViewEntry> entries;
 
-    public Log() {
-        this.entries = new HashMap<String, LogEntry>();
+    public View() {
+        this.entries = new HashMap<String, ViewEntry>();
     }
 
-    public Map<String, LogEntry> getEntries() {
+    public Map<String, ViewEntry> getEntries() {
         return entries;
     }
 
     public List<Byte> toBytes() {
         List<Byte> asBytes = new ArrayList<>();
 
-        for (Map.Entry<String, LogEntry> logEntry : entries.entrySet()) {
+        for (Map.Entry<String, ViewEntry> logEntry : entries.entrySet()) {
             byte[] key = logEntry.getKey().getBytes();
             for (byte b: key) {
                 asBytes.add(b);
@@ -46,15 +46,15 @@ public class Log {
         return asBytes;
     }
 
-    public void copyLog(Log log) {
-        for(Map.Entry<String, LogEntry> entry: log.getEntries().entrySet()) {
+    public void copyLog(View log) {
+        for(Map.Entry<String, ViewEntry> entry: log.getEntries().entrySet()) {
             this.addEntry(entry.getKey(), entry.getValue());
         }
     }
 
-    public void addEntry(String nodeId, LogEntry logEntry) {
+    public void addEntry(String nodeId, ViewEntry logEntry) {
         if (entries.containsKey(nodeId)) {
-            LogEntry currentEntry = entries.get(nodeId);
+            ViewEntry currentEntry = entries.get(nodeId);
 
             if (currentEntry.getEpoch() < logEntry.getEpoch() || currentEntry.getCounter() < logEntry.getCounter()) {
                 return;
@@ -64,15 +64,15 @@ public class Log {
         entries.put(nodeId, logEntry);
     }
 
-    public Log getMostRecentEntries(int subsetSize) {
-        List<Map.Entry<String, LogEntry>> entryList = new ArrayList<>(new ArrayList<>(entries.entrySet()));
+    public View getMostRecentEntries(int subsetSize) {
+        List<Map.Entry<String, ViewEntry>> entryList = new ArrayList<>(new ArrayList<>(entries.entrySet()));
 
         entryList.sort(Comparator.comparing(entry -> entry.getValue().getEpoch()));
 
         entryList.subList(0, subsetSize);
 
-        Log recentLog = new Log();
-        for (Map.Entry<String, LogEntry> entry: entryList) {
+        View recentLog = new View();
+        for (Map.Entry<String, ViewEntry> entry: entryList) {
             recentLog.addEntry(entry.getKey(), entry.getValue());
         }
 
