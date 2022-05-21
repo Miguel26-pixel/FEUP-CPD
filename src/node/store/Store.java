@@ -2,56 +2,99 @@ package node.store;
 
 import java.util.HashMap;
 import java.io.File;  
+import java.util.ArrayList;
 import java.io.IOException;  
 
 public class Store {
-    private HashMap<Integer,String> idStore;
+    private ArrayList<Integer> idStore;
+    private String dynamo_path;
 
     public Store(){
-        this.idStore = new HashMap<Integer,String>();
+        this.idStore = new ArrayList<Integer>();
+        this.dynamo_path = "/home/poker/Documents/feup-cpd-dynamo/src/dynamo";
     }
 
 
     private void putNode(String pathname){
         Integer actual_id = idStore.size();
-        idStore.put(actual_id,pathname);
+        idStore.add(actual_id);
 
-        File file = new File(pathname); 
-        boolean result;  
+        File file1 = new File(pathname + "/folder" + actual_id); 
+
+        boolean folder_result;  
         try   
         {  
-        result = file.createNewFile();  
-        if(result)       
+        folder_result = file1.mkdir();  
+        if(folder_result)       
         {  
-        System.out.println("file created "+file.getCanonicalPath() + " with key " + actual_id);   
+        System.out.println("folder created "+file1.getCanonicalPath() + " with key " + actual_id);   
         }  
         else  
         {  
-        System.out.println("File already exist at location: "+file.getCanonicalPath());  
+        System.out.println("Folder already exist at location: "+file1.getCanonicalPath());  
         }  
         }   
         catch (IOException e)   
         {  
         e.printStackTrace();    
-        }    
+        } 
+        
+        
+        File file2 = new File(pathname + "/folder" + actual_id + "/file" + actual_id); 
+
+        boolean file_result;  
+        try   
+        {  
+        file_result = file2.createNewFile();  
+        if(file_result)       
+        {  
+        System.out.println("file created "+file2.getCanonicalPath() + " with key " + actual_id);   
+        }  
+        else  
+        {  
+        System.out.println("file already exist at location: "+file2.getCanonicalPath());  
+        }  
+        }   
+        catch (IOException e)   
+        {  
+        e.printStackTrace();    
+        } 
+        
+        
 
     }
 
     private String getNode(Integer key){
-        return idStore.get(key);
+
+        for (Integer i = 0; i < idStore.size(); i++){
+            if (idStore.get(i) == key) {
+                return dynamo_path + "/folder" + key + "/file" + key;
+            }
+        }
+        return "don't exist";
     }
 
     private void deleteNode(Integer key){
-        String pathname = idStore.get(key);
+        String path = "";
+        Integer index = 0;
+        for (Integer i = 0; i < idStore.size(); i++){
+            if (idStore.get(i) == key) {
+                 path = dynamo_path + "/folder" + key + "/file" + key;
+                 index = i;
+            }
+        }
 
-        File myObj = new File(pathname); 
-        if (myObj.delete()) { 
-            System.out.println("Deleted the file: " + myObj.getName());
-        } else {
-            System.out.println("Failed to delete the file.");
-        } 
+        if (path != "") {
+            File myObj = new File(path);
 
-        idStore.remove(key);
+            if (myObj.delete()) { 
+                System.out.println("Deleted the file: " + myObj.getName());
+            } else {
+                System.out.println("Failed to delete the file.");
+            }
+
+            idStore.remove(index);
+        }
 
     }
 
