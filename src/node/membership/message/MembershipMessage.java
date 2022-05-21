@@ -1,18 +1,21 @@
 package node.membership.message;
 
+import node.membership.log.Log;
 import node.membership.view.View;
 
 public class MembershipMessage extends Message {
     private final static int RECENTENTRIESSIZE = 32;
-    View log;
+    View view;
 
-    public MembershipMessage(View log) {
+    public MembershipMessage(View view) {
         super(MessageType.MEMBERSHIP);
-        this.log = log;
+        this.view = view;
         this.buildBody();
     }
 
     private void buildBody() {
-        this.body = log.getMostRecentEntries(RECENTENTRIESSIZE).toBytes();
+        this.body.addAll(this.view.toBytes());
+        this.body.add((byte)'|');
+        this.body.addAll(Log.toBytes());
     }
 }
