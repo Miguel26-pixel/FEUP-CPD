@@ -2,6 +2,7 @@ package node.membership.log;
 
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Log {
     private final Map<String, LogEntry> entries;
@@ -59,7 +60,7 @@ public class Log {
     }
 
     public Log getMostRecentEntries(int subsetSize) {
-        List<Map.Entry<String, LogEntry>> entryList = entries.entrySet().stream().toList();
+        List<Map.Entry<String, LogEntry>> entryList = new ArrayList<>(new ArrayList<>(entries.entrySet()));
 
         entryList.sort(Comparator.comparing(entry -> entry.getValue().getEpoch()));
 
