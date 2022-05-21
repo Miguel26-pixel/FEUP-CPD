@@ -18,7 +18,7 @@ public class Node {
 
     public Node(String mcastIP, String mcastPort, String nodeID, String membershipPort) {
         this.nodeID = nodeID;
-        this.membershipService = new MembershipService(mcastIP, mcastPort, membershipPort);
+        this.membershipService = new MembershipService(mcastIP, mcastPort);
         try {
             this.socket = new Socket(nodeID, Integer.parseInt(membershipPort));
             this.input = new DataInputStream(

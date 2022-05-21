@@ -1,35 +1,35 @@
 package node.membership;
 
 import node.membership.log.Log;
+import node.membership.message.JoinMessage;
 
+import java.io.IOException;
 import java.net.*;
 
 public class MembershipService {
+    private final static int MEMBERSHIP_PORT = 5525;
+    private final static int MAX_TRIES = 3;
+    private final static int TIMEOUT = 3000;
+
     private MulticastSocket multicastSocket;
     private final String mcastIP;
     private final String mcastPort;
-    private final String membershipPort;
     private int membership_counter;
     private Log log;
 
-    public MembershipService(String mcastIP, String mcastPort, String membershipPort) {
+    public MembershipService(String mcastIP, String mcastPort) {
         this.mcastIP = mcastIP;
         this.mcastPort = mcastPort;
-        this.membershipPort = membershipPort;
         this.membership_counter = 0;
         this.log = new Log();
     }
 
-    private boolean joinMulticastGroup() {
+    private boolean joinMulticastGroup() throws IOException {
         int multicastPort = Integer.parseInt(mcastPort);
 
-        try {
-            this.multicastSocket = new MulticastSocket(multicastPort);
+        this.multicastSocket = new MulticastSocket(multicastPort);
 
-            multicastSocket.joinGroup(Inet4Address.getByName(mcastIP));
-        } catch (Exception e) {
-            return false;
-        }
+        multicastSocket.joinGroup(Inet4Address.getByName(mcastIP));
 
         return true;
     }
@@ -40,9 +40,24 @@ public class MembershipService {
             return false;
         }
 
-        if (!joinMulticastGroup()) {
+
+        try {
+            joinMulticastGroup();
+
+            ServerSocket membershipSocket = new ServerSocket(MEMBERSHIP_PORT);
+            membershipSocket.setSoTimeout(TIMEOUT);
+
+            byte[] joinMessage = (new JoinMessage(this.membership_counter, MembershipService.MEMBERSHIP_PORT)).assemble();
+
+            multicastSocket.send(new DatagramPacket(joinMessage, joinMessage.length));
+
+            for (int current_try = 0; current_try < MAX_TRIES; current_try++) {
+                // receive membership messages
+            }
+        } catch (Exception e) {
             return false;
         }
+
 
         membership_counter++;
         return true;
