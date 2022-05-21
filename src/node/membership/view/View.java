@@ -1,5 +1,7 @@
 package node.membership.view;
 
+import node.membership.log.Log;
+
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -50,6 +52,8 @@ public class View {
         for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
             this.addEntry(entry.getKey(), entry.getValue());
         }
+
+        Log.update(this);
     }
 
     public void addEntry(String nodeId, ViewEntry logEntry) {
@@ -62,6 +66,7 @@ public class View {
         }
 
         entries.put(nodeId, logEntry);
+        Log.update(this);
     }
 
     public View getMostRecentEntries(int subsetSize) {
