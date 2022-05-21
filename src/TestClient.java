@@ -2,7 +2,6 @@ import client.Services;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.List;
 
 public class TestClient {
     public static void main(String[] args) {
@@ -73,7 +72,7 @@ public class TestClient {
                     break;
             }
         } catch (Exception e) {
-            System.err.println("Client exception: " + e.toString());
+            System.err.println("Client exception: " + e);
             e.printStackTrace();
         }
 

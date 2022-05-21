@@ -20,8 +20,8 @@ public class Store {
 
             Registry registry = LocateRegistry.getRegistry();
             registry.rebind(args[2], stub);
-        } catch (Exception e) {
-            System.err.println("Server exception: " + e.toString());
+        } catch (RemoteException e) {
+            System.err.println("Server exception: " + e);
             e.printStackTrace();
         }
     }
