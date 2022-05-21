@@ -46,6 +46,12 @@ public class Log {
         return asBytes;
     }
 
+    public void copyLog(Log log) {
+        for(Map.Entry<String, LogEntry> entry: log.getEntries().entrySet()) {
+            this.addEntry(entry.getKey(), entry.getValue());
+        }
+    }
+
     public void addEntry(String nodeId, LogEntry logEntry) {
         if (entries.containsKey(nodeId)) {
             LogEntry currentEntry = entries.get(nodeId);
