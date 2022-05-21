@@ -2,7 +2,10 @@ package node.membership;
 
 import node.membership.log.Log;
 
+import java.net.*;
+
 public class MembershipService {
+    private MulticastSocket multicastSocket;
     private final String mcastIP;
     private final String mcastPort;
     private final String membershipPort;
@@ -17,11 +20,30 @@ public class MembershipService {
         this.log = new Log();
     }
 
+    private boolean joinMulticastGroup() {
+        int multicastPort = Integer.parseInt(mcastPort);
+
+        try {
+            this.multicastSocket = new MulticastSocket(multicastPort);
+
+            multicastSocket.joinGroup(Inet4Address.getByName(mcastIP));
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean join() {
         if (!this.canJoin()) {
             membership_counter++;
             return false;
         }
+
+        if (!joinMulticastGroup()) {
+            return false;
+        }
+
         membership_counter++;
         return true;
     }
