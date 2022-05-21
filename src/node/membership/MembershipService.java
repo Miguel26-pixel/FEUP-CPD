@@ -38,4 +38,9 @@ public class MembershipService {
     private boolean canLeave() {
         return this.membership_counter % 2 != 0;
     }
+
+    //for testing TCP communication
+    public boolean sayHello(String nodeIP, String nodePort) {
+        return false;
+    }
 }
