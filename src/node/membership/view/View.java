@@ -83,8 +83,7 @@ public class View {
     public String toString() {
         StringBuilder toString = new StringBuilder();
         for (Map.Entry<String, ViewEntry> entry: entries.entrySet()) {
-            ViewEntry value = entry.getValue();
-            toString.append(entry.getKey()).append(";").append(value.getCounter()).append(";").append(value.getEpoch()).append("\n");
+            toString.append(entry.getKey()).append(";").append(entry.getValue().toString()).append("\n");
         }
 
         return toString.toString();

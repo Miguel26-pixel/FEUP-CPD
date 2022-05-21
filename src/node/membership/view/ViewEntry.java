@@ -16,4 +16,9 @@ public class ViewEntry {
     public int getEpoch() {
         return epoch;
     }
+
+    @Override
+    public String toString() {
+        return counter + ";" + epoch;
+    }
 }
