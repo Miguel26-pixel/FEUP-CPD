@@ -16,10 +16,10 @@ public class Store {
         Node node = new Node(args[0], args[1], args[2], args[3]);
 
         try {
-            Registry registry = LocateRegistry.getRegistry();
-            registry.rebind("Hello", node);
+            Services stub = (Services) UnicastRemoteObject.exportObject(node, 0);
 
-            System.out.println("Bound with gotten registry");
+            Registry registry = LocateRegistry.getRegistry();
+            registry.rebind(args[2], stub);
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
             e.printStackTrace();
