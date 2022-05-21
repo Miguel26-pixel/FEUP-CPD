@@ -20,7 +20,7 @@ public class Log {
             logFile.createNewFile();
 
             FileWriter logFileWriter = new FileWriter(LOG_PATH);
-            logFileWriter.write(view.toString());
+            logFileWriter.write(recentEntries.toString());
             logFileWriter.close();
         } catch (IOException ignored) {
         }
