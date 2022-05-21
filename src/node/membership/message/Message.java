@@ -29,7 +29,7 @@ public abstract class Message {
         return body;
     }
 
-    public List<Byte> assemble() {
+    public byte[] assemble() {
         List<Byte> message = new ArrayList<Byte>();
 
         for (MessageField field: messageFields) {
@@ -43,7 +43,12 @@ public abstract class Message {
 
         message.addAll(body);
 
-        return message;
+        byte[] messageBytes = new byte[message.size()];
+        for (int i = 0; i < message.size(); i++) {
+            messageBytes[i] = message.get(i);
+        }
+
+        return messageBytes;
     }
 
     //1:5,1237;2:8,129381 Log message data format
