@@ -12,7 +12,6 @@ import java.net.Socket;
 public class Node {
     private final String nodeID;
     private MembershipService membershipService;
-    private Log log;
     private Socket socket;
     private DataInputStream input;
     private DataOutputStream out;
@@ -20,7 +19,6 @@ public class Node {
     public Node(String mcastIP, String mcastPort, String nodeID, String membershipPort) {
         this.nodeID = nodeID;
         this.membershipService = new MembershipService(mcastIP, mcastPort, membershipPort);
-        this.log = new Log();
         try {
             this.socket = new Socket(nodeID, Integer.parseInt(membershipPort));
             this.input = new DataInputStream(

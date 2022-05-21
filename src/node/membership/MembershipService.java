@@ -1,16 +1,20 @@
 package node.membership;
 
+import node.membership.log.Log;
+
 public class MembershipService {
     private final String mcastIP;
     private final String mcastPort;
     private final String membershipPort;
     private int membership_counter;
+    private Log log;
 
     public MembershipService(String mcastIP, String mcastPort, String membershipPort) {
         this.mcastIP = mcastIP;
         this.mcastPort = mcastPort;
         this.membershipPort = membershipPort;
         this.membership_counter = 0;
+        this.log = new Log();
     }
 
     public boolean join() {
