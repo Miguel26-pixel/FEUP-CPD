@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Log {
@@ -39,5 +41,15 @@ public class Log {
         }
 
         return log.toString();
+    }
+
+    public static List<Byte> toBytes() {
+        List<Byte> asBytes = new ArrayList<>();
+
+        for (Byte b: getLog().getBytes()) {
+            asBytes.add(b);
+        }
+
+        return asBytes;
     }
 }
