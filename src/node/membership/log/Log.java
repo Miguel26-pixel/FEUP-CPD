@@ -3,8 +3,10 @@ package node.membership.log;
 import node.membership.view.View;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class Log {
     private final static String LOG_PATH = "./dynamo.log";
@@ -17,10 +19,25 @@ public class Log {
         try {
             logFile.createNewFile();
 
-            FileWriter logFileWrite = new FileWriter(LOG_PATH);
-            logFileWrite.write(view.toString());
-            logFileWrite.close();
+            FileWriter logFileWriter = new FileWriter(LOG_PATH);
+            logFileWriter.write(view.toString());
+            logFileWriter.close();
         } catch (IOException ignored) {
         }
+    }
+
+    public static String getLog() {
+        StringBuilder log = new StringBuilder();
+
+        File logFile = new File(LOG_PATH);
+        try {
+            Scanner fileReader = new Scanner(logFile);
+            while (fileReader.hasNext()) {
+                log.append(fileReader.nextLine());
+            }
+        } catch (IOException ignored) {
+        }
+
+        return log.toString();
     }
 }
