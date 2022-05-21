@@ -7,13 +7,14 @@ public class TestClient {
     public static void main(String[] args) {
 
         if (args.length < 2) {
-            System.err.println("usage: java TestClient <node_ap> <operation> [<opnd>]");
+            System.err.println("Invalid number of arguments");
+            System.out.println("usage: java TestClient <node_ap> <operation> [<opnd>]");
             System.exit(1);
         }
 
         if (args[0].split(":").length != 2) {
             System.err.println("Invalid node_ap argument");
-            System.err.println("usage: java TestClient <IP>:<remote_name> <operation> [<opnd>]");
+            System.out.println("usage: java TestClient <IP>:<remote_name> <operation> [<opnd>]");
             System.exit(1);
         }
 
@@ -68,7 +69,7 @@ public class TestClient {
                     System.out.println("response: " + response);
                     break;
                 default:
-                    System.out.println("Invalid operation");
+                    System.err.println("Invalid operation");
                     break;
             }
         } catch (Exception e) {
