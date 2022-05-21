@@ -59,7 +59,7 @@ public class Log {
     }
 
     public Log getMostRecentEntries(int subsetSize) {
-        List<Map.Entry<String, LogEntry>> entryList = entries.entrySet().stream().toList();
+        List<Map.Entry<String, LogEntry>> entryList = new ArrayList<>(new ArrayList<>(entries.entrySet()));
 
         entryList.sort(Comparator.comparing(entry -> entry.getValue().getEpoch()));
 
