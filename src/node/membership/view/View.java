@@ -19,30 +19,8 @@ public class View {
     public List<Byte> toBytes() {
         List<Byte> asBytes = new ArrayList<>();
 
-        for (Map.Entry<String, ViewEntry> viewEntry : entries.entrySet()) {
-            byte[] key = viewEntry.getKey().getBytes();
-            for (byte b: key) {
-                asBytes.add(b);
-            }
-
-            asBytes.add((byte) ';');
-
-            byte[] counter = ByteBuffer.allocate(4).putInt(viewEntry.getValue().getCounter()).array();
-
-            for (byte b : counter) {
-                asBytes.add(b);
-            }
-
-            asBytes.add((byte) ';');
-
-            byte[] epoch = ByteBuffer.allocate(4).putInt(viewEntry.getValue().getEpoch()).array();
-
-            for (byte b : epoch) {
-                asBytes.add(b);
-            }
-
-            asBytes.add((byte) ' ');
-
+        for (Byte b: this.toString().getBytes()) {
+            asBytes.add(b);
         }
 
         return asBytes;
