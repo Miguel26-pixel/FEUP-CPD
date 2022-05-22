@@ -22,6 +22,7 @@ public class TestClient {
         String nodeIP = words[0];
         String remoteObj = words[1];
         String operation = args[1];
+        String response;
 
         try {
             Registry registry = LocateRegistry.getRegistry(nodeIP);
@@ -48,6 +49,9 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> put <filepath>");
                         System.exit(1);
                     }
+                    String filepath = args[2];
+                    response = stub.put(filepath);
+                    System.out.println("New key: " + response);
                     break;
                 case "get":
                     if (args.length != 3) {
@@ -55,6 +59,8 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> get <encoded_key>");
                         System.exit(1);
                     }
+                    String getKey = args[2];
+                    stub.get(getKey);
                     break;
                 case "delete":
                     if (args.length != 3) {
@@ -62,10 +68,12 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> delete <encoded_key>");
                         System.exit(1);
                     }
+                    String deleteKey = args[2];
+                    stub.get(deleteKey);
                     break;
                 // for testing
                 case "Hello":
-                    String response = stub.sayHello();
+                    response = stub.sayHello();
                     System.out.println("response: " + response);
                     break;
                 default:

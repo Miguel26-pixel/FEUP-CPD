@@ -17,7 +17,7 @@ public class KeyValueStore {
     }
 
 
-    private String putNode(String pathname) {
+    public String putNewPair(String pathname) {
         byte[] key;
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -61,35 +61,33 @@ public class KeyValueStore {
         return "";
     }
 
-    private String getNode(Integer key){
-        for (int i = 0; i < idStore.size(); i++){
-            if (Objects.equals(idStore.get(i), key)) {
-                return folderPath + "/folder" + key + "/file" + key;
+    public String getValue(String key){
+        int parsed_key = Integer.parseInt(key);
+        for (Integer integer : idStore) {
+            if (Objects.equals(integer, parsed_key)) {
+                return folderPath + "/folder" + parsed_key + "/file" + parsed_key;
             }
         }
         return "don't exist";
     }
 
-    private void deleteNode(Integer key){
+    public boolean deleteValue(String key){
         String path = "";
-        Integer index = 0;
+        int index = -1;
+        int parsed_key = Integer.parseInt(key);
         for (int i = 0; i < idStore.size(); i++){
-            if (Objects.equals(idStore.get(i), key)) {
-                 path = folderPath + "/folder" + key + "/file" + key;
+            if (Objects.equals(idStore.get(i), parsed_key)) {
+                 path = folderPath + "/folder" + parsed_key + "/file" + parsed_key;
                  index = i;
             }
         }
 
-        if (!path.equals("")) {
-            File myObj = new File(path);
+        if (index == -1 || path.equals("")) { return false; }
 
-            if (myObj.delete()) { 
-                System.out.println("Deleted the file: " + myObj.getName());
-            } else {
-                System.out.println("Failed to delete the file.");
-            }
+        File file = new File(path);
+        if (!file.delete()) { return false; }
 
-            idStore.remove(index);
-        }
+        idStore.remove(index);
+        return true;
     }
 }
