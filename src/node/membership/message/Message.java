@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Message {
-    private static final Byte CR = 0x0d;
-    private static final Byte LF = 0x0a;
+    public static final Byte CR = 0x0d;
+    public static final Byte LF = 0x0a;
 
     private final List<MessageField> messageFields;
     protected List<Byte> body;
