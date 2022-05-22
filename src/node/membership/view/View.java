@@ -27,34 +27,42 @@ public class View {
     }
 
     public void copyView(View view) {
-        for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
-            this.addEntry(entry.getKey(), entry.getValue());
+        synchronized (entries) {
+            for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
+                this.addEntry(entry.getKey(), entry.getValue());
+            }
         }
     }
 
     public void copyView(View view, boolean updateLog) {
-        for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
-            this.addEntry(entry.getKey(), entry.getValue(), updateLog);
+        synchronized (entries) {
+            for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
+                this.addEntry(entry.getKey(), entry.getValue(), updateLog);
+            }
         }
     }
 
     public void addEntry(String nodeId, ViewEntry logEntry) {
-        if (entries.containsKey(nodeId)) {
-            ViewEntry currentEntry = entries.get(nodeId);
+        synchronized (entries) {
+            if (entries.containsKey(nodeId)) {
+                ViewEntry currentEntry = entries.get(nodeId);
 
-            if (currentEntry.getEpoch() < logEntry.getEpoch() || currentEntry.getCounter() < logEntry.getCounter()) {
-                return;
+                if (currentEntry.getEpoch() < logEntry.getEpoch() || currentEntry.getCounter() < logEntry.getCounter()) {
+                    return;
+                }
             }
-        }
 
-        entries.put(nodeId, logEntry);
+            entries.put(nodeId, logEntry);
+        }
     }
 
     public void addEntry(String nodeId, ViewEntry logEntry, boolean updateLog) {
-        addEntry(nodeId, logEntry);
+        synchronized (entries) {
+            addEntry(nodeId, logEntry);
 
-        if (updateLog) {
-            Log.update(this);
+            if (updateLog) {
+                Log.update(this);
+            }
         }
     }
 
