@@ -26,19 +26,16 @@ public class TestClient {
         String nodeIP = words[0];
         String remoteObj = words[1];
         String operation = args[1];
-        String response;
-        int port;
 
         try {
-
             switch (operation) {
-
                 case "join":
                     if (args.length > 2) {
                         System.err.println("Invalid number of arguments for join operation");
                         System.out.println("usage: java TestClient <node_ap> join");
                         System.exit(1);
                     }
+                    sendRMIJoin();
                     break;
                 case "leave":
                     if (args.length > 2) {
@@ -46,6 +43,7 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> leave");
                         System.exit(1);
                     }
+                    sendRMILeave();
                     break;
                 case "put":
                     if (args.length != 3) {
@@ -53,14 +51,7 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> put <filepath>");
                         System.exit(1);
                     }
-                    String filepath = args[2];
-                    port = Integer.parseInt(remoteObj);
-                    try {
-                        Socket socket = new Socket(nodeIP, port);
-                        sendTCPMessage(socket, "put" ,filepath);
-                    } catch (IOException e) {
-                        System.out.println("Client exception" + e);
-                    }
+                    handleTCPPut(nodeIP, Integer.parseInt(remoteObj), args[2]);
                     break;
                 case "get":
                     if (args.length != 3) {
@@ -68,14 +59,7 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> get <encoded_key>");
                         System.exit(1);
                     }
-                    String getKey = args[2];
-                    port = Integer.parseInt(remoteObj);
-                    try {
-                        Socket socket = new Socket(nodeIP, port);
-                        sendTCPMessage(socket, "get" ,getKey);
-                    } catch (IOException e) {
-                        System.out.println("Client exception" + e);
-                    }
+                    handleTCPGet(nodeIP, Integer.parseInt(remoteObj), args[2]);
                     break;
                 case "delete":
                     if (args.length != 3) {
@@ -83,20 +67,14 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> delete <encoded_key>");
                         System.exit(1);
                     }
-                    String deleteKey = args[2];
-                    port = Integer.parseInt(remoteObj);
-                    try {
-                        Socket socket = new Socket(nodeIP, port);
-                        sendTCPMessage(socket, "delete" ,deleteKey);
-                    } catch (IOException e) {
-                        System.out.println("Client exception" + e);
-                    }
+                    handleTCPDelete(nodeIP, Integer.parseInt(remoteObj), args[2]);
                     break;
+
                 // for testing
                 case "Hello":
                     Registry registry = LocateRegistry.getRegistry(nodeIP);
                     Services stub = (Services) registry.lookup(remoteObj);
-                    response = stub.sayHello();
+                    String response = stub.sayHello();
                     System.out.println("response: " + response);
                     break;
                 default:
@@ -107,7 +85,41 @@ public class TestClient {
             System.err.println("Client exception: " + e);
             e.printStackTrace();
         }
+    }
 
+    private static void sendRMIJoin() {
+
+    }
+
+    private static void sendRMILeave() {
+
+    }
+
+    private static void handleTCPPut(String nodeIP, int port, String filepath) {
+        try {
+            Socket socket = new Socket(nodeIP, port);
+            sendTCPMessage(socket, "put", filepath);
+        } catch (IOException e) {
+            System.out.println("Client exception" + e);
+        }
+    }
+
+    private static void handleTCPGet(String nodeIP, int port, String key) {
+        try {
+            Socket socket = new Socket(nodeIP, port);
+            sendTCPMessage(socket, "get", key);
+        } catch (IOException e) {
+            System.out.println("Client exception" + e);
+        }
+    }
+
+    private static void handleTCPDelete(String nodeIP, int port, String key) {
+        try {
+            Socket socket = new Socket(nodeIP, port);
+            sendTCPMessage(socket, "delete", key);
+        } catch (IOException e) {
+            System.out.println("Client exception" + e);
+        }
     }
 
     private static void sendTCPMessage(Socket socket, String type, String arg) throws IOException {
