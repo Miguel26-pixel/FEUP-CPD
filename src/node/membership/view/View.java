@@ -30,8 +30,12 @@ public class View {
         for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
             this.addEntry(entry.getKey(), entry.getValue());
         }
+    }
 
-        Log.update(this);
+    public void copyView(View view, boolean updateLog) {
+        for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
+            this.addEntry(entry.getKey(), entry.getValue(), updateLog);
+        }
     }
 
     public void addEntry(String nodeId, ViewEntry logEntry) {
@@ -44,7 +48,14 @@ public class View {
         }
 
         entries.put(nodeId, logEntry);
-        Log.update(this);
+    }
+
+    public void addEntry(String nodeId, ViewEntry logEntry, boolean updateLog) {
+        addEntry(nodeId, logEntry);
+
+        if (updateLog) {
+            Log.update(this);
+        }
     }
 
     public View getMostRecentEntries(int subsetSize) {
