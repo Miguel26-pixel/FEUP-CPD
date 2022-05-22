@@ -25,7 +25,7 @@ public class Node implements Services {
     public Node(String mcastIP, String mcastPort, String nodeID, String membershipPort) {
         this.nodeID = nodeID;
         this.membershipService = new MembershipService(mcastIP, mcastPort, membershipPort);
-        this.keyValueStore = new KeyValueStore();
+        this.keyValueStore = new KeyValueStore(nodeID);
         this.log = new Log();
         try {
             this.server = new ServerSocket(Integer.parseInt(membershipPort));
@@ -52,10 +52,12 @@ public class Node implements Services {
     }
 
     @Override
-    public void delete(String key) throws RemoteException {
+    public String delete(String key) throws RemoteException {
         if (keyValueStore.deleteValue(key)) {
             System.out.println("Pair with key = " + key + " was deleted with success");
+            return "Pair with key = " + key + " was deleted with success";
         }
         System.err.println("Pair with key = " + key + " could not be deleted");
+        return "Pair with key = " + key + " could not be deleted";
     }
 }

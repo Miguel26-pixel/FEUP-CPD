@@ -1,6 +1,9 @@
 package node.store;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -10,62 +13,75 @@ import java.io.IOException;
 public class KeyValueStore {
     private ArrayList<Integer> idStore;
     private String folderPath;
+    private String nodeID;
 
-    public KeyValueStore(){
+    public KeyValueStore(String nodeID){
         this.idStore = new ArrayList<Integer>();
         this.folderPath = "../dynamo/";
+        this.nodeID = nodeID;
     }
 
 
     public String putNewPair(String pathname) {
-        byte[] key;
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            key = digest.digest(pathname.getBytes(StandardCharsets.UTF_8));
-        } catch (NoSuchAlgorithmException e) {
-            System.err.println("Algorithm does not exist: " + e);
-            e.printStackTrace();
-            return "";
+        Integer valueKey = idStore.size();
+        File file = new File(pathname);
+
+        if (!file.exists() || !file.isFile()) {
+            System.err.println("Invalid pathname");
+            return "Invalid pathname" + pathname;
         }
 
-        Integer actual_id = idStore.size();
-        idStore.add(actual_id);
-
-        File file1 = new File(pathname + "/folder" + actual_id); 
-
-        boolean folder_result;  
-        try {
-            folder_result = file1.mkdir();
-            if(folder_result) {
-                System.out.println("folder created "+file1.getCanonicalPath() + " with key " + actual_id);
+        File dynamoDir = new File(folderPath);
+        if (!dynamoDir.exists() || !dynamoDir.isDirectory()) {
+            boolean res = dynamoDir.mkdir();
+            if(res) {
+                System.out.println("Dynamo main folder created with success");
             } else {
-                System.out.println("Folder already exist at location: " + file1.getCanonicalPath());
+                System.err.println("Dynamo main folder could not be created");
+                return "Dynamo main folder could not be created";
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } 
-        
-        File file2 = new File(pathname + "/folder" + actual_id + "/file" + actual_id);
-
-        boolean file_result;  
-        try {
-            file_result = file2.createNewFile();
-            if(file_result) {
-                System.out.println("file created "+ file2.getCanonicalPath() + " with key " + actual_id);
-            } else {
-                System.out.println("file already exist at location: " + file2.getCanonicalPath());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        return "";
+
+        File nodeDir = new File(folderPath + "node_" + nodeID);
+        if (!nodeDir.exists() || !nodeDir.isDirectory()) {
+            boolean res = nodeDir.mkdir();
+            if(res) {
+                System.out.println("Node folder created with success");
+            } else {
+                System.err.println("Node folder could not be created");
+                return "Node folder could not be created";
+            }
+        }
+
+        File newFile = new File(folderPath + "node_" + nodeID + "/file_" + valueKey);
+
+        if (!this.copyFile(file, newFile)) {
+            return "File could not be created";
+        }
+
+        idStore.add(valueKey);
+
+        return String.valueOf(valueKey);
+    }
+
+    private boolean copyFile(File a, File b) {
+        try (FileInputStream in = new FileInputStream(a); FileOutputStream out = new FileOutputStream(b)) {
+            int n;
+            while ((n = in.read()) != -1) {
+                out.write(n);
+            }
+        } catch (IOException e) {
+            System.err.println("File could not be copied");
+            return false;
+        }
+        return true;
     }
 
     public String getValue(String key){
         int parsed_key = Integer.parseInt(key);
         for (Integer integer : idStore) {
             if (Objects.equals(integer, parsed_key)) {
-                return folderPath + "/folder" + parsed_key + "/file" + parsed_key;
+                return folderPath + "node_" + nodeID + "/file_" + parsed_key;
             }
         }
         return "don't exist";
@@ -76,16 +92,17 @@ public class KeyValueStore {
         int index = -1;
         int parsed_key = Integer.parseInt(key);
         for (int i = 0; i < idStore.size(); i++){
-            if (Objects.equals(idStore.get(i), parsed_key)) {
-                 path = folderPath + "/folder" + parsed_key + "/file" + parsed_key;
+            if (idStore.get(i) == parsed_key) {
+                 path = folderPath + "node_" + nodeID + "/file_" + parsed_key;
                  index = i;
+                 break;
             }
         }
 
-        if (index == -1 || path.equals("")) { return false; }
+        if (index == -1) { return false; }
 
         File file = new File(path);
-        if (!file.delete()) { return false; }
+        if (!file.exists() || !file.delete()) { return false; }
 
         idStore.remove(index);
         return true;

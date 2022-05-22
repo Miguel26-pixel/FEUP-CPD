@@ -69,7 +69,8 @@ public class TestClient {
                         System.exit(1);
                     }
                     String deleteKey = args[2];
-                    stub.get(deleteKey);
+                    response = stub.delete(deleteKey);
+                    System.out.println("Operation Response: " + response);
                     break;
                 // for testing
                 case "Hello":

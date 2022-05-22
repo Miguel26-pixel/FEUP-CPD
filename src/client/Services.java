@@ -10,5 +10,5 @@ public interface Services extends Remote {
 
     String put(String filepath) throws RemoteException;
 
-    void delete(String key) throws RemoteException;
+    String delete(String key) throws RemoteException;
 }
