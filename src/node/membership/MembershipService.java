@@ -1,10 +1,12 @@
 package node.membership;
 
+import node.membership.message.LeaveMessage;
 import node.membership.message.MembershipMessage;
 import node.membership.message.Message;
 import node.membership.view.View;
 import node.membership.message.JoinMessage;
 
+import javax.xml.crypto.Data;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -80,7 +82,6 @@ public class MembershipService {
             return false;
         }
 
-
         membership_counter++;
         return true;
     }
@@ -128,9 +129,16 @@ public class MembershipService {
 
     public boolean leave() {
         if (!this.canLeave()) {
-            membership_counter++;
             return false;
         }
+
+        try {
+            byte[] leaveMessage = (new LeaveMessage(this.membership_counter)).assemble();
+
+            multicastSocket.send(new DatagramPacket(leaveMessage, leaveMessage.length));
+        } catch (IOException ignored) {
+        }
+
         membership_counter++;
         return true;
     }
