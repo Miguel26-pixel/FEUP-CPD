@@ -51,5 +51,23 @@ public abstract class Message {
         return messageBytes;
     }
 
+    public static MessageType getMessageType(String message) {
+        List<String> split = new ArrayList<>(List.of(message.split(CR.toString() + LF.toString())));
+
+        split.removeIf(s -> s.equals(""));
+        split.remove(split.size() - 1);
+
+        for(String headerLine: split) {
+            List<String> splitHeader = List.of(headerLine.split(" "));
+            String header = splitHeader.get(0);
+
+            if (MessageField.translateFieldHeader(header) == FieldType.MESSAGETYPE) {
+                return MessageTypeField.translateType(splitHeader.get(1));
+            }
+        }
+
+        return MessageType.INVALID;
+    }
+
     //1:5,1237;2:8,129381 Log message data format
 }

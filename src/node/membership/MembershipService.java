@@ -14,10 +14,11 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MembershipService {
+public class MembershipService extends Thread {
     private final static int MEMBERSHIP_PORT = 5525;
     private final static int MAX_TRIES = 3;
     private final static int TIMEOUT = 3000;
+    private final static int DATAGRAM_LENGTH = 1024;
 
     private MulticastSocket multicastSocket;
     private final String mcastIP;
@@ -32,6 +33,11 @@ public class MembershipService {
         this.view = new View();
     }
 
+    @Override
+    public void run() {
+        
+    }
+
     private boolean joinMulticastGroup() throws IOException {
         int multicastPort = Integer.parseInt(mcastPort);
 
@@ -42,7 +48,7 @@ public class MembershipService {
         return true;
     }
 
-    public boolean join() {
+    public boolean joinCluster() {
         if (!this.canJoin()) {
             return false;
         }
@@ -99,7 +105,7 @@ public class MembershipService {
         }
     }
 
-    public boolean leave() {
+    public boolean leaveCluster() {
         if (!this.canLeave()) {
             return false;
         }
