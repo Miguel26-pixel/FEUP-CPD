@@ -72,7 +72,10 @@ public class MembershipService {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
                 receiveMembershipMessage(reader);
+                clientSocket.close();
             }
+
+            membershipSocket.close();
         } catch (Exception e) {
             return false;
         }
