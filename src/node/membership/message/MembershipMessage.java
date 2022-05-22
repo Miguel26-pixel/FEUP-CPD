@@ -6,7 +6,7 @@ import node.membership.view.ViewEntry;
 
 public class MembershipMessage extends Message {
     private final static int RECENTENTRIESSIZE = 32;
-    View view;
+    private View view;
 
     public MembershipMessage(View view) {
         super(MessageType.MEMBERSHIP);
@@ -39,5 +39,9 @@ public class MembershipMessage extends Message {
         this.body.addAll(this.view.toBytes());
         this.body.add((byte)'|');
         this.body.addAll(Log.toBytes());
+    }
+
+    public View getView() {
+        return view;
     }
 }
