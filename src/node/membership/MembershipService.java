@@ -24,7 +24,7 @@ public class MembershipService extends Thread {
     private final String mcastIP;
     private final String mcastPort;
     private int membership_counter;
-    private View view;
+    private final View view;
 
     public MembershipService(String mcastIP, String mcastPort) {
         this.mcastIP = mcastIP;
@@ -35,7 +35,15 @@ public class MembershipService extends Thread {
 
     @Override
     public void run() {
-        
+    }
+
+    private void processJoin(String message) {
+    }
+
+    private void processLeave(String message) {
+    }
+
+    private void processMembership(String message) {
     }
 
     private boolean joinMulticastGroup() throws IOException {
