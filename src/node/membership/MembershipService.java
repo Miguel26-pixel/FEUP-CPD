@@ -50,7 +50,6 @@ public class MembershipService {
 
     public boolean join() {
         if (!this.canJoin()) {
-            membership_counter++;
             return false;
         }
 
