@@ -136,6 +136,7 @@ public class MembershipService {
 
             multicastSocket.send(new DatagramPacket(leaveMessage, leaveMessage.length));
         } catch (IOException ignored) {
+            return false;
         }
 
         membership_counter++;
