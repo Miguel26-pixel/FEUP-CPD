@@ -24,5 +24,7 @@ public class Store {
             System.err.println("Server exception: " + e);
             e.printStackTrace();
         }
+
+        node.run();
     }
 }

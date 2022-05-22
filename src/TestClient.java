@@ -1,5 +1,9 @@
 import client.Services;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
@@ -23,10 +27,10 @@ public class TestClient {
         String remoteObj = words[1];
         String operation = args[1];
         String response;
+        int port;
 
         try {
-            Registry registry = LocateRegistry.getRegistry(nodeIP);
-            Services stub = (Services) registry.lookup(remoteObj);
+
             switch (operation) {
 
                 case "join":
@@ -50,8 +54,13 @@ public class TestClient {
                         System.exit(1);
                     }
                     String filepath = args[2];
-                    response = stub.put(filepath);
-                    System.out.println("New key: " + response);
+                    port = Integer.parseInt(remoteObj);
+                    try {
+                        Socket socket = new Socket(nodeIP, port);
+                        sendTCPMessage(socket, "put" ,filepath);
+                    } catch (IOException e) {
+                        System.out.println("Client exception" + e);
+                    }
                     break;
                 case "get":
                     if (args.length != 3) {
@@ -60,7 +69,13 @@ public class TestClient {
                         System.exit(1);
                     }
                     String getKey = args[2];
-                    stub.get(getKey);
+                    port = Integer.parseInt(remoteObj);
+                    try {
+                        Socket socket = new Socket(nodeIP, port);
+                        sendTCPMessage(socket, "get" ,getKey);
+                    } catch (IOException e) {
+                        System.out.println("Client exception" + e);
+                    }
                     break;
                 case "delete":
                     if (args.length != 3) {
@@ -69,11 +84,18 @@ public class TestClient {
                         System.exit(1);
                     }
                     String deleteKey = args[2];
-                    response = stub.delete(deleteKey);
-                    System.out.println("Operation Response: " + response);
+                    port = Integer.parseInt(remoteObj);
+                    try {
+                        Socket socket = new Socket(nodeIP, port);
+                        sendTCPMessage(socket, "delete" ,deleteKey);
+                    } catch (IOException e) {
+                        System.out.println("Client exception" + e);
+                    }
                     break;
                 // for testing
                 case "Hello":
+                    Registry registry = LocateRegistry.getRegistry(nodeIP);
+                    Services stub = (Services) registry.lookup(remoteObj);
                     response = stub.sayHello();
                     System.out.println("response: " + response);
                     break;
@@ -86,5 +108,10 @@ public class TestClient {
             e.printStackTrace();
         }
 
+    }
+
+    private static void sendTCPMessage(Socket socket, String type, String arg) throws IOException {
+        OutputStream output = socket.getOutputStream();
+        output.write((type + ";" + arg).getBytes());
     }
 }
