@@ -15,12 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MembershipService {
-    private enum MessageReadState {
-        START,
-        FIRST_FLAG,
-        DONE
-    }
-
     private final static int MEMBERSHIP_PORT = 5525;
     private final static int MAX_TRIES = 3;
     private final static int TIMEOUT = 3000;
@@ -53,7 +47,6 @@ public class MembershipService {
             return false;
         }
 
-
         try {
             joinMulticastGroup();
 
@@ -63,8 +56,6 @@ public class MembershipService {
             byte[] joinMessage = (new JoinMessage(this.membership_counter, MembershipService.MEMBERSHIP_PORT)).assemble();
 
             multicastSocket.send(new DatagramPacket(joinMessage, joinMessage.length));
-
-            List<Byte> messageBytes = new ArrayList<>();
 
             for (int current_try = 0; current_try < MAX_TRIES; current_try++) {
                 Socket clientSocket = membershipSocket.accept();
@@ -86,42 +77,24 @@ public class MembershipService {
     }
 
     private void receiveMembershipMessage(BufferedReader reader) throws IOException {
-        MessageReadState messageReadState = MessageReadState.START;
         List<Byte> messageBytes = new ArrayList<>();
 
-        while (messageReadState != MessageReadState.DONE) {
+        while (true) {
             Byte current = (byte) reader.read();
-
-            if (messageBytes.size() < 2) {
-                messageBytes.add(current);
-                continue;
-            }
-
-            Byte previous = messageBytes.get(messageBytes.size() - 1);
-
             messageBytes.add(current);
 
-            if (previous.equals(Message.CR) && current.equals(Message.LF)) {
-                if (messageReadState == MessageReadState.START) {
-                    messageReadState = MessageReadState.FIRST_FLAG;
-                } else {
-                    messageReadState = MessageReadState.DONE;
+            if (current.equals((byte) -1)) {
 
-                    StringBuilder message = new StringBuilder();
-                    for (byte b: messageBytes) {
-                        message.append(b);
-                    }
-
-                    MembershipMessage membershipMessage = new MembershipMessage(message.toString());
-
-                    this.view.copyView(membershipMessage.getView(), true);
+                StringBuilder message = new StringBuilder();
+                for (byte b: messageBytes) {
+                    message.append(b);
                 }
-            } else {
-                messageReadState = MessageReadState.START;
-            }
 
-            if (current.equals((byte) -1)) { //-1 indicates EOF, which is unexpected
-                return;
+                MembershipMessage membershipMessage = new MembershipMessage(message.toString());
+
+                this.view.copyView(membershipMessage.getView(), true);
+
+                break;
             }
         }
     }
