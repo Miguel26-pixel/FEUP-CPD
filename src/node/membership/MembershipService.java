@@ -2,11 +2,10 @@ package node.membership;
 
 import node.membership.message.LeaveMessage;
 import node.membership.message.MembershipMessage;
-import node.membership.message.Message;
 import node.membership.view.View;
 import node.membership.message.JoinMessage;
 
-import javax.xml.crypto.Data;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,15 +34,6 @@ public class MembershipService extends Thread {
 
     @Override
     public void run() {
-    }
-
-    private void processJoin(String message) {
-    }
-
-    private void processLeave(String message) {
-    }
-
-    private void processMembership(String message) {
     }
 
     private boolean joinMulticastGroup() throws IOException {
