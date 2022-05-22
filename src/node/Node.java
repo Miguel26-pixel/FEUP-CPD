@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
+import java.util.Objects;
 
 public class Node implements Services {
     private final String nodeID;
@@ -19,14 +20,13 @@ public class Node implements Services {
     private KeyValueStore keyValueStore;
     private Log log;
     private ServerSocket server;
-    //private Socket socket;
     private DataInputStream input = null;
     private DataOutputStream output = null;
 
     public Node(String mcastIP, String mcastPort, String nodeID, String membershipPort) {
         this.nodeID = nodeID;
         this.membershipService = new MembershipService(mcastIP, mcastPort, membershipPort);
-        this.keyValueStore = new KeyValueStore(nodeID);
+        this.keyValueStore = new KeyValueStore("node_" + nodeID + ":" + membershipPort);
         this.log = new Log();
         try {
             this.server = new ServerSocket(Integer.parseInt(membershipPort));
@@ -46,7 +46,6 @@ public class Node implements Services {
 
     public void run() {
         while (true) {
-
             try {
                 Socket socket = server.accept();
                 System.out.println("Client accepted");
@@ -54,57 +53,69 @@ public class Node implements Services {
                 input = new DataInputStream(
                         new BufferedInputStream(socket.getInputStream()));
 
-                String line = "";
-                try {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    line = reader.readLine();
-                    if (line != null && line.equals("leave")) {
-                        break;
-                    }
-                    String[] words = line.split(";");
-                    System.out.println(words[0]);
-                    switch (words[0]) {
-                        case "put":
-                            System.out.println(keyValueStore.putNewPair(words[1]));
-                            break;
-                        case "get":
-                            System.out.println(keyValueStore.getValue(words[1]));
-                            break;
-                        case "delete":
-                            System.out.println(keyValueStore.deleteValue(words[1]));
-                            break;
-                        default:
-                            break;
-                    }
-                    System.out.println("Closing connection");
-
-                    socket.close();
-                    input.close();
-                } catch (IOException i) {
-                    System.out.println(i);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                String[] parsedMessage = readMessage(reader);
+                if (parsedMessage == null || parsedMessage[0] == null || parsedMessage[1] == null) {
+                    System.err.println("Read message failed");
+                    continue;
                 }
+                switch (parsedMessage[0]) {
+                    case "put":
+                        handlePut(socket, parsedMessage[1]);
+                        break;
+                    case "get":
+                        handleGet(socket, parsedMessage[1]);
+                        break;
+                    case "delete":
+                        handleDelete(socket, parsedMessage[1]);
+                        break;
+                    default:
+                        break;
+                }
+
+                socket.close();
+                input.close();
             } catch (IOException e) {
                 System.err.println("Server exception:" + e);
             }
         }
     }
-    /*@Override
-    public String get(String key) throws RemoteException {
-        return keyValueStore.getValue(key);
-    }
 
-    @Override
-    public String put(String filepath) throws RemoteException {
-        return keyValueStore.putNewPair(filepath);
-    }
-
-    @Override
-    public String delete(String key) throws RemoteException {
-        if (keyValueStore.deleteValue(key)) {
-            System.out.println("Pair with key = " + key + " was deleted with success");
-            return "Pair with key = " + key + " was deleted with success";
+    private String[] readMessage(BufferedReader reader) throws IOException {
+        String op = reader.readLine();
+        if (op == null) {
+            System.err.println("Operation readed from the socket is null");
+            return null;
         }
-        System.err.println("Pair with key = " + key + " could not be deleted");
-        return "Pair with key = " + key + " could not be deleted";
-    }*/
+        String arg = reader.readLine();
+        if (arg == null) {
+            System.err.println("Argument readed from the socket is null");
+            return null;
+        }
+        if (!reader.readLine().equals("END")) {
+            System.err.println("End of the message failed");
+            return null;
+        }
+        return new String[]{op, arg};
+    }
+
+    private void handlePut(Socket socket, String filename) throws IOException {
+        String key = keyValueStore.putNewPair(filename);
+        System.out.println("New key = " + key);
+        OutputStream output = socket.getOutputStream();
+        output.write((key + "\n").getBytes());
+        output.write(("END").getBytes());
+    }
+
+    private void handleGet(Socket socket, String key) {
+        System.out.println(keyValueStore.getValue(key));
+    }
+
+    private void handleDelete(Socket socket, String key) throws IOException {
+        boolean res = keyValueStore.deleteValue(key);
+        System.out.println("Delete operation " + ((res) ? "succeeded" : "failed"));
+        OutputStream output = socket.getOutputStream();
+        output.write(((res) ? "succeeded\n" : "failed\n").getBytes());
+        output.write(("END").getBytes());
+    }
 }

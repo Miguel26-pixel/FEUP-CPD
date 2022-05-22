@@ -1,7 +1,6 @@
 import client.Services;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
@@ -99,6 +98,14 @@ public class TestClient {
         try {
             Socket socket = new Socket(nodeIP, port);
             sendTCPMessage(socket, "put", filepath);
+
+            String res = readTCPMessage(socket);
+            if (res == null) {
+                System.err.println("readTCPMessage failed");
+                return;
+            }
+
+            System.out.println("New Key = " + res);
         } catch (IOException e) {
             System.out.println("Client exception" + e);
         }
@@ -117,6 +124,14 @@ public class TestClient {
         try {
             Socket socket = new Socket(nodeIP, port);
             sendTCPMessage(socket, "delete", key);
+
+            String res = readTCPMessage(socket);
+            if (res == null) {
+                System.err.println("readTCPMessage failed");
+                return;
+            }
+
+            System.out.println("Delete operation has " + res);
         } catch (IOException e) {
             System.out.println("Client exception" + e);
         }
@@ -124,6 +139,22 @@ public class TestClient {
 
     private static void sendTCPMessage(Socket socket, String type, String arg) throws IOException {
         OutputStream output = socket.getOutputStream();
-        output.write((type + ";" + arg).getBytes());
+        output.write((type + "\n").getBytes());
+        output.write((arg + "\n").getBytes());
+        output.write(("END\n").getBytes());
+    }
+
+    private static String readTCPMessage(Socket socket) throws IOException {
+        DataInputStream input = new DataInputStream(
+                new BufferedInputStream(socket.getInputStream()));
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+        String res = reader.readLine();
+
+        if (!reader.readLine().equals("END")) {
+            System.err.println("End of the response message failed");
+            return null;
+        }
+        return res;
     }
 }

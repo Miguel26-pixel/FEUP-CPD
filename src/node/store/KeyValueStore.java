@@ -13,12 +13,12 @@ import java.io.IOException;
 public class KeyValueStore {
     private ArrayList<Integer> idStore;
     private String folderPath;
-    private String nodeID;
+    private String folderName;
 
-    public KeyValueStore(String nodeID){
+    public KeyValueStore(String folderName){
         this.idStore = new ArrayList<Integer>();
         this.folderPath = "../dynamo/";
-        this.nodeID = nodeID;
+        this.folderName = folderName;
     }
 
 
@@ -42,7 +42,7 @@ public class KeyValueStore {
             }
         }
 
-        File nodeDir = new File(folderPath + "node_" + nodeID);
+        File nodeDir = new File(folderPath + folderName);
         if (!nodeDir.exists() || !nodeDir.isDirectory()) {
             boolean res = nodeDir.mkdir();
             if(res) {
@@ -53,7 +53,7 @@ public class KeyValueStore {
             }
         }
 
-        File newFile = new File(folderPath + "node_" + nodeID + "/file_" + valueKey);
+        File newFile = new File(folderPath + folderName + "/file_" + valueKey);
 
         if (!this.copyFile(file, newFile)) {
             return "File could not be created";
@@ -81,7 +81,7 @@ public class KeyValueStore {
         int parsed_key = Integer.parseInt(key);
         for (Integer integer : idStore) {
             if (Objects.equals(integer, parsed_key)) {
-                return folderPath + "node_" + nodeID + "/file_" + parsed_key;
+                return folderPath + folderName + "/file_" + parsed_key;
             }
         }
         return "don't exist";
@@ -93,7 +93,7 @@ public class KeyValueStore {
         int parsed_key = Integer.parseInt(key);
         for (int i = 0; i < idStore.size(); i++){
             if (idStore.get(i) == parsed_key) {
-                 path = folderPath + "node_" + nodeID + "/file_" + parsed_key;
+                 path = folderPath + folderName + "/file_" + parsed_key;
                  index = i;
                  break;
             }
