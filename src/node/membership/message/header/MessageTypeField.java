@@ -13,12 +13,21 @@ public class MessageTypeField extends MessageField {
         this.messageType = messageType;
     }
 
-    public String translateType() {
+    private String translateType() {
         return switch (messageType) {
             case JOIN -> "join";
             case LEAVE -> "leave";
             case MEMBERSHIP -> "membership";
             case INVALID -> "invalid";
+        };
+    }
+
+    public static MessageType translateType(String typeAsString) {
+        return switch (typeAsString) {
+            case "join" -> MessageType.JOIN;
+            case "leave" -> MessageType.LEAVE;
+            case "membership" -> MessageType.MEMBERSHIP;
+            case "invalid" -> MessageType.INVALID;
         };
     }
 
