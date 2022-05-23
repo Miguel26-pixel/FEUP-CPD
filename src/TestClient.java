@@ -116,11 +116,22 @@ public class TestClient {
             Socket socket = new Socket(nodeIP, port);
             sendTCPMessage(socket, "get", key);
 
-            File file = readTCPFile(socket);
+            File testDir = new File("../clientFiles/");
+            if (!testDir.exists() || !testDir.isDirectory()) {
+                boolean res = testDir.mkdir();
+                if(res) {
+                    System.out.println("Client files folder created with success");
+                } else {
+                    System.err.println("Client files folder could not be created");
+                    return;
+                }
+            }
+
+            File file = readTCPFile(socket, "../clientFiles/file_" + key);
             if (file == null) {
                 System.out.println("File not found");
             } else {
-                System.out.println("File retrieved with success (saved as retrieved_file)");
+                System.out.println("File retrieved with success (saved in clientFiles as file_" + key);
             }
         } catch (IOException e) {
             System.out.println("Client exception" + e);
@@ -165,13 +176,13 @@ public class TestClient {
         return res;
     }
 
-    private static File readTCPFile(Socket socket) throws IOException {
+    private static File readTCPFile(Socket socket, String filepath) throws IOException {
         DataInputStream input = new DataInputStream(
                 new BufferedInputStream(socket.getInputStream()));
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         String res = reader.readLine();
-        File file = new File("retrieved_file");
+        File file = new File(filepath);
         FileOutputStream out = new FileOutputStream(file);
         if (res.equals("failed")) {
             return null;
