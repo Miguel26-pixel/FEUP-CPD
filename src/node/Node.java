@@ -6,13 +6,8 @@ import node.membership.log.Log;
 import node.store.KeyValueStore;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.rmi.RemoteException;
-import java.util.Objects;
 
 public class Node implements Services {
     private final String nodeID;

@@ -2,7 +2,6 @@ import client.Services;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
@@ -183,17 +182,19 @@ public class TestClient {
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         String res = reader.readLine();
         File file = new File(filepath);
-        FileOutputStream out = new FileOutputStream(file);
+
         if (res.equals("failed")) {
             return null;
         } else {
-            String line;
-            while ((line = reader.readLine()) != null && !line.equals("END")) {
-                out.write(line.getBytes());
-            }
-            if (line == null) {
-                System.err.println("End of the response message failed");
-                return null;
+            try (FileOutputStream out = new FileOutputStream(file)) {
+                String line;
+                while ((line = reader.readLine()) != null && !line.equals("END")) {
+                    out.write(line.getBytes());
+                }
+                if (line == null) {
+                    System.err.println("End of the response message failed");
+                    return null;
+                }
             }
         }
         return file;
