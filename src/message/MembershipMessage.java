@@ -1,4 +1,4 @@
-package node.membership.message;
+package message;
 
 import message.Message;
 import message.MessageType;

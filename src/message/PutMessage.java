@@ -1,11 +1,11 @@
-package node.store.message;
+package message;
 
 import message.Message;
 import message.MessageType;
 
-public class GetMessage extends Message {
+public class PutMessage extends Message {
 
-    protected GetMessage(MessageType messageType) {
+    protected PutMessage(MessageType messageType) {
         super(messageType);
     }
 
