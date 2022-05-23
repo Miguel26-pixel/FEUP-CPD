@@ -107,8 +107,22 @@ public class Node implements Services {
         output.write(("END").getBytes());
     }
 
-    private void handleGet(Socket socket, String key) {
-        System.out.println(keyValueStore.getValue(key));
+    private void handleGet(Socket socket, String key) throws IOException {
+        File file = keyValueStore.getValue(key);
+        OutputStream output = socket.getOutputStream();
+        if (file == null) {
+            System.out.println("File not found");
+            output.write(("failed\n").getBytes());
+            output.write(("END").getBytes());
+        } else {
+            output.write(("succeeded\n").getBytes());
+            FileInputStream in = new FileInputStream(file);
+            int n = in.read();
+            do  {
+                output.write(n);
+            } while ((n = in.read()) != -1);
+            output.write(("\nEND").getBytes());
+        }
     }
 
     private void handleDelete(Socket socket, String key) throws IOException {

@@ -77,14 +77,17 @@ public class KeyValueStore {
         return true;
     }
 
-    public String getValue(String key){
+    public File getValue(String key){
         int parsed_key = Integer.parseInt(key);
         for (Integer integer : idStore) {
-            if (Objects.equals(integer, parsed_key)) {
-                return folderPath + folderName + "/file_" + parsed_key;
+            if (integer.equals(parsed_key)) {
+                File file = new File(folderPath + folderName + "/file_" + parsed_key);
+                if (file.exists() && file.isFile()) {
+                    return file;
+                }
             }
         }
-        return "don't exist";
+        return null;
     }
 
     public boolean deleteValue(String key){

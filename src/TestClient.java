@@ -115,6 +115,13 @@ public class TestClient {
         try {
             Socket socket = new Socket(nodeIP, port);
             sendTCPMessage(socket, "get", key);
+
+            File file = readTCPFile(socket);
+            if (file == null) {
+                System.out.println("File not found");
+            } else {
+                System.out.println("File retrieved with success (saved as retrieved_file)");
+            }
         } catch (IOException e) {
             System.out.println("Client exception" + e);
         }
@@ -156,5 +163,28 @@ public class TestClient {
             return null;
         }
         return res;
+    }
+
+    private static File readTCPFile(Socket socket) throws IOException {
+        DataInputStream input = new DataInputStream(
+                new BufferedInputStream(socket.getInputStream()));
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+        String res = reader.readLine();
+        File file = new File("retrieved_file");
+        FileOutputStream out = new FileOutputStream(file);
+        if (res.equals("failed")) {
+            return null;
+        } else {
+            String line;
+            while ((line = reader.readLine()) != null && !line.equals("END")) {
+                out.write(line.getBytes());
+            }
+            if (line == null) {
+                System.err.println("End of the response message failed");
+                return null;
+            }
+        }
+        return file;
     }
 }
