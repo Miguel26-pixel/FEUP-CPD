@@ -14,7 +14,8 @@ public class MembershipMessage extends Message {
         this.buildBody();
     }
 
-    private void buildBody() {
+    @Override
+    protected void buildBody() {
         this.body = log.getMostRecentEntries(RECENTENTRIESSIZE).toBytes();
     }
 }

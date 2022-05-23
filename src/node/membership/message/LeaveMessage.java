@@ -14,7 +14,8 @@ public class LeaveMessage extends Message {
         this.counter = counter;
     }
 
-    private void buildBody() {
+    @Override
+    protected void buildBody() {
         this.body = new ArrayList<>();
         byte[] bytes = ByteBuffer.allocate(4).putInt(counter).array();
 

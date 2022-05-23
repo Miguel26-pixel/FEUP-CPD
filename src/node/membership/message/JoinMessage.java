@@ -17,8 +17,8 @@ public class JoinMessage extends Message {
 
         this.buildBody();
     }
-
-    private void buildBody() {
+    @Override
+    protected void buildBody() {
         this.body = new ArrayList<>();
         byte[] bytes = ByteBuffer.allocate(4).putInt(counter).array();
 

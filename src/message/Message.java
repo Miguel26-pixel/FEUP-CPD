@@ -20,6 +20,8 @@ public abstract class Message {
         this.messageFields.add(new MessageTypeField(messageType));
     }
 
+    protected abstract void buildBody();
+
     protected void addMessageField(MessageField messageField) {
         messageFields.add(messageField);
     }
