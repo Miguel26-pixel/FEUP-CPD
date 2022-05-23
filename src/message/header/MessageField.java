@@ -1,4 +1,4 @@
-package node.membership.message.header;
+package message.header;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public abstract class MessageField {
     }
 
     public List<Byte> assemble() {
-        List<Byte> field = new ArrayList<Byte>();
+        List<Byte> field = new ArrayList<>();
 
         field.add(translateFieldHeader());
         field.add((byte) ' ');

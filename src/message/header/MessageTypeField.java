@@ -1,6 +1,8 @@
-package node.membership.message.header;
+package message.header;
 
 import message.MessageType;
+import message.header.FieldType;
+import message.header.MessageField;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package node.membership.message.header;
+package message.header;
 
 public enum FieldType {
     MESSAGETYPE,

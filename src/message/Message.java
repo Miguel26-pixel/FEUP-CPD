@@ -1,7 +1,7 @@
 package message;
 
-import node.membership.message.header.MessageField;
-import node.membership.message.header.MessageTypeField;
+import message.header.MessageField;
+import message.header.MessageTypeField;
 
 import java.util.ArrayList;
 import java.util.List;
