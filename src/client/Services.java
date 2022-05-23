@@ -6,9 +6,7 @@ import java.rmi.RemoteException;
 public interface Services extends Remote {
     String sayHello() throws RemoteException;
 
-    /*String get(String key) throws RemoteException;
+    void join() throws RemoteException;
 
-    String put(String filepath) throws RemoteException;
-
-    String delete(String key) throws RemoteException;*/
+    void leave() throws RemoteException;
 }

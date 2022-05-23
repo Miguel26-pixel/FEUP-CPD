@@ -8,6 +8,7 @@ import node.store.KeyValueStore;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.RemoteException;
 
 public class Node implements Services {
     private final String nodeID;
@@ -37,6 +38,16 @@ public class Node implements Services {
     @Override
     public String sayHello() {
         return "Hello, world!";
+    }
+
+    @Override
+    public void join() throws RemoteException {
+        //TODO
+    }
+
+    @Override
+    public void leave() throws RemoteException {
+        //TODO
     }
 
     public void run() {

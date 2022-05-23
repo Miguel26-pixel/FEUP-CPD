@@ -2,6 +2,8 @@ import client.Services;
 
 import java.io.*;
 import java.net.Socket;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
@@ -22,7 +24,7 @@ public class TestClient {
 
         String[] words = args[0].split(":");
         String nodeIP = words[0];
-        String remoteObj = words[1];
+        String nodeArg = words[1];
         String operation = args[1];
 
         try {
@@ -33,7 +35,7 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> join");
                         System.exit(1);
                     }
-                    sendRMIJoin();
+                    sendRMIJoin(nodeIP, nodeArg);
                     break;
                 case "leave":
                     if (args.length > 2) {
@@ -41,7 +43,7 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> leave");
                         System.exit(1);
                     }
-                    sendRMILeave();
+                    sendRMILeave(nodeIP, nodeArg);
                     break;
                 case "put":
                     if (args.length != 3) {
@@ -49,7 +51,7 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> put <filepath>");
                         System.exit(1);
                     }
-                    handleTCPPut(nodeIP, Integer.parseInt(remoteObj), args[2]);
+                    handleTCPPut(nodeIP, Integer.parseInt(nodeArg), args[2]);
                     break;
                 case "get":
                     if (args.length != 3) {
@@ -57,7 +59,7 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> get <encoded_key>");
                         System.exit(1);
                     }
-                    handleTCPGet(nodeIP, Integer.parseInt(remoteObj), args[2]);
+                    handleTCPGet(nodeIP, Integer.parseInt(nodeArg), args[2]);
                     break;
                 case "delete":
                     if (args.length != 3) {
@@ -65,13 +67,13 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> delete <encoded_key>");
                         System.exit(1);
                     }
-                    handleTCPDelete(nodeIP, Integer.parseInt(remoteObj), args[2]);
+                    handleTCPDelete(nodeIP, Integer.parseInt(nodeArg), args[2]);
                     break;
 
                 // for testing
                 case "Hello":
                     Registry registry = LocateRegistry.getRegistry(nodeIP);
-                    Services stub = (Services) registry.lookup(remoteObj);
+                    Services stub = (Services) registry.lookup(nodeArg);
                     String response = stub.sayHello();
                     System.out.println("response: " + response);
                     break;
@@ -85,12 +87,16 @@ public class TestClient {
         }
     }
 
-    private static void sendRMIJoin() {
-
+    private static void sendRMIJoin(String nodeIP, String remoteObj) throws RemoteException, NotBoundException {
+        Registry registry = LocateRegistry.getRegistry(nodeIP);
+        Services stub = (Services) registry.lookup(remoteObj);
+        stub.join();
     }
 
-    private static void sendRMILeave() {
-
+    private static void sendRMILeave(String nodeIP, String remoteObj) throws RemoteException, NotBoundException {
+        Registry registry = LocateRegistry.getRegistry(nodeIP);
+        Services stub = (Services) registry.lookup(remoteObj);
+        stub.leave();
     }
 
     private static void handleTCPPut(String nodeIP, int port, String filepath) {
