@@ -19,6 +19,21 @@ public class KeyValueStore {
         this.idStore = new ArrayList<Integer>();
         this.folderPath = "../dynamo/";
         this.folderName = folderName;
+        checkPastFiles();
+    }
+
+    private void checkPastFiles() {
+        File nodeDir = new File(folderPath + folderName);
+        if (nodeDir.exists() && nodeDir.isDirectory() && nodeDir.listFiles() != null) {
+            File[] files = nodeDir.listFiles();
+
+            if (files == null) { return; }
+
+            for (File file : files) {
+                String keyStr = file.getName().substring(("file_").length());
+                idStore.add(Integer.parseInt(keyStr));
+            }
+        }
     }
 
 
