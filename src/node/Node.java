@@ -123,10 +123,10 @@ public class Node implements Services {
         } else {
             output.write(("succeeded\n").getBytes());
             FileInputStream in = new FileInputStream(file);
-            int n = in.read();
-            do  {
+            int n;
+            while ((n = in.read()) != -1)  {
                 output.write(n);
-            } while ((n = in.read()) != -1);
+            }
             output.write(("\nEND").getBytes());
         }
     }

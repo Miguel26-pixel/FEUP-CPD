@@ -1,6 +1,5 @@
-package node.membership.message;
+package message;
 
-import node.membership.message.header.FieldType;
 import node.membership.message.header.MessageField;
 import node.membership.message.header.MessageTypeField;
 

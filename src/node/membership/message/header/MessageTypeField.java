@@ -1,6 +1,6 @@
 package node.membership.message.header;
 
-import node.membership.message.MessageType;
+import message.MessageType;
 
 import java.util.List;
 

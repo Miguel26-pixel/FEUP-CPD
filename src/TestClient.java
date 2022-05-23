@@ -120,6 +120,7 @@ public class TestClient {
         try {
             Socket socket = new Socket(nodeIP, port);
             sendTCPMessage(socket, "get", key);
+            //sendTCPFile(socket, key);
 
             File testDir = new File("../clientFiles/");
             if (!testDir.exists() || !testDir.isDirectory()) {
@@ -164,6 +165,18 @@ public class TestClient {
         OutputStream output = socket.getOutputStream();
         output.write((type + "\n").getBytes());
         output.write((arg + "\n").getBytes());
+        output.write(("END\n").getBytes());
+    }
+
+    private static void sendTCPFile(Socket socket, String filepath) throws IOException {
+        File file = new File(filepath);
+        OutputStream output = socket.getOutputStream();
+        output.write(("get" + "\n").getBytes());
+        FileInputStream in = new FileInputStream(file);
+        int n;
+        while ((n = in.read()) != -1)  {
+            output.write(n);
+        }
         output.write(("END\n").getBytes());
     }
 

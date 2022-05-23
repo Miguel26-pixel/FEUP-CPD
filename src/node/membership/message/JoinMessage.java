@@ -1,5 +1,8 @@
 package node.membership.message;
 
+import message.Message;
+import message.MessageType;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 

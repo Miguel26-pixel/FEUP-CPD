@@ -1,4 +1,4 @@
-package node.membership.message;
+package message;
 
 public enum MessageType {
     JOIN,

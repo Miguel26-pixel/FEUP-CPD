@@ -1,5 +1,7 @@
 package node.membership.message;
 
+import message.Message;
+import message.MessageType;
 import node.membership.log.Log;
 
 public class MembershipMessage extends Message {
