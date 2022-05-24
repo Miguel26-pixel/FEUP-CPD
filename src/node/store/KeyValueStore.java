@@ -94,7 +94,7 @@ public class KeyValueStore {
         return null;
     }
 
-    public boolean deleteValue(String key){
+    public String deleteValue(String key){
         String path = "";
         int index = -1;
         int parsed_key = Integer.parseInt(key);
@@ -106,12 +106,12 @@ public class KeyValueStore {
             }
         }
 
-        if (index == -1) { return false; }
+        if (index == -1) { return "failed"; }
 
         File file = new File(path);
-        if (!file.exists() || !file.delete()) { return false; }
+        if (!file.exists() || !file.delete()) { return "failed"; }
 
         idStore.remove(index);
-        return true;
+        return "succeeded";
     }
 }

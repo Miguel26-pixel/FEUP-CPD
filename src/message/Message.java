@@ -45,6 +45,11 @@ public abstract class Message {
 
         message.addAll(body);
 
+        message.add(CR);
+        message.add(LF);
+        message.add(CR);
+        message.add(LF);
+
         byte[] messageBytes = new byte[message.size()];
         for (int i = 0; i < message.size(); i++) {
             messageBytes[i] = message.get(i);

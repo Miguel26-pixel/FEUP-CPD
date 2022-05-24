@@ -3,6 +3,7 @@ package node;
 import client.Services;
 import message.Message;
 import message.messages.DeleteMessage;
+import message.messages.DeleteMessageReply;
 import message.messages.GetMessage;
 import node.membership.MembershipService;
 import node.membership.log.Log;
@@ -61,7 +62,10 @@ public class Node implements Services {
                 Socket socket = server.accept();
                 System.out.println("Client accepted");
 
-                String message = UtilsTCP.readTCPMessage(socket);
+                OutputStream output = socket.getOutputStream();
+                InputStream input = socket.getInputStream();
+
+                String message = UtilsTCP.readTCPMessage(input);
                 switch (Message.getMessageType(message)) {
                     case PUT -> {
                         String key = keyValueStore.putNewPair(Message.getMessageBody(message));
@@ -73,8 +77,10 @@ public class Node implements Services {
                     }
                     case DELETE -> {
                         DeleteMessage deleteMessage = DeleteMessage.assembleMessage(Message.getMessageBody(message));
-                        boolean res = keyValueStore.deleteValue(deleteMessage.getKey());
-                        System.out.println("Delete has " + ((res) ? "succeeded" : "failed"));
+                        String state = keyValueStore.deleteValue(deleteMessage.getKey());
+                        System.out.println("Delete operation has " + state);
+                        DeleteMessageReply reply = new DeleteMessageReply(state);
+                        UtilsTCP.sendTCPMessage(output, reply);
                     }
                     default -> {
                         System.err.println("Wrong message header");
@@ -149,13 +155,5 @@ public class Node implements Services {
                 output.write(("\nEND").getBytes());
             }
         }
-    }
-
-    private void handleDelete(Socket socket, String key) throws IOException {
-        boolean res = keyValueStore.deleteValue(key);
-        System.out.println("Delete operation " + ((res) ? "succeeded" : "failed"));
-        OutputStream output = socket.getOutputStream();
-        output.write(((res) ? "succeeded\n" : "failed\n").getBytes());
-        output.write(("END").getBytes());
     }
 }

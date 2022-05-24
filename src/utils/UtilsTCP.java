@@ -8,25 +8,33 @@ import java.nio.CharBuffer;
 import java.util.Arrays;
 
 public class UtilsTCP {
-    public static void  sendTCPMessage(Socket socket, Message message) throws IOException {
-        OutputStream output = socket.getOutputStream();
+    private static final byte CR = 0x0d;
+    private static final byte LF = 0x0a;
+    private static final byte[] delim = new byte[]{CR,LF,CR,LF};
+    public static void  sendTCPMessage(OutputStream output, Message message) throws IOException {
         output.write(message.assemble());
+        output.flush();
     }
 
-    public static String readTCPMessage(Socket socket) {
+    public static String readTCPMessage(InputStream socketInput) {
         StringBuilder message = new StringBuilder();
         try {
             DataInputStream input = new DataInputStream(
-                    new BufferedInputStream(socket.getInputStream()));
+                    new BufferedInputStream(socketInput));
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 
-            int n;
+            int n, counter = 0;
             char[] buf = new char[1024];
             while((n = reader.read(buf)) != -1) {
                 for (int i = 0; i < n; i++) {
                     message.append(buf[i]);
+                    if (message.length() > 3 && message.substring(message.length() - 4).equals(new String(delim))) {
+                        counter++;
+                        if (counter == 2) { break; }
+                    }
                 }
+                if (counter == 2) { break; }
             }
         } catch (IOException e) {
             System.err.println("TCP Exception: " + e);

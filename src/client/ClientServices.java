@@ -1,7 +1,9 @@
 package client;
 
 import message.Message;
+import message.MessageType;
 import message.messages.DeleteMessage;
+import message.messages.DeleteMessageReply;
 import message.messages.GetMessage;
 import message.messages.PutMessage;
 import utils.UtilsTCP;
@@ -48,8 +50,10 @@ public class ClientServices {
                 return;
             }
             Socket socket = new Socket(nodeIP, port);
+            OutputStream output = socket.getOutputStream();
+            InputStream input = socket.getInputStream();
             PutMessage message = new PutMessage(file);
-            UtilsTCP.sendTCPMessage(socket, message);
+            UtilsTCP.sendTCPMessage(output, message);
 
             /*String res = readTCPMessage(socket);
             if (res == null) {
@@ -67,8 +71,10 @@ public class ClientServices {
         int port = Integer.parseInt(nodeArg);
         try {
             Socket socket = new Socket(nodeIP, port);
+            OutputStream output = socket.getOutputStream();
+            InputStream input = socket.getInputStream();
             GetMessage message = new GetMessage(operand);
-            UtilsTCP.sendTCPMessage(socket, message);
+            UtilsTCP.sendTCPMessage(output, message);
 
             /*File testDir = new File("../clientFiles/");
             if (!testDir.exists() || !testDir.isDirectory()) {
@@ -96,16 +102,21 @@ public class ClientServices {
         int port = Integer.parseInt(nodeArg);
         try {
             Socket socket = new Socket(nodeIP, port);
-            DeleteMessage message = new DeleteMessage(operand);
-            UtilsTCP.sendTCPMessage(socket, message);
+            OutputStream output = socket.getOutputStream();
+            InputStream input = socket.getInputStream();
 
-            /*String res = readTCPMessage(socket);
-            if (res == null) {
-                System.err.println("readTCPMessage failed");
+            DeleteMessage message = new DeleteMessage(operand);
+            UtilsTCP.sendTCPMessage(output, message);
+            String reply = UtilsTCP.readTCPMessage(input);
+
+            if (Message.getMessageType(reply) != MessageType.DELETE_REPLY) {
+                System.err.println("Message reply incorrect");
                 return;
             }
 
-            System.out.println("Delete operation has " + res);*/
+            DeleteMessageReply replyMessage = new DeleteMessageReply(Message.getMessageBody(reply));
+
+            System.out.println("Delete operation has " + replyMessage.getAckMessage());
         } catch (IOException e) {
             System.out.println("Client exception" + e);
         }
