@@ -1,13 +1,6 @@
+import client.ClientServices;
 import client.Services;
-import message.messages.DeleteMessage;
-import message.messages.GetMessage;
-import message.Message;
-import message.messages.PutMessage;
 
-import java.io.*;
-import java.net.Socket;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
@@ -26,20 +19,17 @@ public class TestClient {
             System.exit(1);
         }
 
-        String[] words = args[0].split(":");
-        String nodeIP = words[0];
-        String nodeArg = words[1];
-        String operation = args[1];
+        ClientServices clientServices = new ClientServices(args);
 
         try {
-            switch (operation) {
+            switch (args[1]) {
                 case "join":
                     if (args.length > 2) {
                         System.err.println("Invalid number of arguments for join operation");
                         System.out.println("usage: java TestClient <node_ap> join");
                         System.exit(1);
                     }
-                    sendRMIJoin(nodeIP, nodeArg);
+                    clientServices.sendRMIJoin();
                     break;
                 case "leave":
                     if (args.length > 2) {
@@ -47,7 +37,7 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> leave");
                         System.exit(1);
                     }
-                    sendRMILeave(nodeIP, nodeArg);
+                    clientServices.sendRMILeave();
                     break;
                 case "put":
                     if (args.length != 3) {
@@ -55,7 +45,7 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> put <filepath>");
                         System.exit(1);
                     }
-                    handleTCPPut(nodeIP, Integer.parseInt(nodeArg), args[2]);
+                    clientServices.handleTCPPut();
                     break;
                 case "get":
                     if (args.length != 3) {
@@ -63,7 +53,7 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> get <encoded_key>");
                         System.exit(1);
                     }
-                    handleTCPGet(nodeIP, Integer.parseInt(nodeArg), args[2]);
+                    clientServices.handleTCPGet();
                     break;
                 case "delete":
                     if (args.length != 3) {
@@ -71,13 +61,13 @@ public class TestClient {
                         System.out.println("usage: java TestClient <node_ap> delete <encoded_key>");
                         System.exit(1);
                     }
-                    handleTCPDelete(nodeIP, Integer.parseInt(nodeArg), args[2]);
+                    clientServices.handleTCPDelete();
                     break;
 
                 // for testing
                 case "Hello":
-                    Registry registry = LocateRegistry.getRegistry(nodeIP);
-                    Services stub = (Services) registry.lookup(nodeArg);
+                    Registry registry = LocateRegistry.getRegistry(args[0].split(":")[0]);
+                    Services stub = (Services) registry.lookup(args[0].split(":")[1]);
                     String response = stub.sayHello();
                     System.out.println("response: " + response);
                     break;
@@ -89,142 +79,5 @@ public class TestClient {
             System.err.println("Client exception: " + e);
             e.printStackTrace();
         }
-    }
-
-    private static void sendRMIJoin(String nodeIP, String remoteObj) throws RemoteException, NotBoundException {
-        Registry registry = LocateRegistry.getRegistry(nodeIP);
-        Services stub = (Services) registry.lookup(remoteObj);
-        stub.join();
-    }
-
-    private static void sendRMILeave(String nodeIP, String remoteObj) throws RemoteException, NotBoundException {
-        Registry registry = LocateRegistry.getRegistry(nodeIP);
-        Services stub = (Services) registry.lookup(remoteObj);
-        stub.leave();
-    }
-
-    private static void handleTCPPut(String nodeIP, int port, String filepath) {
-        try {
-            File file = new File(filepath);
-            if (!file.exists() || !file.isFile()) {
-                System.err.println("File does not exists");
-                return;
-            }
-            Socket socket = new Socket(nodeIP, port);
-            PutMessage message = new PutMessage(file);
-            sendTCPMessage(socket, message);
-
-            String res = readTCPMessage(socket);
-            if (res == null) {
-                System.err.println("readTCPMessage failed");
-                return;
-            }
-
-            System.out.println("New Key = " + res);
-        } catch (IOException e) {
-            System.out.println("Client exception" + e);
-        }
-    }
-
-    private static void handleTCPGet(String nodeIP, int port, String key) {
-        try {
-            Socket socket = new Socket(nodeIP, port);
-            GetMessage message = new GetMessage(key);
-            sendTCPMessage(socket, message);
-
-            File testDir = new File("../clientFiles/");
-            if (!testDir.exists() || !testDir.isDirectory()) {
-                boolean res = testDir.mkdir();
-                if(res) {
-                    System.out.println("Client files folder created with success");
-                } else {
-                    System.err.println("Client files folder could not be created");
-                    return;
-                }
-            }
-
-            File file = readTCPFile(socket, "../clientFiles/file_" + key);
-            if (file == null) {
-                System.out.println("File not found");
-            } else {
-                System.out.println("File retrieved with success (saved in clientFiles as file_" + key);
-            }
-        } catch (IOException e) {
-            System.out.println("Client exception" + e);
-        }
-    }
-
-    private static void handleTCPDelete(String nodeIP, int port, String key) {
-        try {
-            Socket socket = new Socket(nodeIP, port);
-            DeleteMessage message = new DeleteMessage(key);
-            sendTCPMessage(socket, message);
-
-            String res = readTCPMessage(socket);
-            if (res == null) {
-                System.err.println("readTCPMessage failed");
-                return;
-            }
-
-            System.out.println("Delete operation has " + res);
-        } catch (IOException e) {
-            System.out.println("Client exception" + e);
-        }
-    }
-
-    private static void sendTCPMessage(Socket socket, Message message) throws IOException {
-        OutputStream output = socket.getOutputStream();
-        output.write(message.assemble());
-    }
-
-    private static void sendTCPFile(Socket socket, String filepath) throws IOException {
-        File file = new File(filepath);
-        OutputStream output = socket.getOutputStream();
-        output.write(("get" + "\n").getBytes());
-        FileInputStream in = new FileInputStream(file);
-        int n;
-        while ((n = in.read()) != -1)  {
-            output.write(n);
-        }
-        output.write(("END\n").getBytes());
-    }
-
-    private static String readTCPMessage(Socket socket) throws IOException {
-        DataInputStream input = new DataInputStream(
-                new BufferedInputStream(socket.getInputStream()));
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-        String res = reader.readLine();
-
-        if (!reader.readLine().equals("END")) {
-            System.err.println("End of the response message failed");
-            return null;
-        }
-        return res;
-    }
-
-    private static File readTCPFile(Socket socket, String filepath) throws IOException {
-        DataInputStream input = new DataInputStream(
-                new BufferedInputStream(socket.getInputStream()));
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-        String res = reader.readLine();
-        File file = new File(filepath);
-
-        if (res.equals("failed")) {
-            return null;
-        } else {
-            try (FileOutputStream out = new FileOutputStream(file)) {
-                String line;
-                while ((line = reader.readLine()) != null && !line.equals("END")) {
-                    out.write(line.getBytes());
-                }
-                if (line == null) {
-                    System.err.println("End of the response message failed");
-                    return null;
-                }
-            }
-        }
-        return file;
     }
 }
