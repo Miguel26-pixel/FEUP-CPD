@@ -5,7 +5,6 @@ import message.header.MessageField;
 import message.header.MessageTypeField;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public abstract class Message {

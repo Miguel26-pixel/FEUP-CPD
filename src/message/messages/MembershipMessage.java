@@ -5,7 +5,7 @@ import message.MessageType;
 import node.membership.log.Log;
 
 public class MembershipMessage extends Message {
-    private final static int RECENTENTRIESSIZE = 32;
+    private final static int RECENT_ENTRIES_SIZE = 32;
     Log log;
 
     public MembershipMessage(Log log) {
@@ -16,7 +16,7 @@ public class MembershipMessage extends Message {
 
     @Override
     protected void buildBody() {
-        this.body = log.getMostRecentEntries(RECENTENTRIESSIZE).toBytes();
+        this.body = log.getMostRecentEntries(RECENT_ENTRIES_SIZE).toBytes();
     }
 
     public static MembershipMessage assembleMessage(byte[] bytes) {

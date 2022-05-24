@@ -26,7 +26,6 @@ public class GetMessage extends Message {
         for (byte b : key.getBytes()) {
             this.body.add(b);
         }
-        System.out.println(this.body);
     }
 
     public static GetMessage assembleMessage(String body) {

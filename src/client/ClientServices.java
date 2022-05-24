@@ -15,14 +15,12 @@ import java.rmi.registry.Registry;
 public class ClientServices {
 
     private final String nodeArg;
-    private final String operation;
     private final String nodeIP;
     private final String operand;
     public ClientServices(String[] args) {
         String[] words = args[0].split(":");
         this.nodeIP = words[0];
         this.nodeArg = words[1];
-        this.operation = args[1];
         this.operand = (args.length == 3) ? args[2] : null;
     }
 
@@ -58,9 +56,8 @@ public class ClientServices {
                 return;
             }
 
-            PutMessageReply replyMessage = new PutMessageReply(Message.getMessageBody(reply));
+            PutMessageReply replyMessage = PutMessageReply.assembleMessage(Message.getMessageBody(reply));
             System.out.println("New key: " + replyMessage.getKey());
-
         } catch (IOException e) {
             System.out.println("Client exception" + e);
         }
@@ -74,8 +71,9 @@ public class ClientServices {
             InputStream input = socket.getInputStream();
             GetMessage message = new GetMessage(operand);
             UtilsTCP.sendTCPMessage(output, message);
+            String reply = UtilsTCP.readTCPMessage(input);
 
-            /*File testDir = new File("../clientFiles/");
+            File testDir = new File("../clientFiles/");
             if (!testDir.exists() || !testDir.isDirectory()) {
                 boolean res = testDir.mkdir();
                 if(res) {
@@ -86,12 +84,8 @@ public class ClientServices {
                 }
             }
 
-            File file = readTCPFile(socket, "../clientFiles/file_" + operand);
-            if (file == null) {
-                System.out.println("File not found");
-            } else {
-                System.out.println("File retrieved with success (saved in clientFiles as file_" + operand);
-            }*/
+            GetMessageReply replyMessage = GetMessageReply.assembleMessage(Message.getMessageBody(reply), "../clientFiles/file_" + operand);
+            System.out.println("File obtained with success (saved as " + replyMessage.getFile().getName() + " in clientFiles folder)");
         } catch (IOException e) {
             System.out.println("Client exception" + e);
         }
@@ -113,62 +107,10 @@ public class ClientServices {
                 return;
             }
 
-            DeleteMessageReply replyMessage = new DeleteMessageReply(Message.getMessageBody(reply));
-
+            DeleteMessageReply replyMessage = DeleteMessageReply.assembleMessage(Message.getMessageBody(reply));
             System.out.println("Delete operation has " + replyMessage.getAckMessage());
         } catch (IOException e) {
             System.out.println("Client exception" + e);
         }
-    }
-
-    private void sendTCPFile(Socket socket, String filepath) throws IOException {
-        File file = new File(filepath);
-        OutputStream output = socket.getOutputStream();
-        output.write(("get" + "\n").getBytes());
-        FileInputStream in = new FileInputStream(file);
-        int n;
-        while ((n = in.read()) != -1)  {
-            output.write(n);
-        }
-        output.write(("END\n").getBytes());
-    }
-
-    private String readTCPMessage(Socket socket) throws IOException {
-        DataInputStream input = new DataInputStream(
-                new BufferedInputStream(socket.getInputStream()));
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-        String res = reader.readLine();
-
-        if (!reader.readLine().equals("END")) {
-            System.err.println("End of the response message failed");
-            return null;
-        }
-        return res;
-    }
-
-    private File readTCPFile(Socket socket, String filepath) throws IOException {
-        DataInputStream input = new DataInputStream(
-                new BufferedInputStream(socket.getInputStream()));
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-        String res = reader.readLine();
-        File file = new File(filepath);
-
-        if (res.equals("failed")) {
-            return null;
-        } else {
-            try (FileOutputStream out = new FileOutputStream(file)) {
-                String line;
-                while ((line = reader.readLine()) != null && !line.equals("END")) {
-                    out.write(line.getBytes());
-                }
-                if (line == null) {
-                    System.err.println("End of the response message failed");
-                    return null;
-                }
-            }
-        }
-        return file;
     }
 }

@@ -25,4 +25,6 @@ public class PutMessageReply extends Message {
             body.add(b);
         }
     }
+
+    public static PutMessageReply assembleMessage(String body) { return new PutMessageReply(body); }
 }

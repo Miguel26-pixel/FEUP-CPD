@@ -3,9 +3,6 @@ package utils;
 import message.Message;
 
 import java.io.*;
-import java.net.Socket;
-import java.nio.CharBuffer;
-import java.util.Arrays;
 
 public class UtilsTCP {
     private static final byte CR = 0x0d;

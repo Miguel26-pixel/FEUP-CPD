@@ -12,7 +12,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.RemoteException;
-import java.util.Arrays;
 
 public class Node implements Services {
     private final String nodeID;
@@ -30,9 +29,7 @@ public class Node implements Services {
         this.log = new Log();
         try {
             this.server = new ServerSocket(Integer.parseInt(membershipPort));
-            //this.socket = new Socket(nodeID, Integer.parseInt(membershipPort));
-            System.out.println("Server started");
-            System.out.println("Socket waiting for a client ...");
+            System.out.println("Server started: waiting for a client ...");
         } catch (IOException e) {
             System.out.println(e);
             System.exit(1);
@@ -75,7 +72,8 @@ public class Node implements Services {
                     case GET -> {
                         GetMessage getMessage = GetMessage.assembleMessage(Message.getMessageBody(message));
                         File file = keyValueStore.getValue(getMessage.getKey());
-                        reply = new GetMessageReply();
+                        System.out.println((file == null) ? "File does not exists" : "File obtained with success");
+                        reply = new GetMessageReply(file);
                     }
                     case DELETE -> {
                         DeleteMessage deleteMessage = DeleteMessage.assembleMessage(Message.getMessageBody(message));
@@ -89,75 +87,9 @@ public class Node implements Services {
                     }
                 }
                 UtilsTCP.sendTCPMessage(output, reply);
-
-
-                /*String[] parsedMessage = readMessage(reader);
-                if (parsedMessage == null || parsedMessage[0] == null || parsedMessage[1] == null) {
-                    System.err.println("Read message failed");
-                    continue;
-                }
-                switch (parsedMessage[0]) {
-                    case "put":
-                        //handlePut(socket, parsedMessage[1]);
-                        break;
-                    case "get":
-                        //handleGet(socket, parsedMessage[1]);
-                        break;
-                    case "delete":
-                        handleDelete(socket, parsedMessage[1]);
-                        break;
-                    default:
-                        break;
-                }*/
-
                 socket.close();
             } catch (IOException e) {
                 System.err.println("Server exception:" + e);
-            }
-        }
-    }
-
-    private String[] readMessage(BufferedReader reader) throws IOException {
-        String op = reader.readLine();
-        if (op == null) {
-            System.err.println("Operation readed from the socket is null");
-            return null;
-        }
-        String arg = reader.readLine();
-        if (arg == null) {
-            System.err.println("Argument readed from the socket is null");
-            return null;
-        }
-        if (!reader.readLine().equals("END")) {
-            System.err.println("End of the message failed");
-            return null;
-        }
-        return new String[]{op, arg};
-    }
-
-    private void handlePut(Socket socket, String filename) throws IOException {
-        String key = keyValueStore.putNewPair(filename);
-        System.out.println("New key = " + key);
-        OutputStream output = socket.getOutputStream();
-        output.write((key + "\n").getBytes());
-        output.write(("END").getBytes());
-    }
-
-    private void handleGet(Socket socket, String key) throws IOException {
-        File file = keyValueStore.getValue(key);
-        OutputStream output = socket.getOutputStream();
-        if (file == null) {
-            System.out.println("File not found");
-            output.write(("failed\n").getBytes());
-            output.write(("END").getBytes());
-        } else {
-            output.write(("succeeded\n").getBytes());
-            try (FileInputStream in = new FileInputStream(file)) {
-                int n;
-                while ((n = in.read()) != -1)  {
-                    output.write(n);
-                }
-                output.write(("\nEND").getBytes());
             }
         }
     }
