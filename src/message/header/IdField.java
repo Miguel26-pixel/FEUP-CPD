@@ -1,8 +1,5 @@
 package message.header;
 
-import message.header.FieldType;
-import message.header.MessageField;
-
 import java.util.List;
 
 public class IdField extends MessageField {

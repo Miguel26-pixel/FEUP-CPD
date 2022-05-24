@@ -1,12 +1,12 @@
 package message;
 
-import message.Message;
-import message.MessageType;
+import java.io.File;
 
 public class PutMessage extends Message {
-
-    protected PutMessage(MessageType messageType) {
-        super(messageType);
+    private final File file;
+    public PutMessage(File file) {
+        super(MessageType.PUT);
+        this.file = file;
     }
 
     @Override

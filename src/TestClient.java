@@ -1,4 +1,8 @@
 import client.Services;
+import message.DeleteMessage;
+import message.GetMessage;
+import message.Message;
+import message.PutMessage;
 
 import java.io.*;
 import java.net.Socket;
@@ -101,8 +105,14 @@ public class TestClient {
 
     private static void handleTCPPut(String nodeIP, int port, String filepath) {
         try {
+            File file = new File(filepath);
+            if (!file.exists() || !file.isFile()) {
+                System.err.println("File does not exists");
+                return;
+            }
             Socket socket = new Socket(nodeIP, port);
-            sendTCPMessage(socket, "put", filepath);
+            PutMessage message = new PutMessage(file);
+            sendTCPMessage(socket, message);
 
             String res = readTCPMessage(socket);
             if (res == null) {
@@ -119,8 +129,8 @@ public class TestClient {
     private static void handleTCPGet(String nodeIP, int port, String key) {
         try {
             Socket socket = new Socket(nodeIP, port);
-            sendTCPMessage(socket, "get", key);
-            //sendTCPFile(socket, key);
+            GetMessage message = new GetMessage(key);
+            sendTCPMessage(socket, message);
 
             File testDir = new File("../clientFiles/");
             if (!testDir.exists() || !testDir.isDirectory()) {
@@ -147,7 +157,8 @@ public class TestClient {
     private static void handleTCPDelete(String nodeIP, int port, String key) {
         try {
             Socket socket = new Socket(nodeIP, port);
-            sendTCPMessage(socket, "delete", key);
+            DeleteMessage message = new DeleteMessage(key);
+            sendTCPMessage(socket, message);
 
             String res = readTCPMessage(socket);
             if (res == null) {
@@ -161,11 +172,9 @@ public class TestClient {
         }
     }
 
-    private static void sendTCPMessage(Socket socket, String type, String arg) throws IOException {
+    private static void sendTCPMessage(Socket socket, Message message) throws IOException {
         OutputStream output = socket.getOutputStream();
-        output.write((type + "\n").getBytes());
-        output.write((arg + "\n").getBytes());
-        output.write(("END\n").getBytes());
+        output.write(message.assemble());
     }
 
     private static void sendTCPFile(Socket socket, String filepath) throws IOException {

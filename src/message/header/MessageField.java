@@ -10,18 +10,28 @@ public abstract class MessageField {
         this.fieldType = fieldType;
     }
 
-    protected byte translateFieldHeader() {
+    protected String translateFieldHeader() {
         return switch (fieldType) {
-            case MESSAGETYPE -> 0x00;
-            case ORIGINID -> 0x01;
-            case DESTID -> 0x02;
+            case MESSAGETYPE -> "messagetype";
+            case ORIGINID -> "originid";
+            case DESTID -> "destid";
+        };
+    }
+
+    public static FieldType translateFieldHeader(String fieldType) {
+        return switch (fieldType) {
+            case "messagetype" -> FieldType.MESSAGETYPE;
+            case "originid" -> FieldType.ORIGINID;
+            case "destid" -> FieldType.DESTID;
         };
     }
 
     public List<Byte> assemble() {
-        List<Byte> field = new ArrayList<>();
+        List<Byte> field = new ArrayList<Byte>();
 
-        field.add(translateFieldHeader());
+        for (Byte b: translateFieldHeader().getBytes()) {
+            field.add(b);
+        }
         field.add((byte) ' ');
         return field;
     }

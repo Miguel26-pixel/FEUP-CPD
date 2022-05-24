@@ -1,12 +1,11 @@
 package message;
 
-import message.Message;
-import message.MessageType;
-
 public class DeleteMessage extends Message {
+    private final String key;
 
-    protected DeleteMessage(MessageType messageType) {
-        super(messageType);
+    public DeleteMessage(String key) {
+        super(MessageType.DELETE);
+        this.key = key;
     }
 
     @Override

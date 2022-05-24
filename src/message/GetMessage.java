@@ -1,12 +1,11 @@
 package message;
 
-import message.Message;
-import message.MessageType;
-
 public class GetMessage extends Message {
+    private final String key;
 
-    protected GetMessage(MessageType messageType) {
-        super(messageType);
+    public GetMessage(String key) {
+        super(MessageType.GET);
+        this.key = key;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package message;
 
+import message.header.FieldType;
 import message.header.MessageField;
 import message.header.MessageTypeField;
 
@@ -7,9 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Message {
-    private static final Byte CR = 0x0d;
-    private static final Byte LF = 0x0a;
+    public static final Byte CR = 0x0d;
+    public static final Byte LF = 0x0a;
 
+    protected abstract void buildBody();
     private final List<MessageField> messageFields;
     protected List<Byte> body;
 
@@ -19,8 +21,6 @@ public abstract class Message {
 
         this.messageFields.add(new MessageTypeField(messageType));
     }
-
-    protected abstract void buildBody();
 
     protected void addMessageField(MessageField messageField) {
         messageFields.add(messageField);
@@ -50,6 +50,24 @@ public abstract class Message {
         }
 
         return messageBytes;
+    }
+
+    public static MessageType getMessageType(String message) {
+        List<String> split = new ArrayList<>(List.of(message.split(CR.toString() + LF.toString())));
+
+        split.removeIf(s -> s.equals(""));
+        split.remove(split.size() - 1);
+
+        for(String headerLine: split) {
+            List<String> splitHeader = List.of(headerLine.split(" "));
+            String header = splitHeader.get(0);
+
+            if (MessageField.translateFieldHeader(header) == FieldType.MESSAGETYPE) {
+                return MessageTypeField.translateType(splitHeader.get(1));
+            }
+        }
+
+        return MessageType.INVALID;
     }
 
     //1:5,1237;2:8,129381 Log message data format
