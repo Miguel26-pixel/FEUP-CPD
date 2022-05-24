@@ -19,8 +19,11 @@ public class MessageTypeField extends MessageField {
             case LEAVE -> "leave";
             case MEMBERSHIP -> "membership";
             case PUT -> "put";
+            case PUT_REPLY -> "put_reply";
             case GET -> "get";
+            case GET_REPLY -> "get_reply";
             case DELETE -> "delete";
+            case DELETE_REPLY -> "delete_reply";
             default -> "invalid";
         };
     }
@@ -31,8 +34,12 @@ public class MessageTypeField extends MessageField {
             case "leave" -> MessageType.LEAVE;
             case "membership" -> MessageType.MEMBERSHIP;
             case "put" -> MessageType.PUT;
+            case "put_reply" -> MessageType.PUT_REPLY;
             case "get" -> MessageType.GET;
+            case "get_reply" -> MessageType.GET_REPLY;
             case "delete" -> MessageType.DELETE;
+            case "delete_reply" -> MessageType.DELETE_REPLY;
+
             default -> MessageType.INVALID;
         };
     }

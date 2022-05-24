@@ -12,6 +12,7 @@ public class PutMessage extends Message {
     public PutMessage(File file) {
         super(MessageType.PUT);
         this.file = file;
+        this.buildBody();
     }
 
     @Override

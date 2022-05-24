@@ -5,7 +5,10 @@ public enum MessageType {
     LEAVE,
     MEMBERSHIP,
     PUT,
+    PUT_REPLY,
     GET,
+    GET_REPLY,
     DELETE,
+    DELETE_REPLY,
     INVALID
 }

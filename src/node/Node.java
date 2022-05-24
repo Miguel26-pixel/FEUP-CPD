@@ -100,7 +100,6 @@ public class Node implements Services {
                 }*/
 
                 socket.close();
-                input.close();
             } catch (IOException e) {
                 System.err.println("Server exception:" + e);
             }
