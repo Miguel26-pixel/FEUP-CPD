@@ -2,9 +2,7 @@ package node;
 
 import client.Services;
 import message.Message;
-import message.messages.DeleteMessage;
-import message.messages.DeleteMessageReply;
-import message.messages.GetMessage;
+import message.messages.*;
 import node.membership.MembershipService;
 import node.membership.log.Log;
 import node.store.KeyValueStore;
@@ -66,26 +64,33 @@ public class Node implements Services {
                 InputStream input = socket.getInputStream();
 
                 String message = UtilsTCP.readTCPMessage(input);
+                Message reply;
                 switch (Message.getMessageType(message)) {
                     case PUT -> {
-                        String key = keyValueStore.putNewPair(Message.getMessageBody(message));
-                        System.out.println("New key = " + key);
+                        String file = Message.getMessageBody(message);
+                        String key = keyValueStore.putNewPair(file);
+                        System.out.println("New key: " + key);
+                        reply = new PutMessageReply(key);
                     }
                     case GET -> {
                         GetMessage getMessage = GetMessage.assembleMessage(Message.getMessageBody(message));
                         File file = keyValueStore.getValue(getMessage.getKey());
+                        reply = new GetMessageReply();
                     }
                     case DELETE -> {
                         DeleteMessage deleteMessage = DeleteMessage.assembleMessage(Message.getMessageBody(message));
                         String state = keyValueStore.deleteValue(deleteMessage.getKey());
                         System.out.println("Delete operation has " + state);
-                        DeleteMessageReply reply = new DeleteMessageReply(state);
-                        UtilsTCP.sendTCPMessage(output, reply);
+                        reply = new DeleteMessageReply(state);
                     }
                     default -> {
                         System.err.println("Wrong message header");
+                        continue;
                     }
                 }
+                UtilsTCP.sendTCPMessage(output, reply);
+
+
                 /*String[] parsedMessage = readMessage(reader);
                 if (parsedMessage == null || parsedMessage[0] == null || parsedMessage[1] == null) {
                     System.err.println("Read message failed");

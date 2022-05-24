@@ -2,10 +2,7 @@ package client;
 
 import message.Message;
 import message.MessageType;
-import message.messages.DeleteMessage;
-import message.messages.DeleteMessageReply;
-import message.messages.GetMessage;
-import message.messages.PutMessage;
+import message.messages.*;
 import utils.UtilsTCP;
 
 import java.io.*;
@@ -54,14 +51,16 @@ public class ClientServices {
             InputStream input = socket.getInputStream();
             PutMessage message = new PutMessage(file);
             UtilsTCP.sendTCPMessage(output, message);
+            String reply = UtilsTCP.readTCPMessage(input);
 
-            /*String res = readTCPMessage(socket);
-            if (res == null) {
-                System.err.println("readTCPMessage failed");
+            if (Message.getMessageType(reply) != MessageType.PUT_REPLY) {
+                System.err.println("Message reply incorrect type. Expected: " + MessageType.PUT_REPLY + ". Given: " + Message.getMessageType(reply));
                 return;
             }
 
-            System.out.println("New Key = " + res);*/
+            PutMessageReply replyMessage = new PutMessageReply(Message.getMessageBody(reply));
+            System.out.println("New key: " + replyMessage.getKey());
+
         } catch (IOException e) {
             System.out.println("Client exception" + e);
         }
@@ -110,7 +109,7 @@ public class ClientServices {
             String reply = UtilsTCP.readTCPMessage(input);
 
             if (Message.getMessageType(reply) != MessageType.DELETE_REPLY) {
-                System.err.println("Message reply incorrect");
+                System.err.println("Message reply incorrect type. Expected: " + MessageType.DELETE_REPLY + ". Given: " + Message.getMessageType(reply));
                 return;
             }
 
