@@ -1,5 +1,9 @@
-package message;
+package message.messages;
 
+import message.Message;
+import message.MessageType;
+
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -30,5 +34,9 @@ public class JoinMessage extends Message {
         for (byte b : bytes) {
             this.body.add(b);
         }
+    }
+
+    public static JoinMessage assembleMessage(byte[] bytes, String pathname) {
+        return new JoinMessage(-1,-1);
     }
 }

@@ -1,8 +1,8 @@
 import client.Services;
-import message.DeleteMessage;
-import message.GetMessage;
+import message.messages.DeleteMessage;
+import message.messages.GetMessage;
 import message.Message;
-import message.PutMessage;
+import message.messages.PutMessage;
 
 import java.io.*;
 import java.net.Socket;

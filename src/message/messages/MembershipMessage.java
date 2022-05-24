@@ -1,5 +1,7 @@
-package message;
+package message.messages;
 
+import message.Message;
+import message.MessageType;
 import node.membership.log.Log;
 
 public class MembershipMessage extends Message {
@@ -15,5 +17,9 @@ public class MembershipMessage extends Message {
     @Override
     protected void buildBody() {
         this.body = log.getMostRecentEntries(RECENTENTRIESSIZE).toBytes();
+    }
+
+    public static MembershipMessage assembleMessage(byte[] bytes) {
+        return new MembershipMessage(new Log());
     }
 }
