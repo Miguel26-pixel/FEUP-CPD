@@ -19,8 +19,7 @@ public class PutMessage extends Message {
         UtilsFile.fileToBytes(file,body);
     }
 
-    public static PutMessage assembleMessage(String body, String pathname) {
-        File recieved_file = new File(pathname);
-        return new PutMessage(recieved_file);
+    public static PutMessage assembleMessage(String body, String filepath) {
+        return new PutMessage(UtilsFile.stringToFile(body,filepath));
     }
 }

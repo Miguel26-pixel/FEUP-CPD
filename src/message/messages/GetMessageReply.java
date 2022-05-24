@@ -26,13 +26,6 @@ public class GetMessageReply extends Message {
     }
 
     public static GetMessageReply assembleMessage(String body, String filepath) {
-        File file= new File(filepath);
-
-        try (FileOutputStream out = new FileOutputStream(file)) {
-            out.write(body.getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return new GetMessageReply(file);
+        return new GetMessageReply(UtilsFile.stringToFile(body,filepath));
     }
 }
