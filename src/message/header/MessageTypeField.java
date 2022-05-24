@@ -21,7 +21,7 @@ public class MessageTypeField extends MessageField {
             case PUT -> "put";
             case GET -> "get";
             case DELETE -> "delete";
-            case INVALID -> "invalid";
+            default -> "invalid";
         };
     }
 
@@ -33,7 +33,7 @@ public class MessageTypeField extends MessageField {
             case "put" -> MessageType.PUT;
             case "get" -> MessageType.GET;
             case "delete" -> MessageType.DELETE;
-            case "invalid" -> MessageType.INVALID;
+            default -> MessageType.INVALID;
         };
     }
 

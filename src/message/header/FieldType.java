@@ -4,4 +4,5 @@ public enum FieldType {
     MESSAGETYPE,
     ORIGINID,
     DESTID,
+    INVALID
 }

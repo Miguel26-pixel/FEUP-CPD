@@ -12,6 +12,11 @@ public class GetMessage extends Message {
     public GetMessage(String key) {
         super(MessageType.GET);
         this.key = key;
+        this.buildBody();
+    }
+
+    public String getKey() {
+        return key;
     }
 
     @Override
@@ -19,11 +24,12 @@ public class GetMessage extends Message {
         this.body = new ArrayList<>();
 
         for (byte b : key.getBytes()) {
-            body.add(b);
+            this.body.add(b);
         }
+        System.out.println(this.body);
     }
 
-    public static GetMessage assembleMessage(byte[] bytes) {
-        return new GetMessage("");
+    public static GetMessage assembleMessage(String body) {
+        return new GetMessage(body);
     }
 }

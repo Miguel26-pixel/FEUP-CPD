@@ -11,6 +11,11 @@ public class DeleteMessage extends Message {
     public DeleteMessage(String key) {
         super(MessageType.DELETE);
         this.key = key;
+        this.buildBody();
+    }
+
+    public String getKey() {
+        return key;
     }
 
     @Override
@@ -22,7 +27,7 @@ public class DeleteMessage extends Message {
         }
     }
 
-    public static DeleteMessage assembleMessage(byte[] bytes) {
-        return new DeleteMessage("");
+    public static DeleteMessage assembleMessage(String body) {
+        return new DeleteMessage(body);
     }
 }

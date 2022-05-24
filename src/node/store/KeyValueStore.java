@@ -1,10 +1,7 @@
 package node.store;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.util.*;
-import java.io.File;
-import java.io.IOException;
 
 public class KeyValueStore {
     private ArrayList<Integer> idStore;
@@ -33,14 +30,8 @@ public class KeyValueStore {
     }
 
 
-    public String putNewPair(String pathname) {
+    public String putNewPair(String file) {
         Integer valueKey = idStore.size();
-        File file = new File(pathname);
-
-        if (!file.exists() || !file.isFile()) {
-            System.err.println("Invalid pathname");
-            return "Invalid pathname" + pathname;
-        }
 
         File dynamoDir = new File(folderPath);
         if (!dynamoDir.exists() || !dynamoDir.isDirectory()) {
@@ -49,7 +40,7 @@ public class KeyValueStore {
                 System.out.println("Dynamo main folder created with success");
             } else {
                 System.err.println("Dynamo main folder could not be created");
-                return "Dynamo main folder could not be created";
+                return null;
             }
         }
 
@@ -60,14 +51,16 @@ public class KeyValueStore {
                 System.out.println("Node folder created with success");
             } else {
                 System.err.println("Node folder could not be created");
-                return "Node folder could not be created";
+                return null;
             }
         }
 
         File newFile = new File(folderPath + folderName + "/file_" + valueKey);
 
-        if (!this.copyFile(file, newFile)) {
-            return "File could not be created";
+        try (FileOutputStream out = new FileOutputStream(newFile)) {
+            out.write(file.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         idStore.add(valueKey);

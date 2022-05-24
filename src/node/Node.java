@@ -1,14 +1,19 @@
 package node;
 
 import client.Services;
+import message.Message;
+import message.messages.DeleteMessage;
+import message.messages.GetMessage;
 import node.membership.MembershipService;
 import node.membership.log.Log;
 import node.store.KeyValueStore;
+import utils.UtilsTCP;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.RemoteException;
+import java.util.Arrays;
 
 public class Node implements Services {
     private final String nodeID;
@@ -56,28 +61,43 @@ public class Node implements Services {
                 Socket socket = server.accept();
                 System.out.println("Client accepted");
 
-                input = new DataInputStream(
-                        new BufferedInputStream(socket.getInputStream()));
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                String[] parsedMessage = readMessage(reader);
+                String message = UtilsTCP.readTCPMessage(socket);
+                switch (Message.getMessageType(message)) {
+                    case PUT -> {
+                        String key = keyValueStore.putNewPair(Message.getMessageBody(message));
+                        System.out.println("New key = " + key);
+                    }
+                    case GET -> {
+                        GetMessage getMessage = GetMessage.assembleMessage(Message.getMessageBody(message));
+                        File file = keyValueStore.getValue(getMessage.getKey());
+                    }
+                    case DELETE -> {
+                        DeleteMessage deleteMessage = DeleteMessage.assembleMessage(Message.getMessageBody(message));
+                        boolean res = keyValueStore.deleteValue(deleteMessage.getKey());
+                        System.out.println("Delete has " + ((res) ? "succeeded" : "failed"));
+                    }
+                    default -> {
+                        System.err.println("Wrong message header");
+                    }
+                }
+                /*String[] parsedMessage = readMessage(reader);
                 if (parsedMessage == null || parsedMessage[0] == null || parsedMessage[1] == null) {
                     System.err.println("Read message failed");
                     continue;
                 }
                 switch (parsedMessage[0]) {
                     case "put":
-                        handlePut(socket, parsedMessage[1]);
+                        //handlePut(socket, parsedMessage[1]);
                         break;
                     case "get":
-                        handleGet(socket, parsedMessage[1]);
+                        //handleGet(socket, parsedMessage[1]);
                         break;
                     case "delete":
                         handleDelete(socket, parsedMessage[1]);
                         break;
                     default:
                         break;
-                }
+                }*/
 
                 socket.close();
                 input.close();
@@ -122,12 +142,13 @@ public class Node implements Services {
             output.write(("END").getBytes());
         } else {
             output.write(("succeeded\n").getBytes());
-            FileInputStream in = new FileInputStream(file);
-            int n;
-            while ((n = in.read()) != -1)  {
-                output.write(n);
+            try (FileInputStream in = new FileInputStream(file)) {
+                int n;
+                while ((n = in.read()) != -1)  {
+                    output.write(n);
+                }
+                output.write(("\nEND").getBytes());
             }
-            output.write(("\nEND").getBytes());
         }
     }
 

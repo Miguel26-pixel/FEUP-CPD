@@ -4,6 +4,7 @@ import message.Message;
 import message.messages.DeleteMessage;
 import message.messages.GetMessage;
 import message.messages.PutMessage;
+import utils.UtilsTCP;
 
 import java.io.*;
 import java.net.Socket;
@@ -48,15 +49,15 @@ public class ClientServices {
             }
             Socket socket = new Socket(nodeIP, port);
             PutMessage message = new PutMessage(file);
-            sendTCPMessage(socket, message);
+            UtilsTCP.sendTCPMessage(socket, message);
 
-            String res = readTCPMessage(socket);
+            /*String res = readTCPMessage(socket);
             if (res == null) {
                 System.err.println("readTCPMessage failed");
                 return;
             }
 
-            System.out.println("New Key = " + res);
+            System.out.println("New Key = " + res);*/
         } catch (IOException e) {
             System.out.println("Client exception" + e);
         }
@@ -67,9 +68,9 @@ public class ClientServices {
         try {
             Socket socket = new Socket(nodeIP, port);
             GetMessage message = new GetMessage(operand);
-            sendTCPMessage(socket, message);
+            UtilsTCP.sendTCPMessage(socket, message);
 
-            File testDir = new File("../clientFiles/");
+            /*File testDir = new File("../clientFiles/");
             if (!testDir.exists() || !testDir.isDirectory()) {
                 boolean res = testDir.mkdir();
                 if(res) {
@@ -85,7 +86,7 @@ public class ClientServices {
                 System.out.println("File not found");
             } else {
                 System.out.println("File retrieved with success (saved in clientFiles as file_" + operand);
-            }
+            }*/
         } catch (IOException e) {
             System.out.println("Client exception" + e);
         }
@@ -96,23 +97,18 @@ public class ClientServices {
         try {
             Socket socket = new Socket(nodeIP, port);
             DeleteMessage message = new DeleteMessage(operand);
-            sendTCPMessage(socket, message);
+            UtilsTCP.sendTCPMessage(socket, message);
 
-            String res = readTCPMessage(socket);
+            /*String res = readTCPMessage(socket);
             if (res == null) {
                 System.err.println("readTCPMessage failed");
                 return;
             }
 
-            System.out.println("Delete operation has " + res);
+            System.out.println("Delete operation has " + res);*/
         } catch (IOException e) {
             System.out.println("Client exception" + e);
         }
-    }
-
-    private void sendTCPMessage(Socket socket, Message message) throws IOException {
-        OutputStream output = socket.getOutputStream();
-        output.write(message.assemble());
     }
 
     private void sendTCPFile(Socket socket, String filepath) throws IOException {
