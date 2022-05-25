@@ -20,12 +20,14 @@ public class MembershipService extends Thread {
     private MulticastSocket multicastSocket;
     private final String mcastIP;
     private final String mcastPort;
+    private final String nodeIP;
     private int membership_counter;
     private final View view;
 
-    public MembershipService(String mcastIP, String mcastPort) {
+    public MembershipService(String mcastIP, String mcastPort, String nodeIP) {
         this.mcastIP = mcastIP;
         this.mcastPort = mcastPort;
+        this.nodeIP = nodeIP;
         this.membership_counter = 0;
         this.view = new View();
     }
@@ -55,7 +57,7 @@ public class MembershipService extends Thread {
             ServerSocket membershipSocket = new ServerSocket(MEMBERSHIP_PORT);
             membershipSocket.setSoTimeout(TIMEOUT);
 
-            byte[] joinMessage = (new JoinMessage(this.membership_counter, MembershipService.MEMBERSHIP_PORT)).assemble();
+            byte[] joinMessage = (new JoinMessage(this.membership_counter, MembershipService.MEMBERSHIP_PORT, this.nodeIP)).assemble();
 
             multicastSocket.send(new DatagramPacket(joinMessage, joinMessage.length));
 

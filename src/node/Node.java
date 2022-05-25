@@ -24,7 +24,7 @@ public class Node implements Services {
 
     public Node(String mcastIP, String mcastPort, String nodeID, String membershipPort) {
         this.nodeID = nodeID;
-        this.membershipService = new MembershipService(mcastIP, mcastPort);
+        this.membershipService = new MembershipService(mcastIP, mcastPort, nodeID);
         this.keyValueStore = new KeyValueStore("node_" + nodeID + ":" + membershipPort);
 
         try {
