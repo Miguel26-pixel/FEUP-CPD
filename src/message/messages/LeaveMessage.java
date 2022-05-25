@@ -50,6 +50,10 @@ public class LeaveMessage extends Message {
         return ip;
     }
 
+    public Integer getCounter() {
+        return counter;
+    }
+
     @Override
     protected void buildBody() {
         this.body = new ArrayList<>();

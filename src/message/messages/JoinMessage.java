@@ -53,6 +53,14 @@ public class JoinMessage extends Message {
         return ip;
     }
 
+    public Integer getPort() {
+        return port;
+    }
+
+    public Integer getCounter() {
+        return counter;
+    }
+
     @Override
     protected void buildBody() {
         this.body = new ArrayList<>();
