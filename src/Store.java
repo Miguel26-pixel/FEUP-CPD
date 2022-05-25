@@ -43,16 +43,11 @@ public class Store {
 
         Node node = new Node(args[0], args[1], args[2], args[3]);
 
-        try {
-            Services stub = (Services) UnicastRemoteObject.exportObject(node, 0);
-
-            Registry registry = LocateRegistry.getRegistry();
-            registry.rebind(args[2], stub);
-        } catch (RemoteException e) {
-            System.err.println("Server exception: " + e);
-            e.printStackTrace();
+        if (!RMIServer.register(node,args[2])) {
+            System.err.println("RMI register failed");
+            System.exit(1);
         }
-
+        
         node.run();
     }
 }
