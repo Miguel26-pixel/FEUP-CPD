@@ -109,7 +109,7 @@ public class MembershipService extends Thread {
         }
 
         try {
-            byte[] leaveMessage = (new LeaveMessage(this.membership_counter)).assemble();
+            byte[] leaveMessage = (new LeaveMessage(this.membership_counter, this.nodeIP)).assemble();
 
             multicastSocket.send(new DatagramPacket(leaveMessage, leaveMessage.length));
         } catch (IOException ignored) {
