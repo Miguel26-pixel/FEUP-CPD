@@ -18,7 +18,6 @@ public class Node implements Services {
     private MembershipService membershipService;
     private Socket socket;
     private KeyValueStore keyValueStore;
-    private Log log;
     private ServerSocket server;
     private DataInputStream input = null;
     private DataOutputStream output = null;
@@ -27,7 +26,6 @@ public class Node implements Services {
         this.nodeID = nodeID;
         this.membershipService = new MembershipService(mcastIP, mcastPort);
         this.keyValueStore = new KeyValueStore("node_" + nodeID + ":" + membershipPort);
-        this.log = new Log();
 
         try {
             this.server = new ServerSocket(Integer.parseInt(membershipPort));
