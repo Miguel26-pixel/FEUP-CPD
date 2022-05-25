@@ -7,12 +7,12 @@ import java.io.*;
 import java.util.*;
 
 public class KeyValueStore {
-    private ArrayList<String> idStore;
-    private String folderPath;
-    private String folderName;
+    private final ArrayList<String> keys;
+    private final String folderPath;
+    private final String folderName;
 
     public KeyValueStore(String folderName){
-        this.idStore = new ArrayList<>();
+        this.keys = new ArrayList<>();
         this.folderPath = "../dynamo/";
         this.folderName = folderName;
         checkPastFiles();
@@ -27,11 +27,10 @@ public class KeyValueStore {
 
             for (File file : files) {
                 String keyStr = file.getName().substring(("file_").length());
-                idStore.add(keyStr);
+                keys.add(keyStr);
             }
         }
     }
-
 
     public String putNewPair(String file) {
         String valueKey = UtilsHash.hashSHA256(file);
@@ -66,13 +65,13 @@ public class KeyValueStore {
             throw new RuntimeException(e);
         }
 
-        idStore.add(valueKey);
+        keys.add(valueKey);
 
         return valueKey;
     }
 
     public File getValue(String key){
-        for (String existingKey : idStore) {
+        for (String existingKey : keys) {
             if (existingKey.equals(key)) {
                 File file = new File(folderPath + folderName + "/file_" + key);
                 if (file.exists() && file.isFile()) {
@@ -86,8 +85,8 @@ public class KeyValueStore {
     public String deleteValue(String key){
         String path = "";
         int index = -1;
-        for (int i = 0; i < idStore.size(); i++){
-            if (idStore.get(i).equals(key)) {
+        for (int i = 0; i < keys.size(); i++){
+            if (keys.get(i).equals(key)) {
                  path = folderPath + folderName + "/file_" + key;
                  index = i;
                  break;
@@ -99,7 +98,7 @@ public class KeyValueStore {
         File file = new File(path);
         if (!file.exists() || !file.delete()) { return "failed"; }
 
-        idStore.remove(index);
+        keys.remove(index);
         return "succeeded";
     }
 }
