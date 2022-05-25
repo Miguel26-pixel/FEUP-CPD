@@ -46,6 +46,10 @@ public class LeaveMessage extends Message {
         this.counter = Integer.parseInt(params.get(0));
     }
 
+    public String getIp() {
+        return ip;
+    }
+
     @Override
     protected void buildBody() {
         this.body = new ArrayList<>();

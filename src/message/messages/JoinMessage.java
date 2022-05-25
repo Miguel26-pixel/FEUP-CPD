@@ -49,6 +49,10 @@ public class JoinMessage extends Message {
         this.port = Integer.parseInt(params.get(1));
     }
 
+    public String getIp() {
+        return ip;
+    }
+
     @Override
     protected void buildBody() {
         this.body = new ArrayList<>();
