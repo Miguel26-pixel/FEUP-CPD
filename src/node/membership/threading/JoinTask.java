@@ -1,6 +1,6 @@
 package node.membership.threading;
 
-import node.membership.message.JoinMessage;
+import message.messages.JoinMessage;
 import node.membership.view.View;
 
 public class JoinTask extends Thread {

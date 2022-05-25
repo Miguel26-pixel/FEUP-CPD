@@ -1,5 +1,7 @@
-package node.membership.message;
+package message.messages;
 
+import message.Message;
+import message.MessageType;
 import node.membership.log.Log;
 import node.membership.view.View;
 import node.membership.view.ViewEntry;
@@ -35,7 +37,7 @@ public class MembershipMessage extends Message {
         return view;
     }
 
-    private void buildBody() {
+    protected void buildBody() {
         this.body.addAll(this.view.toBytes());
         this.body.add((byte)'|');
         this.body.addAll(Log.toBytes());

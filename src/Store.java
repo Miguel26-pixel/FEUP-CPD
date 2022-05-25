@@ -1,4 +1,10 @@
+import client.Services;
 import node.Node;
+
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 public class Store {
     public static void main(String[] args) {
@@ -8,8 +14,17 @@ public class Store {
         }
 
         Node node = new Node(args[0], args[1], args[2], args[3]);
-        node.start();
 
-        System.exit(0);
+        try {
+            Services stub = (Services) UnicastRemoteObject.exportObject(node, 0);
+
+            Registry registry = LocateRegistry.getRegistry();
+            registry.rebind(args[2], stub);
+        } catch (RemoteException e) {
+            System.err.println("Server exception: " + e);
+            e.printStackTrace();
+        }
+
+        node.run();
     }
 }

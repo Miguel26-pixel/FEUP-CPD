@@ -1,8 +1,7 @@
-package node.membership.message;
+package message.messages;
 
-import node.membership.message.header.FieldType;
-import node.membership.message.header.MessageField;
-import node.membership.message.header.MessageTypeField;
+import message.Message;
+import message.MessageType;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -34,7 +33,8 @@ public class JoinMessage extends Message {
         this.port = Integer.parseInt(params.get(1));
     }
 
-    private void buildBody() {
+    @Override
+    protected void buildBody() {
         this.body = new ArrayList<>();
         byte[] bytes = ByteBuffer.allocate(4).putInt(counter).array();
 
@@ -49,5 +49,9 @@ public class JoinMessage extends Message {
         for (byte b : bytes) {
             this.body.add(b);
         }
+    }
+
+    public static JoinMessage assembleMessage(byte[] bytes, String pathname) {
+        return new JoinMessage(-1,-1);
     }
 }

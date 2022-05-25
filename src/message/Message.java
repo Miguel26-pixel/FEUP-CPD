@@ -1,8 +1,8 @@
-package node.membership.message;
+package message;
 
-import node.membership.message.header.FieldType;
-import node.membership.message.header.MessageField;
-import node.membership.message.header.MessageTypeField;
+import message.header.FieldType;
+import message.header.MessageField;
+import message.header.MessageTypeField;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +11,7 @@ public abstract class Message {
     public static final Byte CR = 0x0d;
     public static final Byte LF = 0x0a;
 
+    protected abstract void buildBody();
     private final List<MessageField> messageFields;
     protected List<Byte> body;
 
@@ -30,7 +31,7 @@ public abstract class Message {
     }
 
     public byte[] assemble() {
-        List<Byte> message = new ArrayList<Byte>();
+        List<Byte> message = new ArrayList<>();
 
         for (MessageField field: messageFields) {
             message.addAll(field.assemble());
@@ -43,6 +44,11 @@ public abstract class Message {
 
         message.addAll(body);
 
+        message.add(CR);
+        message.add(LF);
+        message.add(CR);
+        message.add(LF);
+
         byte[] messageBytes = new byte[message.size()];
         for (int i = 0; i < message.size(); i++) {
             messageBytes[i] = message.get(i);
@@ -52,10 +58,8 @@ public abstract class Message {
     }
 
     public static MessageType getMessageType(String message) {
-        List<String> split = new ArrayList<>(List.of(message.split(CR.toString() + LF.toString())));
-
-        split.removeIf(s -> s.equals(""));
-        split.remove(split.size() - 1);
+        byte[] delim = new byte[]{CR,LF};
+        String[] split = message.split(new String(delim));
 
         for(String headerLine: split) {
             List<String> splitHeader = List.of(headerLine.split(" "));
@@ -69,5 +73,10 @@ public abstract class Message {
         return MessageType.INVALID;
     }
 
-    //1:5,1237;2:8,129381 Log message data format
+    public static String getMessageBody(String message) {
+        byte[] delim = new byte[]{CR,LF};
+        String[] split = message.split(new String(delim));
+
+        return split[split.length -1];
+    }
 }

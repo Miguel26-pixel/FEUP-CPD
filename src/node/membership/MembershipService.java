@@ -1,11 +1,9 @@
 package node.membership;
 
-import node.membership.message.LeaveMessage;
-import node.membership.message.MembershipMessage;
+import message.messages.JoinMessage;
+import message.messages.LeaveMessage;
+import message.messages.MembershipMessage;
 import node.membership.view.View;
-import node.membership.message.JoinMessage;
-
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
