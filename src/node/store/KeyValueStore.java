@@ -1,9 +1,12 @@
 package node.store;
 
-import utils.UtilsFile;
+import message.Message;
+import node.membership.view.View;
 import utils.UtilsHash;
+import utils.UtilsTCP;
 
 import java.io.*;
+import java.net.Socket;
 import java.util.*;
 
 public class KeyValueStore {
@@ -87,9 +90,9 @@ public class KeyValueStore {
         int index = -1;
         for (int i = 0; i < keys.size(); i++){
             if (keys.get(i).equals(key)) {
-                 path = folderPath + folderName + "/file_" + key;
-                 index = i;
-                 break;
+                path = folderPath + folderName + "/file_" + key;
+                index = i;
+                break;
             }
         }
 
@@ -101,4 +104,6 @@ public class KeyValueStore {
         keys.remove(index);
         return "succeeded";
     }
+
+
 }

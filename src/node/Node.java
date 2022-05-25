@@ -5,7 +5,10 @@ import message.Message;
 import message.messages.*;
 import node.membership.MembershipService;
 import node.membership.log.Log;
+import node.membership.view.View;
+import node.membership.view.ViewEntry;
 import node.store.KeyValueStore;
+import utils.UtilsHash;
 import utils.UtilsIP;
 import utils.UtilsTCP;
 
@@ -21,6 +24,7 @@ public class Node implements Services {
     private Socket socket;
     private KeyValueStore keyValueStore;
     private Log log;
+    private String myHash;
     private ServerSocket server;
     private DataInputStream input = null;
     private DataOutputStream output = null;
@@ -30,9 +34,10 @@ public class Node implements Services {
         this.membershipService = new MembershipService(mcastIP, mcastPort);
 
         for (String key: this.membershipService.getView().getEntries().keySet()) {
-            System.out.println("IP: " + key + " Port: " + this.membershipService.getView().getEntries().get(key).getPort());
+            System.out.println("IP: " + this.membershipService.getView().getEntries().get(key).getAddress()
+                    + " Port: " + this.membershipService.getView().getEntries().get(key).getPort());
         }
-
+        this.myHash = UtilsHash.hashSHA256(nodeID);
         this.keyValueStore = new KeyValueStore("node_" + nodeID + ":" + membershipPort);
         this.log = new Log();
 
@@ -74,9 +79,20 @@ public class Node implements Services {
                 switch (Message.getMessageType(message)) {
                     case PUT -> {
                         String file = Message.getMessageBody(message);
-                        String key = keyValueStore.putNewPair(file);
-                        System.out.println("New key: " + key);
-                        reply = new PutMessageReply(key);
+                        String fileKey = UtilsHash.hashSHA256(file);
+                        String nodeHash = getClosestNodeKey(fileKey);
+                        if (nodeHash == null) {
+                            System.err.println("Successor node not found");
+                            reply = new PutMessageReply("failed");
+                        } else if (nodeHash.equals(myHash)) {
+                            String key = keyValueStore.putNewPair(file);
+                            System.out.println("New key: " + key);
+                            reply = new PutMessageReply(key);
+                        } else {
+                            ViewEntry entry = membershipService.getView().getEntries().get(nodeHash);
+                            UtilsTCP.sendTCPString(output,redirectMessage(message,entry.getAddress(), entry.getPort()));
+                            continue;
+                        }
                     }
                     case GET -> {
                         GetMessage getMessage = GetMessage.assembleMessage(Message.getMessageBody(message));
@@ -101,5 +117,25 @@ public class Node implements Services {
                 System.err.println("Server exception:" + e);
             }
         }
+    }
+
+    private String getClosestNodeKey(String hash) {
+        View view = this.membershipService.getView();
+        if (view.getEntries().isEmpty()) { return null; }
+        for (String key: view.getEntries().keySet()) {
+            if (key.compareTo(hash) > 0) { return key; }
+        }
+        return view.getEntries().keySet().iterator().next();
+    }
+
+    private String redirectMessage(String message, String address, int port) throws IOException {
+        Socket socket = new Socket(address, port);
+        System.out.println("Redirecting message...");
+        OutputStream output = socket.getOutputStream();
+        InputStream input = socket.getInputStream();
+        UtilsTCP.sendTCPString(output,message);
+        String reply = UtilsTCP.readTCPMessage(input);
+        socket.close();
+        return reply;
     }
 }

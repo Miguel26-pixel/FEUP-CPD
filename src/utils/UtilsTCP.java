@@ -13,6 +13,11 @@ public class UtilsTCP {
         output.flush();
     }
 
+    public static void  sendTCPString(OutputStream output, String message) throws IOException {
+        output.write(message.getBytes());
+        output.flush();
+    }
+
     public static String readTCPMessage(InputStream socketInput) {
         StringBuilder message = new StringBuilder();
         try {

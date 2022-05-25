@@ -5,15 +5,13 @@ import message.messages.LeaveMessage;
 import message.messages.MembershipMessage;
 import node.membership.view.View;
 import node.membership.view.ViewEntry;
+import utils.UtilsHash;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MembershipService extends Thread {
     private final static int MEMBERSHIP_PORT = 5525;
@@ -32,12 +30,9 @@ public class MembershipService extends Thread {
         this.mcastPort = mcastPort;
         this.membership_counter = 0;
         //this.view = new View();
-        Map<String, ViewEntry> entries = new HashMap<String, ViewEntry>();
-        if (Integer.parseInt(mcastPort) == 1) {
-            entries.put("127.0.1.2", new ViewEntry(1,0, 5002));
-        } else {
-            entries.put("127.0.1.1", new ViewEntry(1,0,5001));
-        }
+        Map<String, ViewEntry> entries = new TreeMap<>();
+        entries.put(UtilsHash.hashSHA256("127.0.1.2"), new ViewEntry(1,0, 5002, "127.0.1.2"));
+        entries.put(UtilsHash.hashSHA256("127.0.1.1"), new ViewEntry(1,0,5001, "127.0.1.1"));
         this.view = new View(entries);
     }
 
