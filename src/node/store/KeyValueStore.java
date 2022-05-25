@@ -1,18 +1,18 @@
 package node.store;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import utils.UtilsFile;
+import utils.UtilsHash;
+
+import java.io.*;
 import java.util.*;
-import java.io.File;
-import java.io.IOException;
 
 public class KeyValueStore {
-    private ArrayList<Integer> idStore;
+    private ArrayList<String> idStore;
     private String folderPath;
     private String folderName;
 
     public KeyValueStore(String folderName){
-        this.idStore = new ArrayList<Integer>();
+        this.idStore = new ArrayList<>();
         this.folderPath = "../dynamo/";
         this.folderName = folderName;
         checkPastFiles();
@@ -27,20 +27,14 @@ public class KeyValueStore {
 
             for (File file : files) {
                 String keyStr = file.getName().substring(("file_").length());
-                idStore.add(Integer.parseInt(keyStr));
+                idStore.add(keyStr);
             }
         }
     }
 
 
-    public String putNewPair(String pathname) {
-        Integer valueKey = idStore.size();
-        File file = new File(pathname);
-
-        if (!file.exists() || !file.isFile()) {
-            System.err.println("Invalid pathname");
-            return "Invalid pathname" + pathname;
-        }
+    public String putNewPair(String file) {
+        String valueKey = UtilsHash.hashSHA256(file);
 
         File dynamoDir = new File(folderPath);
         if (!dynamoDir.exists() || !dynamoDir.isDirectory()) {
@@ -49,7 +43,7 @@ public class KeyValueStore {
                 System.out.println("Dynamo main folder created with success");
             } else {
                 System.err.println("Dynamo main folder could not be created");
-                return "Dynamo main folder could not be created";
+                return null;
             }
         }
 
@@ -60,39 +54,27 @@ public class KeyValueStore {
                 System.out.println("Node folder created with success");
             } else {
                 System.err.println("Node folder could not be created");
-                return "Node folder could not be created";
+                return null;
             }
         }
 
         File newFile = new File(folderPath + folderName + "/file_" + valueKey);
 
-        if (!this.copyFile(file, newFile)) {
-            return "File could not be created";
+        try (FileOutputStream out = new FileOutputStream(newFile)) {
+            out.write(file.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         idStore.add(valueKey);
 
-        return String.valueOf(valueKey);
-    }
-
-    private boolean copyFile(File a, File b) {
-        try (FileInputStream in = new FileInputStream(a); FileOutputStream out = new FileOutputStream(b)) {
-            int n;
-            while ((n = in.read()) != -1) {
-                out.write(n);
-            }
-        } catch (IOException e) {
-            System.err.println("File could not be copied");
-            return false;
-        }
-        return true;
+        return valueKey;
     }
 
     public File getValue(String key){
-        int parsed_key = Integer.parseInt(key);
-        for (Integer integer : idStore) {
-            if (integer.equals(parsed_key)) {
-                File file = new File(folderPath + folderName + "/file_" + parsed_key);
+        for (String existingKey : idStore) {
+            if (existingKey.equals(key)) {
+                File file = new File(folderPath + folderName + "/file_" + key);
                 if (file.exists() && file.isFile()) {
                     return file;
                 }
@@ -101,24 +83,23 @@ public class KeyValueStore {
         return null;
     }
 
-    public boolean deleteValue(String key){
+    public String deleteValue(String key){
         String path = "";
         int index = -1;
-        int parsed_key = Integer.parseInt(key);
         for (int i = 0; i < idStore.size(); i++){
-            if (idStore.get(i) == parsed_key) {
-                 path = folderPath + folderName + "/file_" + parsed_key;
+            if (idStore.get(i).equals(key)) {
+                 path = folderPath + folderName + "/file_" + key;
                  index = i;
                  break;
             }
         }
 
-        if (index == -1) { return false; }
+        if (index == -1) { return "failed"; }
 
         File file = new File(path);
-        if (!file.exists() || !file.delete()) { return false; }
+        if (!file.exists() || !file.delete()) { return "failed"; }
 
         idStore.remove(index);
-        return true;
+        return "succeeded";
     }
 }

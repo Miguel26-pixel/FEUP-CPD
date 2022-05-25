@@ -1,8 +1,10 @@
-package node.membership.message;
+package message.messages;
+
+import message.Message;
+import message.MessageType;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.List;
 
 public class LeaveMessage extends Message {
     private final Integer counter;
@@ -12,12 +14,17 @@ public class LeaveMessage extends Message {
         this.counter = counter;
     }
 
-    private void buildBody() {
+    @Override
+    protected void buildBody() {
         this.body = new ArrayList<>();
         byte[] bytes = ByteBuffer.allocate(4).putInt(counter).array();
 
         for (byte b : bytes) {
             this.body.add(b);
         }
+    }
+
+    public static LeaveMessage assembleMessage(byte[] bytes, String pathname) {
+        return new LeaveMessage(-1);
     }
 }
