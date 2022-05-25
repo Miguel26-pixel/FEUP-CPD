@@ -128,8 +128,8 @@ public class Node implements Services {
         return view.getEntries().keySet().iterator().next();
     }
 
-    private String redirectMessage(String message, String address, int port) throws IOException {
-        Socket socket = new Socket(address, port);
+    private String redirectMessage(String message, String address, String port) throws IOException {
+        Socket socket = new Socket(address, Integer.parseInt(port));
         System.out.println("Redirecting message...");
         OutputStream output = socket.getOutputStream();
         InputStream input = socket.getInputStream();

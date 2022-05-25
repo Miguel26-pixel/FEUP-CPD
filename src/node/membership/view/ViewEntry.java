@@ -4,17 +4,17 @@ public class ViewEntry {
     private final int counter;
     private final int epoch;
 
-    private final int port;
+    private final String port;
     private final String address;
 
-    public ViewEntry(int counter, int epoch, int port, String address) {
+    public ViewEntry(int counter, int epoch, String port, String address) {
         this.counter = counter;
         this.epoch = epoch;
         this.port = port;
         this.address = address;
     }
 
-    public int getPort() {
+    public String getPort() {
         return port;
     }
 
