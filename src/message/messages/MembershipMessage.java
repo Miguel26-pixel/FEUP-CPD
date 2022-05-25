@@ -31,7 +31,7 @@ public class MembershipMessage extends Message {
             String counter = entry[1];
             String epoch = entry[2];
 
-            view.addEntry(id, new ViewEntry(Integer.parseInt(counter), Integer.parseInt(epoch)));
+            //view.addEntry(id, new ViewEntry(Integer.parseInt(counter), Integer.parseInt(epoch)));
         }
 
         return view;

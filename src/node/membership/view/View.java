@@ -12,6 +12,10 @@ public class View {
         this.entries = new HashMap<String, ViewEntry>();
     }
 
+    public View(Map<String, ViewEntry> entries) {
+        this.entries = entries;
+    }
+
     public Map<String, ViewEntry> getEntries() {
         return entries;
     }
