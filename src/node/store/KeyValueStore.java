@@ -1,24 +1,68 @@
 package node.store;
 
 import message.Message;
-import message.messages.DeleteMessage;
-import message.messages.DeleteMessageReply;
-import message.messages.PutMessageReply;
+import message.messages.*;
 import node.membership.view.View;
 import node.membership.view.ViewEntry;
 import utils.UtilsHash;
 import utils.UtilsTCP;
 
 import java.io.*;
-import java.net.Socket;
 import java.util.*;
 
 public class KeyValueStore {
     private final ArrayList<String> keys;
     private final String folderPath;
     private final String folderName;
-    private String myHash;
+    private final String myHash;
 
+    public String handlePut(String message, View view) {
+        String file = Message.getMessageBody(message);
+        String fileKey = UtilsHash.hashSHA256(file);
+        String nodeHash = getClosestNodeKey(fileKey, view);
+        if (nodeHash == null) {
+            System.err.println("Successor node not found");
+            return new String((new PutMessageReply("Successor node not found")).assemble());
+        } else if (nodeHash.equals(myHash)) {
+            String key = putNewPair(file);
+            System.out.println("New key: " + key);
+            return new String((new PutMessageReply(key)).assemble());
+        }
+        ViewEntry entry = view.getEntries().get(nodeHash);
+        return UtilsTCP.redirectMessage(message,entry.getAddress(), entry.getPort());
+    }
+
+    public String handleGet(String message, View view) {
+        GetMessage getMessage = GetMessage.assembleMessage(Message.getMessageBody(message));
+        String fileKey = getMessage.getKey();
+        String nodeHash = getClosestNodeKey(fileKey, view);
+        if (nodeHash == null) {
+            System.err.println("Successor node not found");
+            return new String((new GetMessageReply(null)).assemble());
+        } else if (nodeHash.equals(myHash)) {
+            File file = getValue(fileKey);
+            System.out.println((file == null) ? "File does not exists" : "File obtained with success");
+            return new String((new GetMessageReply(file)).assemble());
+        }
+        ViewEntry entry = view.getEntries().get(nodeHash);
+        return UtilsTCP.redirectMessage(message,entry.getAddress(), entry.getPort());
+    }
+
+    public String handleDelete(String message, View view) {
+        DeleteMessage deleteMessage = DeleteMessage.assembleMessage(Message.getMessageBody(message));
+        String fileKey = deleteMessage.getKey();
+        String nodeHash = getClosestNodeKey(fileKey, view);
+        if (nodeHash == null) {
+            System.err.println("Successor node not found");
+            return new String((new DeleteMessageReply("failed")).assemble());
+        } else if (nodeHash.equals(myHash)) {
+            String state = deleteValue(fileKey);
+            System.out.println("Delete operation has " + state);
+            return new String((new DeleteMessageReply(state)).assemble());
+        }
+        ViewEntry entry = view.getEntries().get(nodeHash);
+        return UtilsTCP.redirectMessage(message,entry.getAddress(), entry.getPort());
+    }
 
     public KeyValueStore(String folderName, String myHash){
         this.keys = new ArrayList<>();
@@ -48,40 +92,6 @@ public class KeyValueStore {
             if (key.compareTo(hash) > 0) { return key; }
         }
         return view.getEntries().keySet().iterator().next();
-    }
-
-    public String handlePut(String message, View view) {
-        String file = Message.getMessageBody(message);
-        String fileKey = UtilsHash.hashSHA256(file);
-        String nodeHash = getClosestNodeKey(fileKey, view);
-        if (nodeHash == null) {
-            System.err.println("Successor node not found");
-            return new String((new PutMessageReply("Successor node not found")).assemble());
-        } else if (nodeHash.equals(myHash)) {
-            String key = putNewPair(file);
-            System.out.println("New key: " + key);
-            return new String((new PutMessageReply(key)).assemble());
-        } else {
-            ViewEntry entry = view.getEntries().get(nodeHash);
-            return UtilsTCP.redirectMessage(message,entry.getAddress(), entry.getPort());
-        }
-    }
-
-    public String handleDelete(String message, View view) {
-        DeleteMessage deleteMessage = DeleteMessage.assembleMessage(Message.getMessageBody(message));
-        String fileKey = deleteMessage.getKey();
-        String nodeHash = getClosestNodeKey(fileKey, view);
-        if (nodeHash == null) {
-            System.err.println("Successor node not found");
-            return new String((new DeleteMessageReply("failed")).assemble());
-        } else if (nodeHash.equals(myHash)) {
-            String state = deleteValue(fileKey);
-            System.out.println("Delete operation has " + state);
-            return new String((new DeleteMessageReply(state)).assemble());
-        } else {
-            ViewEntry entry = view.getEntries().get(nodeHash);
-            return UtilsTCP.redirectMessage(message,entry.getAddress(), entry.getPort());
-        }
     }
 
     private String putNewPair(String file) {
@@ -122,7 +132,7 @@ public class KeyValueStore {
         return valueKey;
     }
 
-    public File getValue(String key){
+    private File getValue(String key){
         for (String existingKey : keys) {
             if (existingKey.equals(key)) {
                 File file = new File(folderPath + folderName + "/file_" + key);
@@ -153,6 +163,4 @@ public class KeyValueStore {
         keys.remove(index);
         return "succeeded";
     }
-
-
 }
