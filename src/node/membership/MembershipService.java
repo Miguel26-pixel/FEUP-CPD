@@ -1,6 +1,7 @@
 package node.membership;
 
 import message.Message;
+import message.header.MessageTypeField;
 import message.messages.JoinMessage;
 import message.messages.LeaveMessage;
 import message.messages.MembershipMessage;
@@ -47,9 +48,13 @@ public class MembershipService extends Thread {
 
     @Override
     public void run() {
+        System.out.println("Joining membership...");
+
         if (!this.joinCluster()) {
             return;
         }
+
+        System.out.println("Joined membership");
 
         while (true) {
             DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
@@ -64,7 +69,10 @@ public class MembershipService extends Thread {
                 String message = new String(receivedPacket.getData(), 0, receivedPacket.getLength());
 
                 switch (Message.getMessageType(message)) {
-                    case JOIN -> workerThreads.execute(new JoinTask(this.view, message));
+                    case JOIN ->  {
+                        System.out.println("JOIN");
+                        workerThreads.execute(new JoinTask(this.view, message));
+                    }
                 }
             } catch (IOException ignored) {
             }
@@ -77,7 +85,10 @@ public class MembershipService extends Thread {
 
         this.multicastSocket = new MulticastSocket(multicastPort);
 
-        multicastSocket.joinGroup(Inet4Address.getByName(mcastIP));
+        InetAddress ipAddress = InetAddress.getByName(mcastIP);
+        SocketAddress socketAddress = new InetSocketAddress(mcastIP, multicastPort);
+
+        multicastSocket.joinGroup(socketAddress, NetworkInterface.getByInetAddress(ipAddress));
     }
 
     public boolean joinCluster() {
@@ -95,6 +106,7 @@ public class MembershipService extends Thread {
 
             multicastSocket.send(new DatagramPacket(joinMessage, joinMessage.length));
 
+
             for (int current_try = 0; current_try < MAX_TRIES; current_try++) {
                 Socket clientSocket = membershipSocket.accept();
                 clientSocket.setSoTimeout(TIMEOUT);
@@ -107,6 +119,7 @@ public class MembershipService extends Thread {
 
             membershipSocket.close();
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
 
