@@ -71,14 +71,12 @@ public class MembershipService extends Thread {
         }
     }
 
-    private boolean joinMulticastGroup() throws IOException {
+    private void joinMulticastGroup() throws IOException {
         int multicastPort = Integer.parseInt(mcastPort);
 
         this.multicastSocket = new MulticastSocket(multicastPort);
 
         multicastSocket.joinGroup(Inet4Address.getByName(mcastIP));
-
-        return true;
     }
 
     public boolean joinCluster() {
@@ -87,7 +85,7 @@ public class MembershipService extends Thread {
         }
 
         try {
-            joinMulticastGroup();
+            this.joinMulticastGroup();
 
             ServerSocket membershipSocket = new ServerSocket(MEMBERSHIP_PORT);
             membershipSocket.setSoTimeout(TIMEOUT);
