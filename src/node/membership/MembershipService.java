@@ -7,6 +7,7 @@ import message.messages.MembershipMessage;
 import node.membership.threading.JoinTask;
 import node.membership.view.View;
 import threading.ThreadPool;
+import utils.UtilsTCP;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -98,9 +99,9 @@ public class MembershipService extends Thread {
                 Socket clientSocket = membershipSocket.accept();
                 clientSocket.setSoTimeout(TIMEOUT);
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                String msg = UtilsTCP.readTCPMessage(clientSocket.getInputStream());
 
-                receiveMembershipMessage(reader);
+                this.view.copyView(new MembershipMessage(msg).getView(), true);
                 clientSocket.close();
             }
 
@@ -111,29 +112,6 @@ public class MembershipService extends Thread {
 
         membership_counter++;
         return true;
-    }
-
-    private void receiveMembershipMessage(BufferedReader reader) throws IOException {
-        List<Byte> messageBytes = new ArrayList<>();
-
-        while (true) {
-            Byte current = (byte) reader.read();
-            messageBytes.add(current);
-
-            if (current.equals((byte) -1)) {
-
-                StringBuilder message = new StringBuilder();
-                for (byte b: messageBytes) {
-                    message.append(b);
-                }
-
-                MembershipMessage membershipMessage = new MembershipMessage(message.toString());
-
-                this.view.copyView(membershipMessage.getView(), true);
-
-                break;
-            }
-        }
     }
 
     public boolean leaveCluster() {
