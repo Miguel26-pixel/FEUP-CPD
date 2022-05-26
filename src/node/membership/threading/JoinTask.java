@@ -3,6 +3,7 @@ package node.membership.threading;
 import message.messages.JoinMessage;
 import message.messages.MembershipMessage;
 import node.membership.view.View;
+import utils.UtilsTCP;
 
 import java.io.*;
 import java.net.Socket;
@@ -28,10 +29,9 @@ public class JoinTask extends Thread {
 
         try {
             Socket socket = new Socket(joinMessage.getIp(), joinMessage.getPort());
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 
-            out.write(reply.assemble());
-            socket.close();
+            UtilsTCP.sendTCPMessage(output, reply);
         } catch (IOException ignored) {
         }
     }
