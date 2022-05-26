@@ -6,9 +6,11 @@ import message.messages.*;
 import node.membership.MembershipService;
 import node.membership.log.Log;
 import node.store.KeyValueStore;
+import utils.UtilsIP;
 import utils.UtilsTCP;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.RemoteException;
@@ -28,10 +30,10 @@ public class Node implements Services {
         this.keyValueStore = new KeyValueStore("node_" + nodeID + ":" + membershipPort);
 
         try {
-            this.server = new ServerSocket(Integer.parseInt(membershipPort));
+            this.server = new ServerSocket(Integer.parseInt(membershipPort), 0 , InetAddress.getByName(nodeID));
             System.out.println("Server started: waiting for a client ...");
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println("Server initialization exception: " + e);
             System.exit(1);
         }
     }
