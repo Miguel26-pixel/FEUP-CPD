@@ -1,9 +1,13 @@
 package node.membership;
 
+import message.Message;
 import message.messages.JoinMessage;
 import message.messages.LeaveMessage;
 import message.messages.MembershipMessage;
+import node.membership.threading.JoinTask;
 import node.membership.view.View;
+import threading.ThreadPool;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,6 +27,8 @@ public class MembershipService extends Thread {
     private final String nodeIP;
     private int membership_counter;
     private final View view;
+    private final ThreadPool workerThreads;
+    private final byte[] buffer;
 
     public MembershipService(String mcastIP, String mcastPort, String nodeIP) {
         this.mcastIP = mcastIP;
@@ -30,10 +36,39 @@ public class MembershipService extends Thread {
         this.nodeIP = nodeIP;
         this.membership_counter = 0;
         this.view = new View();
+
+        int coreNumber = Runtime.getRuntime().availableProcessors();
+
+        this.workerThreads = new ThreadPool(coreNumber, coreNumber);
+
+        this.buffer = new byte[DATAGRAM_LENGTH];
     }
 
     @Override
     public void run() {
+        if (!this.joinCluster()) {
+            return;
+        }
+
+        while (true) {
+            DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
+
+            try {
+                multicastSocket.receive(receivedPacket);
+
+                InetAddress address = receivedPacket.getAddress();
+                int port = receivedPacket.getPort();
+                receivedPacket = new DatagramPacket(buffer, buffer.length, address, port);
+
+                String message = new String(receivedPacket.getData(), 0, receivedPacket.getLength());
+
+                switch (Message.getMessageType(message)) {
+                    case JOIN -> workerThreads.execute(new JoinTask(this.view, message));
+                }
+            } catch (IOException ignored) {
+            }
+
+        }
     }
 
     private boolean joinMulticastGroup() throws IOException {
