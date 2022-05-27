@@ -39,11 +39,6 @@ public class Node implements Services {
             System.out.println("Server initialization exception: " + e);
             System.exit(1);
         }
-
-        for (String key: this.membershipService.getView().getEntries().keySet()) {
-            System.out.println("IP: " + this.membershipService.getView().getEntries().get(key).getAddress()
-                    + " Port: " + this.membershipService.getView().getEntries().get(key).getPort());
-        }
     }
 
     @Override

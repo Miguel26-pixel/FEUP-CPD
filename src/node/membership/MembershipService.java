@@ -29,11 +29,7 @@ public class MembershipService extends Thread {
         this.mcastIP = mcastIP;
         this.mcastPort = mcastPort;
         this.membership_counter = 0;
-        //this.view = new View();
-        Map<String, ViewEntry> entries = new TreeMap<>();
-        entries.put(UtilsHash.hashSHA256("127.0.1.2"), new ViewEntry(1,0, "5002", "127.0.1.2"));
-        entries.put(UtilsHash.hashSHA256("127.0.1.1"), new ViewEntry(1,0,"5001", "127.0.1.1"));
-        this.view = new View(entries);
+        this.view = new View();
     }
 
     public View getView() {
