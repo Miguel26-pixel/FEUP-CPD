@@ -9,7 +9,7 @@ public class View {
     private final Map<String, ViewEntry> entries;
 
     public View() {
-        this.entries = new HashMap<String, ViewEntry>();
+        this.entries = new TreeMap<>();
     }
 
     public Map<String, ViewEntry> getEntries() {
