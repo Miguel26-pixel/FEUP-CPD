@@ -45,10 +45,6 @@ public class Node implements Services {
 
     @Override
     public void join() throws RemoteException {
-        if (!this.membershipService.joinCluster()) {
-            return;
-        }
-
         membershipService.start();
     }
 

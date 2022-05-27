@@ -1,7 +1,6 @@
 package node.membership;
 
 import message.Message;
-import message.header.MessageTypeField;
 import message.messages.JoinMessage;
 import message.messages.LeaveMessage;
 import message.messages.MembershipMessage;
@@ -10,12 +9,8 @@ import node.membership.view.View;
 import threading.ThreadPool;
 import utils.UtilsTCP;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MembershipService extends Thread {
     private final static int MEMBERSHIP_PORT = 5525;
@@ -104,22 +99,23 @@ public class MembershipService extends Thread {
 
             byte[] joinMessage = (new JoinMessage(this.membership_counter, MembershipService.MEMBERSHIP_PORT, this.nodeIP)).assemble();
 
-            multicastSocket.send(new DatagramPacket(joinMessage, joinMessage.length));
-
+            multicastSocket.send(new DatagramPacket(joinMessage, joinMessage.length, InetAddress.getByName(mcastIP), Integer.parseInt(mcastPort)));
 
             for (int current_try = 0; current_try < MAX_TRIES; current_try++) {
-                Socket clientSocket = membershipSocket.accept();
-                clientSocket.setSoTimeout(TIMEOUT);
+                try {
+                    Socket clientSocket = membershipSocket.accept();
 
-                String msg = UtilsTCP.readTCPMessage(clientSocket.getInputStream());
+                    clientSocket.setSoTimeout(TIMEOUT);
 
-                this.view.copyView(new MembershipMessage(msg).getView(), true);
-                clientSocket.close();
+                    String msg = UtilsTCP.readTCPMessage(clientSocket.getInputStream());
+
+                    this.view.copyView(new MembershipMessage(msg).getView(), true);
+                    clientSocket.close();
+                } catch (SocketTimeoutException ignored) {} // In case of timeout, do nothing
             }
 
             membershipSocket.close();
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
 
