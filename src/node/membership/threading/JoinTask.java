@@ -3,6 +3,7 @@ package node.membership.threading;
 import message.messages.JoinMessage;
 import message.messages.MembershipMessage;
 import node.membership.view.View;
+import node.membership.view.ViewEntry;
 import utils.UtilsTCP;
 
 import java.io.*;
@@ -24,6 +25,9 @@ public class JoinTask extends Thread {
         if (!this.isCounterCorrect(joinMessage.getCounter())) {
             return;
         }
+
+        long secondsSinceEpoch = System.currentTimeMillis() / 1000;
+        this.view.addEntry(joinMessage.getOriginId(), new ViewEntry("Foda-se", "Isto não devia estar aqui", joinMessage.getCounter(), secondsSinceEpoch), true);
 
         MembershipMessage reply = new MembershipMessage(this.view);
 
