@@ -1,6 +1,7 @@
 package node.comms;
 
 import message.Message;
+import message.MessageType;
 import node.membership.MembershipService;
 import node.store.KeyValueStore;
 import utils.UtilsTCP;
@@ -10,7 +11,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class TCPReceiver extends CommunicationReceiver {
+public class TCPAgent extends CommunicationAgent {
     private static final byte CR = 0x0d;
     private static final byte LF = 0x0a;
     private static final byte[] delim = new byte[]{CR,LF,CR,LF};
@@ -19,7 +20,7 @@ public class TCPReceiver extends CommunicationReceiver {
     private final KeyValueStore keyValueStore;
     private final ServerSocket serverSocket;
 
-    public TCPReceiver(MembershipService membershipService, KeyValueStore keyValueStore, String ipAddr, String port) throws IOException {
+    public TCPAgent(MembershipService membershipService, KeyValueStore keyValueStore, String ipAddr, String port) throws IOException {
         super();
         this.membershipService = membershipService;
         this.keyValueStore = keyValueStore;
@@ -65,5 +66,15 @@ public class TCPReceiver extends CommunicationReceiver {
                 }
             }
         } catch (Exception ignore) {}
+    }
+
+    public void send(Message message, String address, String port) throws IOException {
+        MessageType messageType = message.getMessageType();
+
+        if (!(messageType == MessageType.JOIN || messageType == MessageType.LEAVE)) {
+            Socket socket = new Socket(address, Integer.parseInt(port));
+
+            UtilsTCP.sendTCPMessage(socket.getOutputStream(), message);
+        }
     }
 }

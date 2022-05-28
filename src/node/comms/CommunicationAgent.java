@@ -1,14 +1,16 @@
 package node.comms;
 
+import message.Message;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class CommunicationReceiver extends Thread {
+public abstract class CommunicationAgent extends Thread {
     protected final static int TIMEOUT = 3000;
 
     protected final AtomicBoolean isAlive;
     protected final AtomicBoolean stop;
 
-    public CommunicationReceiver() {
+    public CommunicationAgent() {
         this.isAlive = new AtomicBoolean(true);
         this.stop = new AtomicBoolean(false);
     }

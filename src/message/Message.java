@@ -14,10 +14,12 @@ public abstract class Message {
 
     protected abstract void buildBody();
     private final List<MessageField> messageFields;
+    private final MessageType messageType;
     private String originId;
     protected List<Byte> body;
 
     protected Message(MessageType messageType) {
+        this.messageType = messageType;
         this.messageFields = new ArrayList<>();
         this.body = new ArrayList<Byte>();
 
@@ -28,6 +30,7 @@ public abstract class Message {
         this.messageFields = new ArrayList<>();
         this.body = new ArrayList<Byte>();
         this.originId = originId;
+        this.messageType = messageType;
 
         this.messageFields.add(new MessageTypeField(messageType));
     }
@@ -104,5 +107,9 @@ public abstract class Message {
         String[] split = message.split(new String(delim));
 
         return split[split.length -1];
+    }
+
+    public MessageType getMessageType() {
+        return messageType;
     }
 }

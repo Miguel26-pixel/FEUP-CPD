@@ -1,37 +1,37 @@
 package node.comms;
 
 import message.Message;
-import message.messages.JoinMessage;
-import message.messages.MembershipMessage;
+import message.MessageType;
 import node.membership.MembershipService;
 import node.store.KeyValueStore;
-import utils.UtilsTCP;
 
 import java.io.IOException;
 import java.net.*;
 
-public class UDPReceiver extends CommunicationReceiver {
+public class UDPAgent extends CommunicationAgent {
     private final static int DATAGRAM_LENGTH = 1024;
 
     private final MembershipService membershipService;
     private final KeyValueStore keyValueStore;
     private final MulticastSocket multicastSocket;
+    private final InetAddress groupAddress;
+    private final int groupPort;
     private final byte[] buffer;
 
-    public UDPReceiver(MembershipService membershipService, KeyValueStore keyValueStore, String groupAddress, String groupPortString) throws IOException {
+    public UDPAgent(MembershipService membershipService, KeyValueStore keyValueStore, String groupAddress, String groupPortString) throws IOException {
         super();
 
         this.membershipService = membershipService;
         this.keyValueStore = keyValueStore;
-        int groupPort = Integer.parseInt(groupPortString);
+        this.groupPort = Integer.parseInt(groupPortString);
 
         this.multicastSocket = new MulticastSocket(groupPort);
         this.multicastSocket.setSoTimeout(TIMEOUT);
 
-        InetAddress ipAddress = InetAddress.getByName(groupAddress);
-        SocketAddress socketAddress = new InetSocketAddress(groupAddress, groupPort);
+        this.groupAddress = InetAddress.getByName(groupAddress);
+        SocketAddress socketAddress = new InetSocketAddress(this.groupAddress, this.groupPort);
 
-        multicastSocket.joinGroup(socketAddress, NetworkInterface.getByInetAddress(ipAddress));
+        multicastSocket.joinGroup(socketAddress, NetworkInterface.getByInetAddress(this.groupAddress));
 
         this.buffer = new byte[DATAGRAM_LENGTH];
     }
@@ -60,5 +60,17 @@ public class UDPReceiver extends CommunicationReceiver {
                 }
             }
         } catch (Exception ignore) {}
+    }
+
+    public void send(Message message) throws IOException {
+        MessageType messageType = message.getMessageType();
+
+        if (messageType == MessageType.JOIN || messageType == MessageType.LEAVE) {
+            byte[] messageBytes = message.assemble();
+
+            DatagramPacket packet = new DatagramPacket(messageBytes, messageBytes.length, this.groupAddress, this.groupPort);
+
+            multicastSocket.send(packet);
+        }
     }
 }

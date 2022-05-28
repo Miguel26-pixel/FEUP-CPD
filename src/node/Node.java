@@ -1,21 +1,12 @@
 package node;
 
 import client.Services;
-import message.Message;
-import message.messages.*;
-import node.comms.TCPReceiver;
-import node.comms.UDPReceiver;
+import node.comms.TCPAgent;
+import node.comms.UDPAgent;
 import node.membership.MembershipService;
-import node.membership.log.Log;
 import node.store.KeyValueStore;
-import utils.UtilsIP;
-import utils.UtilsTCP;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.rmi.RemoteException;
 
 public class Node implements Services {
@@ -23,16 +14,16 @@ public class Node implements Services {
     private KeyValueStore keyValueStore;
     private MembershipService membershipService;
     //private ServerSocket server;
-    private final TCPReceiver tcpReceiver;
-    private final UDPReceiver udpReceiver;
+    private final TCPAgent tcpAgent;
+    private final UDPAgent udpAgent;
 
     public Node(String mcastIP, String mcastPort, String nodeID, String membershipPort) throws IOException {
         this.nodeID = nodeID;
         this.keyValueStore = new KeyValueStore("node_" + nodeID + ":" + membershipPort);
         this.membershipService = new MembershipService();
 
-        this.tcpReceiver = new TCPReceiver(membershipService, keyValueStore, nodeID, membershipPort);
-        this.udpReceiver = new UDPReceiver(membershipService, keyValueStore, mcastIP, mcastPort);
+        this.tcpAgent = new TCPAgent(membershipService, keyValueStore, nodeID, membershipPort);
+        this.udpAgent = new UDPAgent(membershipService, keyValueStore, mcastIP, mcastPort);
 
         /*
         try {
@@ -61,8 +52,8 @@ public class Node implements Services {
     }
 
     public void run() {
-        this.udpReceiver.start();
-        this.tcpReceiver.run();
+        this.udpAgent.start();
+        this.tcpAgent.run();
     }
 
     /*
