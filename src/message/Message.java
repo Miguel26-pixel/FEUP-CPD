@@ -1,6 +1,7 @@
 package message;
 
 import message.header.FieldType;
+import message.header.IdField;
 import message.header.MessageField;
 import message.header.MessageTypeField;
 
@@ -13,6 +14,7 @@ public abstract class Message {
 
     protected abstract void buildBody();
     private final List<MessageField> messageFields;
+    private String originId;
     protected List<Byte> body;
 
     protected Message(MessageType messageType) {
@@ -20,6 +22,22 @@ public abstract class Message {
         this.body = new ArrayList<Byte>();
 
         this.messageFields.add(new MessageTypeField(messageType));
+    }
+
+    protected Message(MessageType messageType, String originId) {
+        this.messageFields = new ArrayList<>();
+        this.body = new ArrayList<Byte>();
+        this.originId = originId;
+
+        this.messageFields.add(new MessageTypeField(messageType));
+    }
+
+    protected void setOriginId(String originId) {
+        this.originId = originId;
+    }
+
+    public String getOriginId() {
+        return originId;
     }
 
     protected void addMessageField(MessageField messageField) {
@@ -31,6 +49,8 @@ public abstract class Message {
     }
 
     public byte[] assemble() {
+        this.setOriginIdField();
+
         List<Byte> message = new ArrayList<>();
 
         for (MessageField field: messageFields) {
@@ -55,6 +75,12 @@ public abstract class Message {
         }
 
         return messageBytes;
+    }
+
+    private void setOriginIdField() {
+        if (!this.originId.equals("")) {
+            this.addMessageField(new IdField(FieldType.ORIGINID, originId));
+        }
     }
 
     public static MessageType getMessageType(String message) {

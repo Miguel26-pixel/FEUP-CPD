@@ -3,7 +3,6 @@ package message.messages;
 import message.Message;
 import message.MessageType;
 import message.header.FieldType;
-import message.header.IdField;
 import message.header.MessageField;
 
 import java.nio.ByteBuffer;
@@ -13,15 +12,11 @@ import java.util.List;
 public class JoinMessage extends Message {
     private final Integer counter;
     private final Integer port;
-    private String ip;
 
-    public JoinMessage(int counter, int port, String ip) {
-        super(MessageType.JOIN);
+    public JoinMessage(int counter, int port, String originId) {
+        super(MessageType.JOIN, originId);
         this.counter = counter;
         this.port = port;
-        this.ip = ip;
-
-        this.addMessageField(new IdField(FieldType.ORIGINID, ip));
 
         this.buildBody();
     }
@@ -38,8 +33,9 @@ public class JoinMessage extends Message {
 
         for (int i = 0; i < split.size() / 2; i += 2) {
             if (MessageField.translateFieldHeader(split.get(i)) == FieldType.ORIGINID) {
-                this.ip = split.get(i + 1);
-                this.addMessageField(new IdField(FieldType.ORIGINID, ip));
+                String originId = split.get(i + 1);
+
+                this.setOriginId(originId);
             }
         }
 
@@ -47,10 +43,6 @@ public class JoinMessage extends Message {
 
         this.counter = Integer.parseInt(params.get(0));
         this.port = Integer.parseInt(params.get(1));
-    }
-
-    public String getIp() {
-        return ip;
     }
 
     public Integer getPort() {

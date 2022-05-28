@@ -12,14 +12,10 @@ import java.util.List;
 
 public class LeaveMessage extends Message {
     private final Integer counter;
-    private String ip;
 
-    public LeaveMessage(int counter, String ip) {
-        super(MessageType.LEAVE);
+    public LeaveMessage(int counter, String originId) {
+        super(MessageType.LEAVE, originId);
         this.counter = counter;
-        this.ip = ip;
-
-        this.addMessageField(new IdField(FieldType.ORIGINID, ip));
 
         this.buildBody();
     }
@@ -36,18 +32,15 @@ public class LeaveMessage extends Message {
 
         for (int i = 0; i < split.size() / 2; i += 2) {
             if (MessageField.translateFieldHeader(split.get(i)) == FieldType.ORIGINID) {
-                this.ip = split.get(i + 1);
-                this.addMessageField(new IdField(FieldType.ORIGINID, ip));
+                String originId = split.get(i + 1);
+
+                this.setOriginId(originId);
             }
         }
 
         List<String> params = new ArrayList<>(List.of(body.split(" ")));
 
         this.counter = Integer.parseInt(params.get(0));
-    }
-
-    public String getIp() {
-        return ip;
     }
 
     public Integer getCounter() {
