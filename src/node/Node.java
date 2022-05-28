@@ -50,7 +50,7 @@ public class Node implements Services {
 
     @Override
     public void leave() throws RemoteException {
-        //TODO
+        membershipService.close();
     }
 
     public void run() {

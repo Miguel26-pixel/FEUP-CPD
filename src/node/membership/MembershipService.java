@@ -13,6 +13,7 @@ import utils.UtilsTCP;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MembershipService extends Thread {
     private final static int MEMBERSHIP_PORT = 5525;
@@ -28,6 +29,8 @@ public class MembershipService extends Thread {
     private final View view;
     private final ThreadPool workerThreads;
     private final byte[] buffer;
+    private AtomicBoolean running;
+    private AtomicBoolean closed;
 
     public MembershipService(String mcastIP, String mcastPort, String nodeIP) {
         this.mcastIP = mcastIP;
@@ -35,6 +38,8 @@ public class MembershipService extends Thread {
         this.nodeIP = nodeIP;
         this.membership_counter = 0;
         this.view = new View();
+        this.running.set(false);
+        this.closed.set(true);
 
         int coreNumber = Runtime.getRuntime().availableProcessors();
 
@@ -51,9 +56,19 @@ public class MembershipService extends Thread {
             return;
         }
 
+        try {
+            multicastSocket.setSoTimeout(TIMEOUT);
+        } catch (SocketException e) {
+            return;
+        }
+
+        this.running.set(true);
+        this.closed.set(false);
+        this.workerThreads.reopen();
+
         System.out.println("Joined membership");
 
-        while (true) {
+        while (running.get()) {
             DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
 
             try {
@@ -79,10 +94,30 @@ public class MembershipService extends Thread {
                         workerThreads.execute(new MembershipTask(this.view, message));
                     }
                 }
-            } catch (IOException ignored) {
+            } catch (Exception ignored) {
             }
 
         }
+
+        this.closed.set(true);
+    }
+
+    public void close() {
+        this.running.set(false);
+
+        while(!this.closed.get()) {
+            try {
+                Thread.sleep(1);
+            } catch (Exception ignored) {
+            }
+        }
+
+        this.workerThreads.waitForTasks();
+        this.workerThreads.stop();
+
+        this.leaveCluster();
+
+        this.multicastSocket.close();
     }
 
     private void joinMulticastGroup() throws IOException {

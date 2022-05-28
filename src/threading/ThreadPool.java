@@ -35,6 +35,20 @@ public class ThreadPool {
             for (PoolThread thread: threads) {
                 thread.stopThread();
             }
+            tasks.clear();
+
+            this.closed = true;
+        }
+
+    }
+
+    public synchronized void reopen() {
+        if (closed) {
+            for (PoolThread thread: threads) {
+                thread.start();
+            }
+
+            this.closed = false;
         }
     }
 
