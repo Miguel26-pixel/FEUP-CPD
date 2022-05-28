@@ -6,11 +6,11 @@ import message.messages.LeaveMessage;
 import message.messages.MembershipMessage;
 import node.membership.threading.JoinTask;
 import node.membership.view.View;
+import threading.ThreadPool;
 import utils.UtilsTCP;
+
 import java.io.IOException;
 import java.net.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class MembershipService extends Thread {
     private final static int MEMBERSHIP_PORT = 5525;
@@ -24,7 +24,7 @@ public class MembershipService extends Thread {
     private final String nodeIP;
     private int membership_counter;
     private final View view;
-    private final ThreadPoolExecutor workerThreads;
+    private final ThreadPool workerThreads;
     private final byte[] buffer;
 
     public MembershipService(String mcastIP, String mcastPort, String nodeIP) {
@@ -34,15 +34,11 @@ public class MembershipService extends Thread {
         this.membership_counter = 0;
         this.view = new View();
 
-        int numberOfCores = Runtime.getRuntime().availableProcessors();
+        int coreNumber = Runtime.getRuntime().availableProcessors();
 
-        this.workerThreads = (ThreadPoolExecutor) Executors.newFixedThreadPool(numberOfCores);
+        this.workerThreads = new ThreadPool(coreNumber, coreNumber);
 
         this.buffer = new byte[DATAGRAM_LENGTH];
-    }
-
-    public View getView() {
-        return view;
     }
 
     @Override
@@ -150,5 +146,10 @@ public class MembershipService extends Thread {
 
     private boolean canLeave() {
         return this.membership_counter % 2 != 0;
+    }
+
+    //for testing TCP communication
+    public boolean sayHello(String nodeIP, String nodePort) {
+        return false;
     }
 }

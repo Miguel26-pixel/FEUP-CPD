@@ -1,5 +1,11 @@
+import client.Services;
 import node.Node;
 import utils.UtilsIP;
+
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 public class Store {
     public static void main(String[] args) {
@@ -32,7 +38,7 @@ public class Store {
             Integer.parseInt(args[1]);
             Integer.parseInt(args[3]);
         } catch (NumberFormatException e) {
-            System.err.println("Invalid port exception: " + e);
+            System.err.println("Invalid port");
         }
 
         Node node = new Node(args[0], args[1], args[2], args[3]);

@@ -1,74 +1,20 @@
 package node.store;
 
-import message.Message;
-import message.messages.*;
-import node.membership.view.View;
-import node.membership.view.ViewEntry;
+import utils.UtilsFile;
 import utils.UtilsHash;
-import utils.UtilsTCP;
 
 import java.io.*;
 import java.util.*;
 
 public class KeyValueStore {
-    private final ArrayList<String> keys;
-    private final String folderPath;
-    private final String folderName;
-    private final String myHash;
+    private ArrayList<String> idStore;
+    private String folderPath;
+    private String folderName;
 
-    public String handlePut(String message, View view) {
-        String file = Message.getMessageBody(message);
-        String fileKey = UtilsHash.hashSHA256(file);
-        String nodeHash = getClosestNodeKey(fileKey, view);
-        if (nodeHash == null) {
-            System.err.println("Successor node not found");
-            return new String((new PutMessageReply("Successor node not found")).assemble());
-        } else if (nodeHash.equals(myHash)) {
-            String key = putNewPair(file);
-            System.out.println("New key: " + key);
-            return new String((new PutMessageReply(key)).assemble());
-        }
-        ViewEntry entry = view.getEntries().get(nodeHash);
-        return UtilsTCP.redirectMessage(message,entry.getAddress(), entry.getPort());
-    }
-
-    public String handleGet(String message, View view) {
-        GetMessage getMessage = GetMessage.assembleMessage(Message.getMessageBody(message));
-        String fileKey = getMessage.getKey();
-        String nodeHash = getClosestNodeKey(fileKey, view);
-        if (nodeHash == null) {
-            System.err.println("Successor node not found");
-            return new String((new GetMessageReply(null)).assemble());
-        } else if (nodeHash.equals(myHash)) {
-            File file = getValue(fileKey);
-            System.out.println((file == null) ? "File does not exists" : "File obtained with success");
-            return new String((new GetMessageReply(file)).assemble());
-        }
-        ViewEntry entry = view.getEntries().get(nodeHash);
-        return UtilsTCP.redirectMessage(message,entry.getAddress(), entry.getPort());
-    }
-
-    public String handleDelete(String message, View view) {
-        DeleteMessage deleteMessage = DeleteMessage.assembleMessage(Message.getMessageBody(message));
-        String fileKey = deleteMessage.getKey();
-        String nodeHash = getClosestNodeKey(fileKey, view);
-        if (nodeHash == null) {
-            System.err.println("Successor node not found");
-            return new String((new DeleteMessageReply("failed")).assemble());
-        } else if (nodeHash.equals(myHash)) {
-            String state = deleteValue(fileKey);
-            System.out.println("Delete operation has " + state);
-            return new String((new DeleteMessageReply(state)).assemble());
-        }
-        ViewEntry entry = view.getEntries().get(nodeHash);
-        return UtilsTCP.redirectMessage(message,entry.getAddress(), entry.getPort());
-    }
-
-    public KeyValueStore(String folderName, String myHash){
-        this.keys = new ArrayList<>();
+    public KeyValueStore(String folderName){
+        this.idStore = new ArrayList<>();
         this.folderPath = "../dynamo/";
         this.folderName = folderName;
-        this.myHash = myHash;
         checkPastFiles();
     }
 
@@ -81,20 +27,13 @@ public class KeyValueStore {
 
             for (File file : files) {
                 String keyStr = file.getName().substring(("file_").length());
-                keys.add(keyStr);
+                idStore.add(keyStr);
             }
         }
     }
 
-    private String getClosestNodeKey(String hash, View view) {
-        if (view.getEntries().isEmpty()) { return null; }
-        for (String key: view.getEntries().keySet()) {
-            if (key.compareTo(hash) > 0) { return key; }
-        }
-        return view.getEntries().keySet().iterator().next();
-    }
 
-    private String putNewPair(String file) {
+    public String putNewPair(String file) {
         String valueKey = UtilsHash.hashSHA256(file);
 
         File dynamoDir = new File(folderPath);
@@ -127,13 +66,13 @@ public class KeyValueStore {
             throw new RuntimeException(e);
         }
 
-        keys.add(valueKey);
+        idStore.add(valueKey);
 
         return valueKey;
     }
 
-    private File getValue(String key){
-        for (String existingKey : keys) {
+    public File getValue(String key){
+        for (String existingKey : idStore) {
             if (existingKey.equals(key)) {
                 File file = new File(folderPath + folderName + "/file_" + key);
                 if (file.exists() && file.isFile()) {
@@ -144,14 +83,14 @@ public class KeyValueStore {
         return null;
     }
 
-    private String deleteValue(String key){
+    public String deleteValue(String key){
         String path = "";
         int index = -1;
-        for (int i = 0; i < keys.size(); i++){
-            if (keys.get(i).equals(key)) {
-                path = folderPath + folderName + "/file_" + key;
-                index = i;
-                break;
+        for (int i = 0; i < idStore.size(); i++){
+            if (idStore.get(i).equals(key)) {
+                 path = folderPath + folderName + "/file_" + key;
+                 index = i;
+                 break;
             }
         }
 
@@ -160,7 +99,7 @@ public class KeyValueStore {
         File file = new File(path);
         if (!file.exists() || !file.delete()) { return "failed"; }
 
-        keys.remove(index);
+        idStore.remove(index);
         return "succeeded";
     }
 }
