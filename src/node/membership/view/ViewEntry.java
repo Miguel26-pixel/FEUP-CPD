@@ -3,10 +3,10 @@ package node.membership.view;
 public class ViewEntry {
     private final int counter;
     private final long epoch;
-    private final String port;
+    private final int port;
     private final String address;
 
-    public ViewEntry(String port, String address, int counter, long epoch) {
+    public ViewEntry(int port, String address, int counter, long epoch) {
         this.counter = counter;
         this.epoch = epoch;
         this.port = port;
@@ -21,7 +21,7 @@ public class ViewEntry {
         return epoch;
     }
 
-    public String getPort() { return port; }
+    public int getPort() { return port; }
 
     public String getAddress() { return address; }
 
