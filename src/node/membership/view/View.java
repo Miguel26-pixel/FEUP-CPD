@@ -42,25 +42,25 @@ public class View {
         }
     }
 
-    public void addEntry(String nodeId, ViewEntry logEntry) {
+    public boolean addEntry(String nodeId, ViewEntry logEntry) {
         synchronized (entries) {
             if (entries.containsKey(nodeId)) {
                 ViewEntry currentEntry = entries.get(nodeId);
 
                 if (currentEntry.getEpoch() < logEntry.getEpoch() || currentEntry.getCounter() < logEntry.getCounter()) {
-                    return;
+                    return false;
                 }
             }
 
             entries.put(nodeId, logEntry);
+
+            return true;
         }
     }
 
     public void addEntry(String nodeId, ViewEntry logEntry, boolean updateLog) {
         synchronized (entries) {
-            addEntry(nodeId, logEntry);
-
-            if (updateLog) {
+            if (addEntry(nodeId, logEntry) && updateLog) {
                 Log.update(this);
             }
         }
