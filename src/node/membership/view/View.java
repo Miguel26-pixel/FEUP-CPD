@@ -2,14 +2,15 @@ package node.membership.view;
 
 import node.membership.log.Log;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 
 public class View {
     private final Map<String, ViewEntry> entries;
+    private final Map<String, ViewEntry> upEntries;
 
     public View() {
         this.entries = new TreeMap<>();
+        this.upEntries = new TreeMap<>();
     }
 
     public Map<String, ViewEntry> getEntries() {
@@ -42,25 +43,31 @@ public class View {
         }
     }
 
-    public boolean addEntry(String nodeId, ViewEntry logEntry) {
+    public boolean addEntry(String key, ViewEntry viewEntry) {
         synchronized (entries) {
-            if (entries.containsKey(nodeId)) {
-                ViewEntry currentEntry = entries.get(nodeId);
+            if (entries.containsKey(key)) {
+                ViewEntry currentEntry = entries.get(key);
 
-                if (currentEntry.getEpoch() < logEntry.getEpoch() || currentEntry.getCounter() < logEntry.getCounter()) {
+                if (currentEntry.getEpoch() < viewEntry.getEpoch() || currentEntry.getCounter() < viewEntry.getCounter()) {
                     return false;
                 }
             }
 
-            entries.put(nodeId, logEntry);;
+            entries.put(key, viewEntry);
+
+            if (viewEntry.getCounter() % 2 == 0) {
+                upEntries.put(key, viewEntry);
+            } else {
+                upEntries.remove(key);
+            }
 
             return true;
         }
     }
 
-    public void addEntry(String nodeId, ViewEntry logEntry, boolean updateLog) {
+    public void addEntry(String key, ViewEntry viewEntry, boolean updateLog) {
         synchronized (entries) {
-            if (addEntry(nodeId, logEntry) && updateLog) {
+            if (addEntry(key, viewEntry) && updateLog) {
                 Log.update(this);
             }
         }
