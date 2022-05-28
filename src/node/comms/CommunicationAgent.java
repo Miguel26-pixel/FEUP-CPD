@@ -12,7 +12,7 @@ public abstract class CommunicationAgent extends Thread {
 
     public CommunicationAgent() {
         this.isAlive = new AtomicBoolean(true);
-        this.stop = new AtomicBoolean(false);
+        this.stop = new AtomicBoolean(true);
     }
 
     @Override
