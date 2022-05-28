@@ -5,6 +5,7 @@ import message.messages.JoinMessage;
 import message.messages.LeaveMessage;
 import message.messages.MembershipMessage;
 import node.membership.threading.JoinTask;
+import node.membership.threading.MembershipTask;
 import node.membership.view.View;
 import threading.ThreadPool;
 import utils.UtilsTCP;
@@ -67,6 +68,10 @@ public class MembershipService extends Thread {
                     case JOIN ->  {
                         System.out.println("JOIN");
                         workerThreads.execute(new JoinTask(this.view, message));
+                    }
+                    case MEMBERSHIP -> {
+                        System.out.println("MEMBERSHIP");
+                        workerThreads.execute(new MembershipTask(this.view, message));
                     }
                 }
             } catch (IOException ignored) {
