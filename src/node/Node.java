@@ -11,21 +11,21 @@ import utils.UtilsTCP;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.RemoteException;
 
 public class Node implements Services {
     private final String nodeID;
-    private Socket socket;
     private KeyValueStore keyValueStore;
+    private MembershipService membershipService;
     private ServerSocket server;
-    private DataInputStream input = null;
-    private DataOutputStream output = null;
 
     public Node(String mcastIP, String mcastPort, String nodeID, String membershipPort) {
         this.nodeID = nodeID;
         this.keyValueStore = new KeyValueStore("node_" + nodeID + ":" + membershipPort);
+        this.membershipService = new MembershipService();
 
         try {
             this.server = new ServerSocket(Integer.parseInt(membershipPort), 0 , InetAddress.getByName(nodeID));
