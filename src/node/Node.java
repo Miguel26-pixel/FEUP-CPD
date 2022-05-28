@@ -20,7 +20,7 @@ public class Node implements Services {
     public Node(String mcastIP, String mcastPort, String nodeID, String membershipPort) throws IOException {
         this.nodeID = nodeID;
         this.keyValueStore = new KeyValueStore("node_" + nodeID + ":" + membershipPort);
-        this.membershipService = new MembershipService();
+        this.membershipService = new MembershipService(nodeID);
 
         this.tcpAgent = new TCPAgent(membershipService, keyValueStore, nodeID, membershipPort);
         this.udpAgent = new UDPAgent(membershipService, keyValueStore, mcastIP, mcastPort);

@@ -1,20 +1,57 @@
 package node.membership;
 
+import message.messages.JoinMessage;
+import message.messages.LeaveMessage;
+import node.comms.UDPAgent;
 import node.membership.threading.JoinTask;
 import node.membership.threading.LeaveTask;
 import node.membership.threading.MembershipTask;
 import node.membership.view.View;
 import threading.ThreadPool;
 
+import java.io.IOException;
+
 public class MembershipService {
     private final View view;
     private final ThreadPool workers;
+    private final int membershipCounter;
+    private final String identifier;
 
-    public MembershipService() {
+    public MembershipService(String identifier) {
+        this.identifier = identifier;
         int numberOfCores = Runtime.getRuntime().availableProcessors();
         this.workers = new ThreadPool(numberOfCores, numberOfCores);
 
         this.view = new View();
+        this.membershipCounter = 0;
+    }
+
+    public boolean join(UDPAgent udpAgent, int tcpPort) {
+        if (this.membershipCounter % 2 == 0) {
+            try {
+                udpAgent.send(new JoinMessage(this.membershipCounter, tcpPort, this.identifier));
+            } catch (IOException e) {
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean leave(UDPAgent udpAgent) {
+        if (this.membershipCounter % 2 != 0) {
+            try {
+                udpAgent.send(new LeaveMessage(this.membershipCounter, this.identifier));
+            } catch (IOException e) {
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public void processJoin(String joinMessageString) {
