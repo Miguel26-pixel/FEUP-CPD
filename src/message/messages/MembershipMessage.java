@@ -18,7 +18,10 @@ public class MembershipMessage extends Message {
 
     public MembershipMessage(String asString) {
         super(MessageType.MEMBERSHIP);
-        this.view = new View(asString);
+
+        String[] split = asString.split("\\|");
+        String viewString = split[0];
+        this.view = new View(viewString);
     }
 
     protected void buildBody() {

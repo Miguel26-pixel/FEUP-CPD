@@ -17,8 +17,7 @@ public class View {
         this.entries = new TreeMap<>();
         this.upEntries = new TreeMap<>();
 
-        String[] split = asString.split("\\|");
-        for(String entryString: split[0].split("\n")) {
+        for(String entryString: asString.split("\n")) {
             String[] entry = entryString.split(";");
             if (entry.length != 5) {
                 continue;
