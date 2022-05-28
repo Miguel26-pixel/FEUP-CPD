@@ -17,7 +17,6 @@ import java.rmi.RemoteException;
 
 public class Node implements Services {
     private final String nodeID;
-    private MembershipService membershipService;
     private Socket socket;
     private KeyValueStore keyValueStore;
     private ServerSocket server;
@@ -26,7 +25,6 @@ public class Node implements Services {
 
     public Node(String mcastIP, String mcastPort, String nodeID, String membershipPort) {
         this.nodeID = nodeID;
-        this.membershipService = new MembershipService(mcastIP, mcastPort, nodeID);
         this.keyValueStore = new KeyValueStore("node_" + nodeID + ":" + membershipPort);
 
         try {
@@ -45,12 +43,12 @@ public class Node implements Services {
 
     @Override
     public void join() throws RemoteException {
-        membershipService.start();
+
     }
 
     @Override
     public void leave() throws RemoteException {
-        membershipService.close();
+
     }
 
     public void run() {
