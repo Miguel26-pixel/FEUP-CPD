@@ -6,6 +6,8 @@ import node.store.KeyValueStore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class CommunicationReceiver extends Thread {
+    protected final static int TIMEOUT = 3000;
+
     protected final AtomicBoolean running;
     protected final AtomicBoolean stop;
 
