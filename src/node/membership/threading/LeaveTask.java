@@ -4,6 +4,7 @@ import message.messages.JoinMessage;
 import message.messages.LeaveMessage;
 import message.messages.MembershipMessage;
 import node.membership.view.View;
+import node.membership.view.ViewEntry;
 import utils.UtilsTCP;
 
 import java.io.DataOutputStream;
@@ -27,7 +28,8 @@ public class LeaveTask extends Thread {
             return;
         }
 
-        // Update view to reflect changes
+        long secondsSinceEpoch = System.currentTimeMillis() / 1000;
+        this.view.addEntry(leaveMessage.getOriginId(), new ViewEntry("Foda-se", "Isto não devia estar aqui", leaveMessage.getCounter(), secondsSinceEpoch), true);
     }
 
     private boolean isCounterCorrect(int counter) {
