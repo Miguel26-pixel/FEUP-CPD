@@ -14,7 +14,7 @@ import java.io.IOException;
 public class MembershipService {
     private final View view;
     private final ThreadPool workers;
-    private final int membershipCounter;
+    private int membershipCounter;
     private final String identifier;
 
     public MembershipService(String identifier) {
@@ -34,6 +34,7 @@ public class MembershipService {
                 return false;
             }
 
+            this.membershipCounter++;
             return true;
         }
 
@@ -48,6 +49,7 @@ public class MembershipService {
                 return false;
             }
 
+            this.membershipCounter++;
             return true;
         }
 
