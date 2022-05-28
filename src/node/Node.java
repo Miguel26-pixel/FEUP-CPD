@@ -43,12 +43,16 @@ public class Node implements Services {
 
     @Override
     public void join() throws RemoteException {
-
+        this.udpAgent.resumeExecution();
+        this.tcpAgent.resumeExecution();
+        this.membershipService.join(this.udpAgent, this.tcpAgent.getPort());
     }
 
     @Override
     public void leave() throws RemoteException {
-
+        this.udpAgent.stopExecution();
+        this.tcpAgent.stopExecution();
+        this.membershipService.stop();
     }
 
     public void run() {

@@ -54,6 +54,11 @@ public class MembershipService {
         return false;
     }
 
+    public void stop() {
+        this.workers.stop();
+        this.workers.waitForTasks();
+    }
+
     public void processJoin(String joinMessageString) {
         workers.execute(new JoinTask(this.view, joinMessageString));
     }

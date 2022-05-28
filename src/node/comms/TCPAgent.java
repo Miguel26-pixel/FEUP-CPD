@@ -77,4 +77,8 @@ public class TCPAgent extends CommunicationAgent {
             UtilsTCP.sendTCPMessage(socket.getOutputStream(), message);
         }
     }
+
+    public int getPort() {
+        return this.serverSocket.getLocalPort();
+    }
 }
