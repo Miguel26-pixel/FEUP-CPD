@@ -3,6 +3,8 @@ package node;
 import client.Services;
 import message.Message;
 import message.messages.*;
+import node.comms.TCPReceiver;
+import node.comms.UDPReceiver;
 import node.membership.MembershipService;
 import node.membership.log.Log;
 import node.store.KeyValueStore;
@@ -20,13 +22,19 @@ public class Node implements Services {
     private final String nodeID;
     private KeyValueStore keyValueStore;
     private MembershipService membershipService;
-    private ServerSocket server;
+    //private ServerSocket server;
+    private final TCPReceiver tcpReceiver;
+    private final UDPReceiver udpReceiver;
 
-    public Node(String mcastIP, String mcastPort, String nodeID, String membershipPort) {
+    public Node(String mcastIP, String mcastPort, String nodeID, String membershipPort) throws IOException {
         this.nodeID = nodeID;
         this.keyValueStore = new KeyValueStore("node_" + nodeID + ":" + membershipPort);
         this.membershipService = new MembershipService();
 
+        this.tcpReceiver = new TCPReceiver(membershipService, keyValueStore, nodeID, membershipPort);
+        this.udpReceiver = new UDPReceiver(membershipService, keyValueStore, mcastIP, mcastPort);
+
+        /*
         try {
             this.server = new ServerSocket(Integer.parseInt(membershipPort), 0 , InetAddress.getByName(nodeID));
             System.out.println("Server started: waiting for a client ...");
@@ -34,6 +42,7 @@ public class Node implements Services {
             System.out.println("Server initialization exception: " + e);
             System.exit(1);
         }
+        */
     }
 
     @Override
@@ -51,6 +60,12 @@ public class Node implements Services {
 
     }
 
+    public void run() {
+        this.udpReceiver.start();
+        this.tcpReceiver.run();
+    }
+
+    /*
     public void run() {
         while (true) {
             try {
@@ -93,4 +108,6 @@ public class Node implements Services {
             }
         }
     }
+
+     */
 }

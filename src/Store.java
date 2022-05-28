@@ -1,11 +1,5 @@
-import client.Services;
 import node.Node;
 import utils.UtilsIP;
-
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 
 public class Store {
     public static void main(String[] args) {
@@ -41,13 +35,18 @@ public class Store {
             System.err.println("Invalid port");
         }
 
-        Node node = new Node(args[0], args[1], args[2], args[3]);
+        try {
+            Node node = new Node(args[0], args[1], args[2], args[3]);
 
-        if (!RMIServer.register(node,args[2])) {
-            System.err.println("RMI register failed");
-            System.exit(1);
+            if (!RMIServer.register(node,args[2])) {
+                System.err.println("RMI register failed");
+                System.exit(1);
+            }
+
+            node.run();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        
-        node.run();
+
     }
 }
