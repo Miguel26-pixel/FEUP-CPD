@@ -1,15 +1,9 @@
 package node.membership.threading;
 
-import message.messages.JoinMessage;
 import message.messages.LeaveMessage;
-import message.messages.MembershipMessage;
 import node.membership.view.View;
 import node.membership.view.ViewEntry;
-import utils.UtilsTCP;
-
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.Socket;
+import utils.UtilsHash;
 
 public class LeaveTask extends Thread {
     private final View view;
@@ -29,7 +23,7 @@ public class LeaveTask extends Thread {
         }
 
         long secondsSinceEpoch = System.currentTimeMillis() / 1000;
-        this.view.addEntry(leaveMessage.getOriginId(), new ViewEntry("Foda-se", "Isto não devia estar aqui", leaveMessage.getCounter(), secondsSinceEpoch), true);
+        this.view.addEntry(UtilsHash.hashSHA256(leaveMessage.getOriginId()), new ViewEntry(ViewEntry.INVALID_INT, leaveMessage.getOriginId(), leaveMessage.getCounter(), secondsSinceEpoch), true);
     }
 
     private boolean isCounterCorrect(int counter) {

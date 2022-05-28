@@ -52,7 +52,7 @@ public class View {
                 }
             }
 
-            entries.put(nodeId, logEntry);
+            entries.put(nodeId, logEntry);;
 
             return true;
         }

@@ -27,13 +27,16 @@ public class MembershipMessage extends Message {
         String[] split = asString.split("\\|");
         for(String entryString: split[0].split("\n")) {
             String[] entry = entryString.split(";");
+            if (entry.length != 5) {
+                continue;
+            }
             String id = entry[0];
             String address = entry[1];
-            String port = entry[2];
+            int port = Integer.parseInt(entry[2]);
             String counter = entry[3];
             String epoch = entry[4];
 
-            view.addEntry(id, new ViewEntry(address, port, Integer.parseInt(counter), Integer.parseInt(epoch)));
+            view.addEntry(id, new ViewEntry(port, address, Integer.parseInt(counter), Integer.parseInt(epoch)));
         }
 
         return view;

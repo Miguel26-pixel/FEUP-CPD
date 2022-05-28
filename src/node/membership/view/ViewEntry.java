@@ -1,6 +1,8 @@
 package node.membership.view;
 
 public class ViewEntry {
+    public final static int INVALID_INT = -1;
+
     private final int counter;
     private final long epoch;
     private final int port;
