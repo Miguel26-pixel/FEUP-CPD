@@ -13,6 +13,26 @@ public class View {
         this.upEntries = new TreeMap<>();
     }
 
+    public View(String asString) {
+        this.entries = new TreeMap<>();
+        this.upEntries = new TreeMap<>();
+
+        String[] split = asString.split("\\|");
+        for(String entryString: split[0].split("\n")) {
+            String[] entry = entryString.split(";");
+            if (entry.length != 5) {
+                continue;
+            }
+            String id = entry[0];
+            String address = entry[1];
+            int port = Integer.parseInt(entry[2]);
+            String counter = entry[3];
+            String epoch = entry[4];
+
+            this.addEntry(id, new ViewEntry(port, address, Integer.parseInt(counter), Integer.parseInt(epoch)));
+        }
+    }
+
     public Map<String, ViewEntry> getEntries() {
         return entries;
     }

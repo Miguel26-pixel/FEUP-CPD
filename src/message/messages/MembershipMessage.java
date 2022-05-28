@@ -18,28 +18,7 @@ public class MembershipMessage extends Message {
 
     public MembershipMessage(String asString) {
         super(MessageType.MEMBERSHIP);
-        this.view = extractString(asString);
-    }
-
-    private static View extractString(String asString) {
-        View view = new View();
-
-        String[] split = asString.split("\\|");
-        for(String entryString: split[0].split("\n")) {
-            String[] entry = entryString.split(";");
-            if (entry.length != 5) {
-                continue;
-            }
-            String id = entry[0];
-            String address = entry[1];
-            int port = Integer.parseInt(entry[2]);
-            String counter = entry[3];
-            String epoch = entry[4];
-
-            view.addEntry(id, new ViewEntry(port, address, Integer.parseInt(counter), Integer.parseInt(epoch)));
-        }
-
-        return view;
+        this.view = new View(asString);
     }
 
     protected void buildBody() {
