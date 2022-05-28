@@ -56,7 +56,7 @@ public class UDPReceiver extends CommunicationReceiver {
                 }
                 case LEAVE -> {
                     System.out.println("LEAVE");
-                    this.membershipService.processJoin(messageString);
+                    this.membershipService.processLeave(messageString);
                 }
             }
         } catch (Exception ignore) {}
