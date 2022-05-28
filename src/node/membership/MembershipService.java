@@ -141,7 +141,7 @@ public class MembershipService extends Thread {
         try {
             byte[] leaveMessage = (new LeaveMessage(this.membership_counter, this.nodeIP)).assemble();
 
-            multicastSocket.send(new DatagramPacket(leaveMessage, leaveMessage.length));
+            multicastSocket.send(new DatagramPacket(leaveMessage, leaveMessage.length, InetAddress.getByName(mcastIP), Integer.parseInt(mcastPort)));
         } catch (IOException ignored) {
             return false;
         }
