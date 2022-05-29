@@ -48,18 +48,14 @@ public class View {
     }
 
     public void copyView(View view) {
-        synchronized (entries) {
-            for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
-                this.addEntry(entry.getKey(), entry.getValue());
-            }
+        for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
+            this.addEntry(entry.getKey(), entry.getValue());
         }
     }
 
     public void copyView(View view, boolean updateLog) {
-        synchronized (entries) {
-            for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
-                this.addEntry(entry.getKey(), entry.getValue(), updateLog);
-            }
+        for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
+            this.addEntry(entry.getKey(), entry.getValue(), updateLog);
         }
     }
 
@@ -87,10 +83,8 @@ public class View {
     }
 
     public void addEntry(String key, ViewEntry viewEntry, boolean updateLog) {
-        synchronized (entries) {
-            if (addEntry(key, viewEntry) && updateLog) {
-                Log.update(this);
-            }
+        if (addEntry(key, viewEntry) && updateLog) {
+            Log.update(this);
         }
     }
 
@@ -99,7 +93,7 @@ public class View {
 
         entryList.sort(Comparator.comparing(entry -> entry.getValue().getEpoch()));
 
-        entryList.subList(0, subsetSize);
+        entryList.subList(0, Integer.min(subsetSize, entryList.size()));
 
         View recentView = new View();
         for (Map.Entry<String, ViewEntry> entry: entryList) {

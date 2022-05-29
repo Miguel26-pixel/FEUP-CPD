@@ -24,6 +24,7 @@ public class Log {
             logFileWriter.write(recentEntries.toString());
             logFileWriter.close();
         } catch (IOException ignored) {
+            ignored.printStackTrace();
         }
     }
 

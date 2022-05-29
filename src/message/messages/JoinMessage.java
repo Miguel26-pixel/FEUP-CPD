@@ -5,7 +5,6 @@ import message.MessageType;
 import message.header.FieldType;
 import message.header.MessageField;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,15 +27,17 @@ public class JoinMessage extends Message {
 
         List<String> split = new ArrayList<>(List.of(asString.split(new String(delim))));
 
+
         split.removeIf(s -> s.equals(""));
         split.remove(split.size() - 1);
 
         String body = split.get(split.size() - 1);
         split.remove(split.size() - 1);
 
-        for (int i = 0; i < split.size() / 2; i += 2) {
-            if (MessageField.translateFieldHeader(split.get(i)) == FieldType.ORIGINID) {
-                String originId = split.get(i + 1);
+        for (int i = 0; i < split.size(); i++) {
+            String[] field = split.get(i).split(" ");
+            if (MessageField.translateFieldHeader(field[0]) == FieldType.ORIGINID) {
+                String originId = field[1];
 
                 this.setOriginId(originId);
             }
