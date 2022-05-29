@@ -24,24 +24,18 @@ public class UtilsHash {
         return hexString.toString();
     }
 
-    public static int compareSHA256(String first, String second) throws Exception {
+    public static int compareHex(String first, String second) throws Exception {
         if (first.length() < second.length()) {
             throw new Exception("Both strings should be of equal size");
         }
 
-        HexFormat hexFormat = HexFormat.of();
+        BigInteger firstBigInt = new BigInteger(first, 16);
+        BigInteger secondBigInt = new BigInteger(second, 16);
 
-        byte[] firstHex = hexFormat.parseHex(first);
-        byte[] secondHex = hexFormat.parseHex(second);
+        return firstBigInt.compareTo(secondBigInt);
+    }
 
-        for (int i = 0; i < firstHex.length; i++) {
-            if (firstHex[i] > secondHex[i]) {
-                return 1;
-            } else if (firstHex[i] < secondHex[i]) {
-                return -1;
-            }
-        }
-
-        return 0;
+    public static BigInteger hexToBigInt(String hash) {
+        return new BigInteger(hash, 16);
     }
 }
