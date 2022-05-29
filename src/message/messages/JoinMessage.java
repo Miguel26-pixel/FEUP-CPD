@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JoinMessage extends Message {
-    private final Integer counter;
-    private final Integer port;
+    private final String counter;
+    private final String port;
 
     public JoinMessage(int counter, int port, String originId) {
         super(MessageType.JOIN, originId);
-        this.counter = counter;
-        this.port = port;
+        this.counter = Integer.toString(counter);
+        this.port = Integer.toString(port);
 
         this.buildBody();
     }
@@ -24,9 +24,12 @@ public class JoinMessage extends Message {
     public JoinMessage(String asString) {
         super(MessageType.JOIN);
 
-        List<String> split = new ArrayList<>(List.of(asString.split(CR.toString() + LF.toString())));
+        byte[] delim = new byte[]{CR,LF};
+
+        List<String> split = new ArrayList<>(List.of(asString.split(new String(delim))));
 
         split.removeIf(s -> s.equals(""));
+        split.remove(split.size() - 1);
 
         String body = split.get(split.size() - 1);
         split.remove(split.size() - 1);
@@ -41,32 +44,29 @@ public class JoinMessage extends Message {
 
         List<String> params = new ArrayList<>(List.of(body.split(" ")));
 
-        this.counter = Integer.parseInt(params.get(0));
-        this.port = Integer.parseInt(params.get(1));
+        this.counter = params.get(0);
+        this.port = params.get(1);
     }
 
     public Integer getPort() {
-        return port;
+        return Integer.parseInt(port);
     }
 
     public Integer getCounter() {
-        return counter;
+        return Integer.parseInt(counter);
     }
 
     @Override
     protected void buildBody() {
         this.body = new ArrayList<>();
-        byte[] bytes = ByteBuffer.allocate(4).putInt(counter).array();
 
-        for (byte b : bytes) {
+        for (byte b : counter.getBytes()) {
             this.body.add(b);
         }
 
         this.body.add((byte) ' ');
 
-        bytes = ByteBuffer.allocate(4).putInt(port).array();
-
-        for (byte b : bytes) {
+        for (byte b : port.getBytes()) {
             this.body.add(b);
         }
     }
