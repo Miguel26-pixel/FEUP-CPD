@@ -81,7 +81,7 @@ public abstract class Message {
     }
 
     private void setOriginIdField() {
-        if (!this.originId.equals("")) {
+        if (this.originId != null) {
             this.addMessageField(new IdField(FieldType.ORIGINID, originId));
         }
     }

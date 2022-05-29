@@ -9,8 +9,12 @@ public class UtilsTCP {
     private static final byte LF = 0x0a;
     private static final byte[] delim = new byte[]{CR,LF,CR,LF};
     public static void  sendTCPMessage(OutputStream output, Message message) throws IOException {
-        output.write(message.assemble());
-        output.flush();
+        try {
+            output.write(message.assemble());
+            output.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static String readTCPMessage(InputStream socketInput) {
