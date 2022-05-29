@@ -28,7 +28,7 @@ public class JoinTask extends Thread {
         }
 
         long secondsSinceEpoch = System.currentTimeMillis() / 1000;
-        this.view.addEntry(UtilsHash.hashSHA256(joinMessage.getOriginId()), new ViewEntry(joinMessage.getPort(), joinMessage.getOriginId(), joinMessage.getCounter(), secondsSinceEpoch), true);
+        this.view.addEntry(joinMessage.getOriginId(), new ViewEntry(joinMessage.getPort(), joinMessage.getOriginId(), joinMessage.getCounter(), secondsSinceEpoch), true);
 
         MembershipMessage reply = new MembershipMessage(this.view);
 

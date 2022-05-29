@@ -1,6 +1,7 @@
 package node.membership.view;
 
 import node.membership.log.Log;
+import utils.UtilsHash;
 
 import java.util.*;
 
@@ -64,20 +65,21 @@ public class View {
 
     public boolean addEntry(String key, ViewEntry viewEntry) {
         synchronized (entries) {
-            if (entries.containsKey(key)) {
-                ViewEntry currentEntry = entries.get(key);
+            String hash = UtilsHash.hashSHA256(key);
+            if (entries.containsKey(hash)) {
+                ViewEntry currentEntry = entries.get(hash);
 
                 if (currentEntry.getEpoch() < viewEntry.getEpoch() || currentEntry.getCounter() < viewEntry.getCounter()) {
                     return false;
                 }
             }
 
-            entries.put(key, viewEntry);
+            entries.put(hash, viewEntry);
 
             if (viewEntry.getCounter() % 2 == 0) {
-                upEntries.put(key, viewEntry);
+                upEntries.put(hash, viewEntry);
             } else {
-                upEntries.remove(key);
+                upEntries.remove(hash);
             }
 
             return true;

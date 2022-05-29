@@ -23,7 +23,7 @@ public class LeaveTask extends Thread {
         }
 
         long secondsSinceEpoch = System.currentTimeMillis() / 1000;
-        this.view.addEntry(UtilsHash.hashSHA256(leaveMessage.getOriginId()), new ViewEntry(ViewEntry.INVALID_INT, leaveMessage.getOriginId(), leaveMessage.getCounter(), secondsSinceEpoch), true);
+        this.view.addEntry(leaveMessage.getOriginId(), new ViewEntry(ViewEntry.INVALID_INT, leaveMessage.getOriginId(), leaveMessage.getCounter(), secondsSinceEpoch), true);
     }
 
     private boolean isCounterCorrect(int counter) {
