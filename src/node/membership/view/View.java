@@ -49,13 +49,13 @@ public class View {
 
     public void copyView(View view) {
         for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
-            this.addEntry(entry.getKey(), entry.getValue());
+            this.addEntry(entry.getValue().getAddress(), entry.getValue());
         }
     }
 
     public void copyView(View view, boolean updateLog) {
         for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
-            this.addEntry(entry.getKey(), entry.getValue(), updateLog);
+            this.addEntry(entry.getValue().getAddress(), entry.getValue(), updateLog);
         }
     }
 
