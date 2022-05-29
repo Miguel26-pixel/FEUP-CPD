@@ -11,7 +11,7 @@ public class ThreadPool {
     private boolean closed;
 
     public ThreadPool(int threadsNum, int maxTasksNum) {
-        this.tasks = new ArrayBlockingQueue(maxTasksNum);
+        this.tasks = (BlockingQueue<Thread>) new ArrayBlockingQueue<Thread>(maxTasksNum);
         this.threads = new ArrayList<>();
         this.closed = false;
 
