@@ -38,13 +38,12 @@ public class ClientServices {
 
     public void handleTCPPut() {
         int port = Integer.parseInt(nodeArg);
-        try {
+        try (Socket socket = new Socket(nodeIP, port)){
             File file = new File(operand);
             if (!file.exists() || !file.isFile()) {
                 System.err.println("File does not exists");
                 return;
             }
-            Socket socket = new Socket(nodeIP, port);
             OutputStream output = socket.getOutputStream();
             InputStream input = socket.getInputStream();
             PutMessage message = new PutMessage(file);
@@ -65,13 +64,17 @@ public class ClientServices {
 
     public void handleTCPGet() {
         int port = Integer.parseInt(nodeArg);
-        try {
-            Socket socket = new Socket(nodeIP, port);
+        try (Socket socket = new Socket(nodeIP, port)){
             OutputStream output = socket.getOutputStream();
             InputStream input = socket.getInputStream();
             GetMessage message = new GetMessage(operand);
             UtilsTCP.sendTCPMessage(output, message);
             String reply = UtilsTCP.readTCPMessage(input);
+
+            if (GetMessageReply.isBodyEmpty(reply)) {
+                System.err.println("File does not exist");
+                return;
+            }
 
             File testDir = new File("../clientFiles/");
             if (!testDir.exists() || !testDir.isDirectory()) {
@@ -93,8 +96,7 @@ public class ClientServices {
 
     public void handleTCPDelete() {
         int port = Integer.parseInt(nodeArg);
-        try {
-            Socket socket = new Socket(nodeIP, port);
+        try (Socket socket = new Socket(nodeIP, port)){
             OutputStream output = socket.getOutputStream();
             InputStream input = socket.getInputStream();
 

@@ -1,16 +1,20 @@
 package node.store;
 
 import message.Message;
+import message.messages.DeleteMessageReply;
 import message.messages.GetMessage;
+import message.messages.GetMessageReply;
+import message.messages.PutMessageReply;
 import node.membership.threading.JoinTask;
 import node.membership.threading.LeaveTask;
 import node.membership.threading.MembershipTask;
-import node.store.threading.DeleteTask;
-import node.store.threading.GetTask;
-import node.store.threading.PutTask;
+import node.membership.view.View;
+import node.membership.view.ViewEntry;
+import node.store.threading.*;
 import threading.ThreadPool;
 import utils.UtilsFile;
 import utils.UtilsHash;
+import utils.UtilsTCP;
 
 import java.io.*;
 import java.net.Socket;
@@ -21,12 +25,16 @@ public class KeyValueStore {
     private final String folderPath;
     private final String folderName;
     private final ThreadPool workers;
+    private final View view;
+    private final String myHash;
 
-    public KeyValueStore(String folderName, ThreadPool workers){
+    public KeyValueStore(String folderName, String myHash, ThreadPool workers, View view){
         this.idStore = new ArrayList<>();
         this.folderPath = "../dynamo/";
         this.folderName = folderName;
         this.workers = workers;
+        this.view = view;
+        this.myHash = myHash;
         checkPastFiles();
     }
 
@@ -44,16 +52,54 @@ public class KeyValueStore {
         }
     }
 
+    private String getClosestNodeKey(String hash, View view) {
+        if (view.getEntries().isEmpty()) { return null; }
+        for (String key: view.getEntries().keySet()) {
+            if (key.compareTo(hash) > 0) { return key; }
+        }
+        return view.getEntries().keySet().iterator().next();
+    }
+
 
     public void processGet(String getMessageString, Socket socket) {
-        workers.execute(new GetTask(getMessageString, socket, folderPath, folderName, idStore));
+        String file = Message.getMessageBody(getMessageString);
+        String fileKey = UtilsHash.hashSHA256(file);
+        String nodeHash = getClosestNodeKey(fileKey, view);
+        if (nodeHash == null) {
+            workers.execute(new GetFailedTask(new GetMessageReply(null), socket));
+        } else if (nodeHash.equals(myHash)) {
+            workers.execute(new GetTask(getMessageString, socket, folderPath, folderName, idStore));
+        } else {
+            ViewEntry entry = view.getEntries().get(nodeHash);
+            workers.execute(new RedirectTask(socket, getMessageString, entry.getAddress(), entry.getPort()));
+        }
     }
 
     public void processPut(String putMessageString, Socket socket) {
-        workers.execute(new PutTask(putMessageString, socket, folderPath, folderName, idStore));
+        String file = Message.getMessageBody(putMessageString);
+        String fileKey = UtilsHash.hashSHA256(file);
+        String nodeHash = getClosestNodeKey(fileKey, view);
+        if (nodeHash == null) {
+            workers.execute(new PutFailedTask(new PutMessageReply("Successor node not found"), socket));
+        } else if (nodeHash.equals(myHash)) {
+            workers.execute(new PutTask(putMessageString, socket, folderPath, folderName, idStore));
+        } else {
+            ViewEntry entry = view.getEntries().get(nodeHash);
+            workers.execute(new RedirectTask(socket, putMessageString, entry.getAddress(), entry.getPort()));
+        }
     }
 
     public void processDelete(String deleteMessageString, Socket socket) {
-        workers.execute(new DeleteTask(deleteMessageString, socket, folderPath, folderName, idStore));
+        String file = Message.getMessageBody(deleteMessageString);
+        String fileKey = UtilsHash.hashSHA256(file);
+        String nodeHash = getClosestNodeKey(fileKey, view);
+        if (nodeHash == null) {
+            workers.execute(new DeleteTaskFailed(new DeleteMessageReply("Successor node not found"), socket));
+        } else if (nodeHash.equals(myHash)) {
+            workers.execute(new DeleteTask(deleteMessageString, socket, folderPath, folderName, idStore));
+        } else {
+            ViewEntry entry = view.getEntries().get(nodeHash);
+            workers.execute(new RedirectTask(socket, deleteMessageString, entry.getAddress(), entry.getPort()));
+        }
     }
 }

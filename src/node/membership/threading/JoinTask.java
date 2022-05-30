@@ -32,8 +32,7 @@ public class JoinTask extends Thread {
 
         MembershipMessage reply = new MembershipMessage(this.view);
 
-        try {
-            Socket socket = new Socket(joinMessage.getOriginId(), joinMessage.getPort());
+        try (Socket socket = new Socket(joinMessage.getOriginId(), joinMessage.getPort())){
             DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 
             UtilsTCP.sendTCPMessage(output, reply);

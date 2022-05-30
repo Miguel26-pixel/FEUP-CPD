@@ -1,13 +1,13 @@
 package node.store.threading;
 
 import message.Message;
-import message.messages.DeleteMessageReply;
 import message.messages.GetMessage;
 import message.messages.GetMessageReply;
 import utils.UtilsTCP;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -33,7 +33,9 @@ public class GetTask extends Thread {
         System.out.println((file == null) ? "File does not exists" : "File obtained with success");
 
         try {
-            UtilsTCP.sendTCPMessage(socket.getOutputStream(), new GetMessageReply(file));
+            OutputStream outputStream = socket.getOutputStream();
+            GetMessageReply m = new GetMessageReply(file);
+            UtilsTCP.sendTCPMessage(outputStream, m);
         } catch (IOException e) {
             System.out.println("TCP Exception: " + e);
         }

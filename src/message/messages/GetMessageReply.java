@@ -5,8 +5,6 @@ import message.MessageType;
 import utils.UtilsFile;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 public class GetMessageReply extends Message {
     private final File file;
@@ -27,5 +25,12 @@ public class GetMessageReply extends Message {
 
     public static GetMessageReply assembleMessage(String body, String filepath) {
         return new GetMessageReply(UtilsFile.stringToFile(body,filepath));
+    }
+
+    public static boolean isBodyEmpty(String message) {
+        byte[] delim = new byte[]{CR,LF};
+        String[] split = message.split(new String(delim));
+
+        return split.length == 1;
     }
 }

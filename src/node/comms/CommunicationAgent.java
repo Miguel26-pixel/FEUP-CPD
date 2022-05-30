@@ -5,7 +5,7 @@ import message.Message;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class CommunicationAgent extends Thread {
-    protected final static int TIMEOUT = 3000;
+    public final static int TIMEOUT = 3000;
 
     protected final AtomicBoolean isAlive;
     protected final AtomicBoolean stop;

@@ -54,15 +54,8 @@ public class TCPAgent extends CommunicationAgent {
                     System.out.println("DELETE");
                     keyValueStore.processDelete(messageString, socket);
                 }
-                case GET_REPLY -> {
-                    System.out.println("GET_REPLY");
-                    // TODO
-                }case PUT_REPLY -> {
-                    System.out.println("PUT_REPLY");
-                    // TODO
-                }case DELETE_REPLY -> {
-                    System.out.println("DELETE_REPLY");
-                    // TODO
+                default -> {
+                    System.err.println("Wrong message header");
                 }
             }
         } catch (Exception ignore) {}
@@ -75,6 +68,7 @@ public class TCPAgent extends CommunicationAgent {
             Socket socket = new Socket(address, Integer.parseInt(port));
 
             UtilsTCP.sendTCPMessage(socket.getOutputStream(), message);
+            socket.close();
         }
     }
 

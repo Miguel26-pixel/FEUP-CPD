@@ -17,6 +17,10 @@ public class MembershipService {
     private int membershipCounter;
     private final String identifier;
 
+    public View getView() {
+        return view;
+    }
+
     public MembershipService(String identifier, ThreadPool workers) {
         this.identifier = identifier;
         this.workers = workers;
