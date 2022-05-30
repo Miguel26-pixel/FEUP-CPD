@@ -1,5 +1,7 @@
 package node.store;
 
+import message.Message;
+import message.messages.GetMessage;
 import node.membership.threading.JoinTask;
 import node.membership.threading.LeaveTask;
 import node.membership.threading.MembershipTask;
@@ -11,12 +13,13 @@ import utils.UtilsFile;
 import utils.UtilsHash;
 
 import java.io.*;
+import java.net.Socket;
 import java.util.*;
 
 public class KeyValueStore {
-    private ArrayList<String> idStore;
-    private String folderPath;
-    private String folderName;
+    private final ArrayList<String> idStore;
+    private final String folderPath;
+    private final String folderName;
     private final ThreadPool workers;
 
     public KeyValueStore(String folderName, ThreadPool workers){
@@ -42,85 +45,15 @@ public class KeyValueStore {
     }
 
 
-    public String putNewPair(String file) {
-        String valueKey = UtilsHash.hashSHA256(file);
-
-        File dynamoDir = new File(folderPath);
-        if (!dynamoDir.exists() || !dynamoDir.isDirectory()) {
-            boolean res = dynamoDir.mkdir();
-            if(res) {
-                System.out.println("Dynamo main folder created with success");
-            } else {
-                System.err.println("Dynamo main folder could not be created");
-                return null;
-            }
-        }
-
-        File nodeDir = new File(folderPath + folderName);
-        if (!nodeDir.exists() || !nodeDir.isDirectory()) {
-            boolean res = nodeDir.mkdir();
-            if(res) {
-                System.out.println("Node folder created with success");
-            } else {
-                System.err.println("Node folder could not be created");
-                return null;
-            }
-        }
-
-        File newFile = new File(folderPath + folderName + "/file_" + valueKey);
-
-        try (FileOutputStream out = new FileOutputStream(newFile)) {
-            out.write(file.getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        idStore.add(valueKey);
-
-        return valueKey;
+    public void processGet(String getMessageString, Socket socket) {
+        workers.execute(new GetTask(getMessageString, socket, folderPath, folderName, idStore));
     }
 
-    public File getValue(String key){
-        for (String existingKey : idStore) {
-            if (existingKey.equals(key)) {
-                File file = new File(folderPath + folderName + "/file_" + key);
-                if (file.exists() && file.isFile()) {
-                    return file;
-                }
-            }
-        }
-        return null;
+    public void processPut(String putMessageString, Socket socket) {
+        workers.execute(new PutTask(putMessageString, socket, folderPath, folderName, idStore));
     }
 
-    public String deleteValue(String key){
-        String path = "";
-        int index = -1;
-        for (int i = 0; i < idStore.size(); i++){
-            if (idStore.get(i).equals(key)) {
-                 path = folderPath + folderName + "/file_" + key;
-                 index = i;
-                 break;
-            }
-        }
-
-        if (index == -1) { return "failed"; }
-
-        File file = new File(path);
-        if (!file.exists() || !file.delete()) { return "failed"; }
-
-        idStore.remove(index);
-        return "succeeded";
-    }
-
-    public void processGet(String getMessageString) {
-        workers.execute(new GetTask(getMessageString));
-    }
-
-    public void processPut(String putMessageString) {
-        workers.execute(new PutTask(putMessageString));
-    }
-
-    public void processDelete(String deleteMessageString) {
-        workers.execute(new DeleteTask(deleteMessageString));
+    public void processDelete(String deleteMessageString, Socket socket) {
+        workers.execute(new DeleteTask(deleteMessageString, socket, folderPath, folderName, idStore));
     }
 }

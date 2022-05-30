@@ -32,10 +32,10 @@ public class TCPAgent extends CommunicationAgent {
     @Override
     protected void read() {
         try {
-            Socket clientSocket = serverSocket.accept();
-            clientSocket.setSoTimeout(TIMEOUT);
+            Socket socket = serverSocket.accept();
+            socket.setSoTimeout(TIMEOUT);
 
-            String messageString = UtilsTCP.readTCPMessage(clientSocket.getInputStream());
+            String messageString = UtilsTCP.readTCPMessage(socket.getInputStream());
 
             switch (Message.getMessageType(messageString)) {
                 case MEMBERSHIP -> {
@@ -44,15 +44,15 @@ public class TCPAgent extends CommunicationAgent {
                 }
                 case GET -> {
                     System.out.println("GET");
-                    keyValueStore.processGet(messageString);
+                    keyValueStore.processGet(messageString, socket);
                 }
                 case PUT -> {
                     System.out.println("PUT");
-                    keyValueStore.processPut(messageString);
+                    keyValueStore.processPut(messageString, socket);
                 }
                 case DELETE -> {
                     System.out.println("DELETE");
-                    keyValueStore.processDelete(messageString);
+                    keyValueStore.processDelete(messageString, socket);
                 }
                 case GET_REPLY -> {
                     System.out.println("GET_REPLY");
