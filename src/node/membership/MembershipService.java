@@ -17,10 +17,9 @@ public class MembershipService {
     private int membershipCounter;
     private final String identifier;
 
-    public MembershipService(String identifier) {
+    public MembershipService(String identifier, ThreadPool workers) {
         this.identifier = identifier;
-        int numberOfCores = Runtime.getRuntime().availableProcessors();
-        this.workers = new ThreadPool(numberOfCores, numberOfCores);
+        this.workers = workers;
 
         this.view = new View();
         this.membershipCounter = 0;
@@ -54,11 +53,6 @@ public class MembershipService {
         }
 
         return false;
-    }
-
-    public void stop() {
-        this.workers.stop();
-        this.workers.waitForTasks();
     }
 
     public void processJoin(String joinMessageString) {

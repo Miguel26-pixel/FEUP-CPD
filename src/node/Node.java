@@ -5,6 +5,7 @@ import node.comms.TCPAgent;
 import node.comms.UDPAgent;
 import node.membership.MembershipService;
 import node.store.KeyValueStore;
+import threading.ThreadPool;
 
 import java.io.*;
 import java.rmi.RemoteException;
@@ -14,13 +15,16 @@ public class Node implements Services {
     private KeyValueStore keyValueStore;
     private MembershipService membershipService;
     //private ServerSocket server;
+    private final ThreadPool workers;
     private final TCPAgent tcpAgent;
     private final UDPAgent udpAgent;
 
     public Node(String mcastIP, String mcastPort, String nodeID, String membershipPort) throws IOException {
         this.nodeID = nodeID;
-        this.keyValueStore = new KeyValueStore("node_" + nodeID + ":" + membershipPort);
-        this.membershipService = new MembershipService(nodeID);
+        int numberOfCores = Runtime.getRuntime().availableProcessors();
+        this.workers = new ThreadPool(numberOfCores, numberOfCores);
+        this.membershipService = new MembershipService(nodeID, this.workers);
+        this.keyValueStore = new KeyValueStore("node_" + nodeID + ":" + membershipPort, this.workers);
 
         this.tcpAgent = new TCPAgent(membershipService, keyValueStore, nodeID, membershipPort);
         this.udpAgent = new UDPAgent(membershipService, keyValueStore, mcastIP, mcastPort);
@@ -50,7 +54,8 @@ public class Node implements Services {
 
     @Override
     public void leave() throws RemoteException {
-        this.membershipService.stop();
+        this.workers.stop();
+        this.workers.waitForTasks();
         this.membershipService.leave(this.udpAgent);
         this.udpAgent.stopExecution();
         this.tcpAgent.stopExecution();

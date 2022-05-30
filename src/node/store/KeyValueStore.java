@@ -1,5 +1,6 @@
 package node.store;
 
+import threading.ThreadPool;
 import utils.UtilsFile;
 import utils.UtilsHash;
 
@@ -10,11 +11,13 @@ public class KeyValueStore {
     private ArrayList<String> idStore;
     private String folderPath;
     private String folderName;
+    private final ThreadPool workers;
 
-    public KeyValueStore(String folderName){
+    public KeyValueStore(String folderName, ThreadPool workers){
         this.idStore = new ArrayList<>();
         this.folderPath = "../dynamo/";
         this.folderName = folderName;
+        this.workers = workers;
         checkPastFiles();
     }
 
