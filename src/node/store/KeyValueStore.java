@@ -1,5 +1,11 @@
 package node.store;
 
+import node.membership.threading.JoinTask;
+import node.membership.threading.LeaveTask;
+import node.membership.threading.MembershipTask;
+import node.store.threading.DeleteTask;
+import node.store.threading.GetTask;
+import node.store.threading.PutTask;
 import threading.ThreadPool;
 import utils.UtilsFile;
 import utils.UtilsHash;
@@ -104,5 +110,17 @@ public class KeyValueStore {
 
         idStore.remove(index);
         return "succeeded";
+    }
+
+    public void processGet(String getMessageString) {
+        workers.execute(new GetTask(getMessageString));
+    }
+
+    public void processPut(String putMessageString) {
+        workers.execute(new PutTask(putMessageString));
+    }
+
+    public void processDelete(String deleteMessageString) {
+        workers.execute(new DeleteTask(deleteMessageString));
     }
 }

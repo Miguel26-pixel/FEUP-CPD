@@ -44,15 +44,15 @@ public class TCPAgent extends CommunicationAgent {
                 }
                 case GET -> {
                     System.out.println("GET");
-                    // TODO
+                    keyValueStore.processGet(messageString);
                 }
                 case PUT -> {
                     System.out.println("PUT");
-                    // TODO
+                    keyValueStore.processPut(messageString);
                 }
                 case DELETE -> {
                     System.out.println("DELETE");
-                    // TODO
+                    keyValueStore.processDelete(messageString);
                 }
                 case GET_REPLY -> {
                     System.out.println("GET_REPLY");
