@@ -3,7 +3,6 @@ package node.membership.threading;
 import message.messages.LeaveMessage;
 import node.membership.view.View;
 import node.membership.view.ViewEntry;
-import utils.UtilsHash;
 
 public class LeaveTask extends Thread {
     private final View view;
