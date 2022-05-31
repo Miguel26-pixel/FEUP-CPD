@@ -11,7 +11,7 @@ public class ThreadPool {
     private boolean closed;
 
     public ThreadPool(int threadsNum, int maxTasksNum) {
-        this.tasks = new ArrayBlockingQueue(maxTasksNum);
+        this.tasks = (BlockingQueue<Thread>) new ArrayBlockingQueue<Thread>(maxTasksNum);
         this.threads = new ArrayList<>();
         this.closed = false;
 
@@ -35,6 +35,20 @@ public class ThreadPool {
             for (PoolThread thread: threads) {
                 thread.stopThread();
             }
+            tasks.clear();
+
+            this.closed = true;
+        }
+
+    }
+
+    public synchronized void reopen() {
+        if (closed) {
+            for (PoolThread thread: threads) {
+                thread.start();
+            }
+
+            this.closed = false;
         }
     }
 

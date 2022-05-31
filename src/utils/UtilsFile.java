@@ -10,6 +10,7 @@ import java.util.List;
 
 public class UtilsFile {
     public static void fileToBytes(File file, List<Byte> buf) {
+        if (file == null) { return; }
         try (FileInputStream in = new FileInputStream(file)) {
             int n;
             byte[] bytes = new byte[1024];

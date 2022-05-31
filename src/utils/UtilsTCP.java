@@ -3,14 +3,21 @@ package utils;
 import message.Message;
 
 import java.io.*;
+import java.net.Socket;
+
+import static node.comms.CommunicationAgent.TIMEOUT;
 
 public class UtilsTCP {
     private static final byte CR = 0x0d;
     private static final byte LF = 0x0a;
     private static final byte[] delim = new byte[]{CR,LF,CR,LF};
     public static void  sendTCPMessage(OutputStream output, Message message) throws IOException {
-        output.write(message.assemble());
-        output.flush();
+        try {
+            output.write(message.assemble());
+            output.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static String readTCPMessage(InputStream socketInput) {
@@ -37,5 +44,30 @@ public class UtilsTCP {
             System.err.println("TCP Exception: " + e);
         }
         return message.toString();
+    }
+
+    public static void sendTCPString(OutputStream output, String message) {
+        try {
+            output.write(message.getBytes());
+            output.flush();
+        } catch (IOException e) {
+            System.err.println("TCP Send String Exception: " + e);
+        }
+    }
+
+    public static String redirectMessage(String message, String address, int port) {
+        String reply = "";
+        try (Socket socket = new Socket(address, port)) {
+            socket.setSoTimeout(TIMEOUT);
+            System.out.println("Redirecting message...");
+            OutputStream output = socket.getOutputStream();
+            InputStream input = socket.getInputStream();
+            UtilsTCP.sendTCPString(output,message);
+            reply = UtilsTCP.readTCPMessage(input);
+            socket.close();
+        } catch (IOException e) {
+            System.err.println("TCP Redirect Exception: " + e);
+        }
+        return reply;
     }
 }

@@ -16,7 +16,7 @@ public class PoolThread extends Thread {
         this.thread = Thread.currentThread();
         while (!stopped) {
             try {
-                Thread task = (Thread) tasks.take();
+                Thread task = tasks.take();
                 task.run();
             } catch (Exception ignored) {
             }

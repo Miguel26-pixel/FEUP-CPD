@@ -1,20 +1,40 @@
 package node.store;
 
+import message.Message;
+import message.messages.DeleteMessageReply;
+import message.messages.GetMessage;
+import message.messages.GetMessageReply;
+import message.messages.PutMessageReply;
+import node.membership.threading.JoinTask;
+import node.membership.threading.LeaveTask;
+import node.membership.threading.MembershipTask;
+import node.membership.view.View;
+import node.membership.view.ViewEntry;
+import node.store.threading.*;
+import threading.ThreadPool;
 import utils.UtilsFile;
 import utils.UtilsHash;
+import utils.UtilsTCP;
 
 import java.io.*;
+import java.net.Socket;
 import java.util.*;
 
 public class KeyValueStore {
-    private ArrayList<String> idStore;
-    private String folderPath;
-    private String folderName;
+    private final ArrayList<String> idStore;
+    private final String folderPath;
+    private final String folderName;
+    private final ThreadPool workers;
+    private final View view;
+    private final String myHash;
 
-    public KeyValueStore(String folderName){
+    public KeyValueStore(String folderName, String myHash, ThreadPool workers, View view){
         this.idStore = new ArrayList<>();
         this.folderPath = "../dynamo/";
         this.folderName = folderName;
+        this.workers = workers;
+        this.view = view;
+        this.myHash = myHash;
         checkPastFiles();
     }
 
@@ -32,74 +52,54 @@ public class KeyValueStore {
         }
     }
 
-
-    public String putNewPair(String file) {
-        String valueKey = UtilsHash.hashSHA256(file);
-
-        File dynamoDir = new File(folderPath);
-        if (!dynamoDir.exists() || !dynamoDir.isDirectory()) {
-            boolean res = dynamoDir.mkdir();
-            if(res) {
-                System.out.println("Dynamo main folder created with success");
-            } else {
-                System.err.println("Dynamo main folder could not be created");
-                return null;
-            }
+    private String getClosestNodeKey(String hash, View view) {
+        if (view.getEntries().isEmpty()) { return null; }
+        for (String key: view.getEntries().keySet()) {
+            if (key.compareTo(hash) > 0) { return key; }
         }
-
-        File nodeDir = new File(folderPath + folderName);
-        if (!nodeDir.exists() || !nodeDir.isDirectory()) {
-            boolean res = nodeDir.mkdir();
-            if(res) {
-                System.out.println("Node folder created with success");
-            } else {
-                System.err.println("Node folder could not be created");
-                return null;
-            }
-        }
-
-        File newFile = new File(folderPath + folderName + "/file_" + valueKey);
-
-        try (FileOutputStream out = new FileOutputStream(newFile)) {
-            out.write(file.getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        idStore.add(valueKey);
-
-        return valueKey;
+        return view.getEntries().keySet().iterator().next();
     }
 
-    public File getValue(String key){
-        for (String existingKey : idStore) {
-            if (existingKey.equals(key)) {
-                File file = new File(folderPath + folderName + "/file_" + key);
-                if (file.exists() && file.isFile()) {
-                    return file;
-                }
-            }
+
+    public void processGet(String getMessageString, Socket socket) {
+        String file = Message.getMessageBody(getMessageString);
+        String fileKey = UtilsHash.hashSHA256(file);
+        String nodeHash = getClosestNodeKey(fileKey, view);
+        if (nodeHash == null) {
+            workers.execute(new GetFailedTask(new GetMessageReply(null), socket));
+        } else if (nodeHash.equals(myHash)) {
+            workers.execute(new GetTask(getMessageString, socket, folderPath, folderName, idStore));
+        } else {
+            ViewEntry entry = view.getEntries().get(nodeHash);
+            workers.execute(new RedirectTask(socket, getMessageString, entry.getAddress(), entry.getPort()));
         }
-        return null;
     }
 
-    public String deleteValue(String key){
-        String path = "";
-        int index = -1;
-        for (int i = 0; i < idStore.size(); i++){
-            if (idStore.get(i).equals(key)) {
-                 path = folderPath + folderName + "/file_" + key;
-                 index = i;
-                 break;
-            }
+    public void processPut(String putMessageString, Socket socket) {
+        String file = Message.getMessageBody(putMessageString);
+        String fileKey = UtilsHash.hashSHA256(file);
+        String nodeHash = getClosestNodeKey(fileKey, view);
+        if (nodeHash == null) {
+            workers.execute(new PutFailedTask(new PutMessageReply("Successor node not found"), socket));
+        } else if (nodeHash.equals(myHash)) {
+            workers.execute(new PutTask(putMessageString, socket, folderPath, folderName, idStore));
+        } else {
+            ViewEntry entry = view.getEntries().get(nodeHash);
+            workers.execute(new RedirectTask(socket, putMessageString, entry.getAddress(), entry.getPort()));
         }
+    }
 
-        if (index == -1) { return "failed"; }
-
-        File file = new File(path);
-        if (!file.exists() || !file.delete()) { return "failed"; }
-
-        idStore.remove(index);
-        return "succeeded";
+    public void processDelete(String deleteMessageString, Socket socket) {
+        String file = Message.getMessageBody(deleteMessageString);
+        String fileKey = UtilsHash.hashSHA256(file);
+        String nodeHash = getClosestNodeKey(fileKey, view);
+        if (nodeHash == null) {
+            workers.execute(new DeleteTaskFailed(new DeleteMessageReply("Successor node not found"), socket));
+        } else if (nodeHash.equals(myHash)) {
+            workers.execute(new DeleteTask(deleteMessageString, socket, folderPath, folderName, idStore));
+        } else {
+            ViewEntry entry = view.getEntries().get(nodeHash);
+            workers.execute(new RedirectTask(socket, deleteMessageString, entry.getAddress(), entry.getPort()));
+        }
     }
 }

@@ -1,76 +1,55 @@
 package node.membership.log;
 
-import java.nio.ByteBuffer;
-import java.util.*;
-import java.util.stream.Collectors;
+import node.membership.view.View;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class Log {
-    private final Map<String, LogEntry> entries;
+    private final static String LOG_PATH = "./dynamo.log";
+    private final static int SAVE_SIZE = 32;
 
-    public Log() {
-        this.entries = new HashMap<String, LogEntry>();
+    public static void update(View view) {
+        View recentEntries = view.getMostRecentEntries(SAVE_SIZE);
+
+        File logFile = new File(LOG_PATH);
+        try {
+            logFile.createNewFile();
+
+            FileWriter logFileWriter = new FileWriter(LOG_PATH);
+            logFileWriter.write(recentEntries.toString());
+            logFileWriter.close();
+        } catch (IOException ignored) {
+            ignored.printStackTrace();
+        }
     }
 
-    public Map<String, LogEntry> getEntries() {
-        return entries;
+    public static String getLog() {
+        StringBuilder log = new StringBuilder();
+
+        File logFile = new File(LOG_PATH);
+        try {
+            Scanner fileReader = new Scanner(logFile);
+            while (fileReader.hasNext()) {
+                log.append(fileReader.nextLine());
+            }
+        } catch (IOException ignored) {
+        }
+
+        return log.toString();
     }
 
-    public List<Byte> toBytes() {
+    public static List<Byte> toBytes() {
         List<Byte> asBytes = new ArrayList<>();
 
-        for (Map.Entry<String, LogEntry> logEntry : entries.entrySet()) {
-            byte[] key = logEntry.getKey().getBytes();
-            for (byte b: key) {
-                asBytes.add(b);
-            }
-
-            asBytes.add((byte) ';');
-
-            byte[] counter = ByteBuffer.allocate(4).putInt(logEntry.getValue().getCounter()).array();
-
-            for (byte b : counter) {
-                asBytes.add(b);
-            }
-
-            asBytes.add((byte) ';');
-
-            byte[] epoch = ByteBuffer.allocate(4).putInt(logEntry.getValue().getEpoch()).array();
-
-            for (byte b : epoch) {
-                asBytes.add(b);
-            }
-
-            asBytes.add((byte) ' ');
-
+        for (Byte b: getLog().getBytes()) {
+            asBytes.add(b);
         }
 
         return asBytes;
-    }
-
-    public void addEntry(String nodeId, LogEntry logEntry) {
-        if (entries.containsKey(nodeId)) {
-            LogEntry currentEntry = entries.get(nodeId);
-
-            if (currentEntry.getEpoch() < logEntry.getEpoch() || currentEntry.getCounter() < logEntry.getCounter()) {
-                return;
-            }
-        }
-
-        entries.put(nodeId, logEntry);
-    }
-
-    public Log getMostRecentEntries(int subsetSize) {
-        List<Map.Entry<String, LogEntry>> entryList = new ArrayList<>(new ArrayList<>(entries.entrySet()));
-
-        entryList.sort(Comparator.comparing(entry -> entry.getValue().getEpoch()));
-
-        entryList.subList(0, subsetSize);
-
-        Log recentLog = new Log();
-        for (Map.Entry<String, LogEntry> entry: entryList) {
-            recentLog.addEntry(entry.getKey(), entry.getValue());
-        }
-
-        return recentLog;
     }
 }

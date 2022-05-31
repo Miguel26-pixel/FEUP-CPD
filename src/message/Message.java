@@ -1,6 +1,7 @@
 package message;
 
 import message.header.FieldType;
+import message.header.IdField;
 import message.header.MessageField;
 import message.header.MessageTypeField;
 
@@ -8,18 +9,38 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Message {
-    public static final byte CR = 0x0d;
-    public static final byte LF = 0x0a;
+    public static final Byte CR = 0x0d;
+    public static final Byte LF = 0x0a;
 
     protected abstract void buildBody();
     private final List<MessageField> messageFields;
+    private final MessageType messageType;
+    private String originId;
     protected List<Byte> body;
 
     protected Message(MessageType messageType) {
+        this.messageType = messageType;
         this.messageFields = new ArrayList<>();
         this.body = new ArrayList<Byte>();
 
         this.messageFields.add(new MessageTypeField(messageType));
+    }
+
+    protected Message(MessageType messageType, String originId) {
+        this.messageFields = new ArrayList<>();
+        this.body = new ArrayList<Byte>();
+        this.originId = originId;
+        this.messageType = messageType;
+
+        this.messageFields.add(new MessageTypeField(messageType));
+    }
+
+    protected void setOriginId(String originId) {
+        this.originId = originId;
+    }
+
+    public String getOriginId() {
+        return originId;
     }
 
     protected void addMessageField(MessageField messageField) {
@@ -31,6 +52,8 @@ public abstract class Message {
     }
 
     public byte[] assemble() {
+        this.setOriginIdField();
+
         List<Byte> message = new ArrayList<>();
 
         for (MessageField field: messageFields) {
@@ -57,6 +80,12 @@ public abstract class Message {
         return messageBytes;
     }
 
+    private void setOriginIdField() {
+        if (this.originId != null) {
+            this.addMessageField(new IdField(FieldType.ORIGINID, originId));
+        }
+    }
+
     public static MessageType getMessageType(String message) {
         byte[] delim = new byte[]{CR,LF};
         String[] split = message.split(new String(delim));
@@ -78,5 +107,9 @@ public abstract class Message {
         String[] split = message.split(new String(delim));
 
         return split[split.length -1];
+    }
+
+    public MessageType getMessageType() {
+        return messageType;
     }
 }

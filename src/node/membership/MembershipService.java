@@ -1,46 +1,73 @@
 package node.membership;
 
+import message.messages.JoinMessage;
+import message.messages.LeaveMessage;
+import node.comms.UDPAgent;
+import node.membership.threading.JoinTask;
+import node.membership.threading.LeaveTask;
+import node.membership.threading.MembershipTask;
+import node.membership.view.View;
+import threading.ThreadPool;
+
+import java.io.IOException;
+
 public class MembershipService {
-    private final String mcastIP;
-    private final String mcastPort;
-    private final String membershipPort;
-    private int membership_counter;
+    private final View view;
+    private final ThreadPool workers;
+    private int membershipCounter;
+    private final String identifier;
 
-    public MembershipService(String mcastIP, String mcastPort, String membershipPort) {
-        this.mcastIP = mcastIP;
-        this.mcastPort = mcastPort;
-        this.membershipPort = membershipPort;
-        this.membership_counter = 0;
+    public View getView() {
+        return view;
     }
 
-    public boolean join() {
-        if (!this.canJoin()) {
-            membership_counter++;
-            return false;
+    public MembershipService(String identifier, ThreadPool workers) {
+        this.identifier = identifier;
+        this.workers = workers;
+
+        this.view = new View();
+        this.membershipCounter = 0;
+    }
+
+    public boolean join(UDPAgent udpAgent, int tcpPort) {
+        if (this.membershipCounter % 2 == 0) {
+            try {
+                udpAgent.send(new JoinMessage(this.membershipCounter, tcpPort, this.identifier));
+            } catch (IOException e) {
+                return false;
+            }
+
+            this.membershipCounter++;
+            return true;
         }
-        membership_counter++;
-        return true;
-    }
 
-    public boolean leave() {
-        if (!this.canLeave()) {
-            membership_counter++;
-            return false;
-        }
-        membership_counter++;
-        return true;
-    }
-
-    private boolean canJoin() {
-        return this.membership_counter % 2 == 0;
-    }
-
-    private boolean canLeave() {
-        return this.membership_counter % 2 != 0;
-    }
-
-    //for testing TCP communication
-    public boolean sayHello(String nodeIP, String nodePort) {
         return false;
+    }
+
+    public boolean leave(UDPAgent udpAgent) {
+        if (this.membershipCounter % 2 != 0) {
+            try {
+                udpAgent.send(new LeaveMessage(this.membershipCounter, this.identifier));
+            } catch (IOException e) {
+                return false;
+            }
+
+            this.membershipCounter++;
+            return true;
+        }
+
+        return false;
+    }
+
+    public void processJoin(String joinMessageString) {
+        workers.execute(new JoinTask(this.view, joinMessageString));
+    }
+
+    public void processLeave(String leaveMessageString) {
+        workers.execute(new LeaveTask(this.view, leaveMessageString));
+    }
+
+    public void processMembership(String membershipMessageString) {
+        workers.execute(new MembershipTask(this.view, membershipMessageString));
     }
 }
