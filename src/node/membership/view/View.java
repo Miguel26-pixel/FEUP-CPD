@@ -37,6 +37,10 @@ public class View {
         return entries;
     }
 
+    public Map<String, ViewEntry> getUpEntries() {
+        return upEntries;
+    }
+
     public List<Byte> toBytes() {
         List<Byte> asBytes = new ArrayList<>();
 

@@ -10,6 +10,7 @@ import node.membership.view.View;
 import threading.ThreadPool;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class MembershipService {
     private final View view;
@@ -47,7 +48,8 @@ public class MembershipService {
     public boolean leave(UDPAgent udpAgent) {
         if (this.membershipCounter % 2 != 0) {
             try {
-                udpAgent.send(new LeaveMessage(this.membershipCounter, this.identifier));
+                LeaveMessage message = new LeaveMessage(this.membershipCounter, this.identifier);
+                udpAgent.send(message);
             } catch (IOException e) {
                 return false;
             }

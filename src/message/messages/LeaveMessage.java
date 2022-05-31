@@ -8,6 +8,7 @@ import message.header.MessageField;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class LeaveMessage extends Message {
@@ -28,10 +29,11 @@ public class LeaveMessage extends Message {
         List<String> split = new ArrayList<>(List.of(asString.split(new String(delim))));
 
         split.removeIf(s -> s.equals(""));
-        split.remove(split.size() - 1);
 
         String body = split.get(split.size() - 1);
         split.remove(split.size() - 1);
+
+        int bodyLen = -1;
 
         for (int i = 0; i < split.size(); i++) {
             String[] field = split.get(i).split(" ");
@@ -40,11 +42,13 @@ public class LeaveMessage extends Message {
 
                 this.setOriginId(originId);
             }
+            if (MessageField.translateFieldHeader(field[0]) == FieldType.BODYLENGHT) {
+                bodyLen = Integer.parseInt(field[1]);
+            }
         }
 
         List<String> params = new ArrayList<>(List.of(body.split(" ")));
-
-        this.counter = params.get(0);
+        this.counter = params.get(0).substring(0,bodyLen);
     }
 
     public Integer getCounter() {
