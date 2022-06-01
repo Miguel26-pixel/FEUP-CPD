@@ -53,11 +53,11 @@ public class KeyValueStore {
     }
 
     private String getClosestNodeKey(String hash, View view) {
-        if (view.getEntries().isEmpty()) { return null; }
-        for (String key: view.getEntries().keySet()) {
+        if (view.getUpEntries().isEmpty()) { return null; }
+        for (String key: view.getUpEntries().keySet()) {
             if (key.compareTo(hash) > 0) { return key; }
         }
-        return view.getEntries().keySet().iterator().next();
+        return view.getUpEntries().keySet().iterator().next();
     }
 
     public Map<String,String> checkFilesView(View view) {
@@ -89,7 +89,7 @@ public class KeyValueStore {
         } else if (nodeHash.equals(myHash)) {
             workers.execute(new GetTask(getMessageString, socket, folderPath, folderName, idStore));
         } else {
-            ViewEntry entry = view.getEntries().get(nodeHash);
+            ViewEntry entry = view.getUpEntries().get(nodeHash);
             workers.execute(new RedirectTask(socket, getMessageString, entry.getAddress(), entry.getPort()));
         }
     }
@@ -103,7 +103,7 @@ public class KeyValueStore {
         } else if (nodeHash.equals(myHash)) {
             workers.execute(new PutTask(putMessageString, socket, folderPath, folderName, idStore));
         } else {
-            ViewEntry entry = view.getEntries().get(nodeHash);
+            ViewEntry entry = view.getUpEntries().get(nodeHash);
             workers.execute(new RedirectTask(socket, putMessageString, entry.getAddress(), entry.getPort()));
         }
     }
@@ -117,7 +117,7 @@ public class KeyValueStore {
         } else if (nodeHash.equals(myHash)) {
             workers.execute(new DeleteTask(deleteMessageString, socket, folderPath, folderName, idStore));
         } else {
-            ViewEntry entry = view.getEntries().get(nodeHash);
+            ViewEntry entry = view.getUpEntries().get(nodeHash);
             workers.execute(new RedirectTask(socket, deleteMessageString, entry.getAddress(), entry.getPort()));
         }
     }
