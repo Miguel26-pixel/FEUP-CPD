@@ -50,9 +50,10 @@ public class JoinTask extends Thread {
         Map<String,String> files_to_change = keyValueStore.checkFilesView(view);
 
         for (Map.Entry<String, String> entry : files_to_change.entrySet()) {
+            String fileKey = entry.getValue().substring(entry.getValue().lastIndexOf("file_") + ("file_").length());
             workers.execute(new SendPutTask(view.getUpEntries().get(entry.getKey()).getAddress(),
                     view.getUpEntries().get(entry.getKey()).getPort(), new PutMessage(new File(entry.getValue())),
-                    keyValueStore, entry.getValue()));
+                    keyValueStore, fileKey));
         }
     }
 

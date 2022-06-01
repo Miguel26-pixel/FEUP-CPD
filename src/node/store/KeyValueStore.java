@@ -1,10 +1,7 @@
 package node.store;
 
 import message.Message;
-import message.messages.DeleteMessageReply;
-import message.messages.GetMessage;
-import message.messages.GetMessageReply;
-import message.messages.PutMessageReply;
+import message.messages.*;
 import node.membership.threading.JoinTask;
 import node.membership.threading.LeaveTask;
 import node.membership.threading.MembershipTask;
@@ -53,11 +50,11 @@ public class KeyValueStore {
     }
 
     private String getClosestNodeKey(String hash, View view) {
-        if (view.getEntries().isEmpty()) { return null; }
-        for (String key: view.getEntries().keySet()) {
+        if (view.getUpEntries().isEmpty()) { return null; }
+        for (String key: view.getUpEntries().keySet()) {
             if (key.compareTo(hash) > 0) { return key; }
         }
-        return view.getEntries().keySet().iterator().next();
+        return view.getUpEntries().keySet().iterator().next();
     }
 
     public Map<String,String> checkFilesView(View view) {
@@ -89,7 +86,7 @@ public class KeyValueStore {
         } else if (nodeHash.equals(myHash)) {
             workers.execute(new GetTask(getMessageString, socket, folderPath, folderName, idStore));
         } else {
-            ViewEntry entry = view.getEntries().get(nodeHash);
+            ViewEntry entry = view.getUpEntries().get(nodeHash);
             workers.execute(new RedirectTask(socket, getMessageString, entry.getAddress(), entry.getPort()));
         }
     }
@@ -101,11 +98,15 @@ public class KeyValueStore {
         if (nodeHash == null) {
             workers.execute(new PutFailedTask(new PutMessageReply("Successor node not found"), socket));
         } else if (nodeHash.equals(myHash)) {
-            workers.execute(new PutTask(putMessageString, socket, folderPath, folderName, idStore));
+            workers.execute(new PutTask(putMessageString, socket, this));
         } else {
-            ViewEntry entry = view.getEntries().get(nodeHash);
+            ViewEntry entry = view.getUpEntries().get(nodeHash);
             workers.execute(new RedirectTask(socket, putMessageString, entry.getAddress(), entry.getPort()));
         }
+    }
+
+    public void processForcePut(String forcePutMessage) {
+        workers.execute(new ForcePutTask(forcePutMessage, this));
     }
 
     public void processDelete(String deleteMessageString, Socket socket) {
@@ -117,13 +118,64 @@ public class KeyValueStore {
         } else if (nodeHash.equals(myHash)) {
             workers.execute(new DeleteTask(deleteMessageString, socket, folderPath, folderName, idStore));
         } else {
-            ViewEntry entry = view.getEntries().get(nodeHash);
+            ViewEntry entry = view.getUpEntries().get(nodeHash);
             workers.execute(new RedirectTask(socket, deleteMessageString, entry.getAddress(), entry.getPort()));
         }
     }
 
-    public String deleteValue(String file_path){
-        String key = file_path.substring(("file_").length());
+    public void sendFilesToNextNode() {
+        while (idStore.size() > 0) {
+            String key = idStore.get(0);
+            File file = new File(folderPath + folderName + "/file_" + key);
+            String nodeKey = getClosestNodeKey(myHash,view);
+
+            new SendForcePutTask(view.getUpEntries().get(nodeKey).getAddress(),
+                    view.getUpEntries().get(nodeKey).getPort(),
+                    new ForcePutMessage(file),this, key).sendForcePut();
+        }
+    }
+
+    public String putNewPair(String file) {
+        String valueKey = UtilsHash.hashSHA256(file);
+
+        File dynamoDir = new File(folderPath);
+        if (!dynamoDir.exists() || !dynamoDir.isDirectory()) {
+            boolean res = dynamoDir.mkdir();
+            if(res) {
+                System.out.println("Dynamo main folder created with success");
+            } else {
+                System.err.println("Dynamo main folder could not be created");
+                return null;
+            }
+        }
+
+        File nodeDir = new File(folderPath + folderName);
+        if (!nodeDir.exists() || !nodeDir.isDirectory()) {
+            boolean res = nodeDir.mkdir();
+            if(res) {
+                System.out.println("Node folder created with success");
+            } else {
+                System.err.println("Node folder could not be created");
+                return null;
+            }
+        }
+
+        File newFile = new File(folderPath + folderName + "/file_" + valueKey);
+
+        try (FileOutputStream out = new FileOutputStream(newFile)) {
+            out.write(file.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (!idStore.contains(valueKey)) {
+            idStore.add(valueKey);
+        }
+
+        return valueKey;
+    }
+
+    public String deleteValue(String key){
         int index = -1;
         for (int i = 0; i < idStore.size(); i++){
             if (idStore.get(i).equals(key)) {
@@ -132,7 +184,7 @@ public class KeyValueStore {
             }
         }
 
-        File file = new File(file_path);
+        File file = new File(folderPath + folderName + "/file_" + key);
         if (!file.exists() || !file.delete()) { return "failed"; }
 
         idStore.remove(index);

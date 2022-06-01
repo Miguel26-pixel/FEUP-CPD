@@ -20,6 +20,7 @@ public class MessageTypeField extends MessageField {
             case MEMBERSHIP -> "membership";
             case PUT -> "put";
             case PUT_REPLY -> "put_reply";
+            case FORCE_PUT -> "force_put";
             case GET -> "get";
             case GET_REPLY -> "get_reply";
             case DELETE -> "delete";
@@ -35,6 +36,7 @@ public class MessageTypeField extends MessageField {
             case "membership" -> MessageType.MEMBERSHIP;
             case "put" -> MessageType.PUT;
             case "put_reply" -> MessageType.PUT_REPLY;
+            case "force_put" -> MessageType.FORCE_PUT;
             case "get" -> MessageType.GET;
             case "get_reply" -> MessageType.GET_REPLY;
             case "delete" -> MessageType.DELETE;

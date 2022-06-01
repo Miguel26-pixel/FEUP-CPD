@@ -32,9 +32,9 @@ public class ThreadPool {
 
     public synchronized void stop() {
         if (!closed) {
-            for (PoolThread thread: threads) {
+            /*for (PoolThread thread: threads) {
                 thread.stopThread();
-            }
+            }*/
             tasks.clear();
 
             this.closed = true;

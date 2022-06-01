@@ -54,6 +54,10 @@ public class TCPAgent extends CommunicationAgent {
                     System.out.println("DELETE");
                     keyValueStore.processDelete(messageString, socket);
                 }
+                case FORCE_PUT -> {
+                    System.out.println("FORCE PUT");
+                    keyValueStore.processForcePut(messageString);
+                }
                 default -> {
                     System.err.println("Wrong message header");
                 }
@@ -70,6 +74,11 @@ public class TCPAgent extends CommunicationAgent {
             UtilsTCP.sendTCPMessage(socket.getOutputStream(), message);
             socket.close();
         }
+    }
+
+    public void sendFilesToLeave() {
+        System.out.println("FORCE PUT");
+        keyValueStore.sendFilesToNextNode();
     }
 
     public int getPort() {
