@@ -7,9 +7,11 @@ import node.membership.threading.JoinTask;
 import node.membership.threading.LeaveTask;
 import node.membership.threading.MembershipTask;
 import node.membership.view.View;
+import node.store.KeyValueStore;
 import threading.ThreadPool;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class MembershipService {
     private final View view;
@@ -47,7 +49,8 @@ public class MembershipService {
     public boolean leave(UDPAgent udpAgent) {
         if (this.membershipCounter % 2 != 0) {
             try {
-                udpAgent.send(new LeaveMessage(this.membershipCounter, this.identifier));
+                LeaveMessage message = new LeaveMessage(this.membershipCounter, this.identifier);
+                udpAgent.send(message);
             } catch (IOException e) {
                 return false;
             }
@@ -59,8 +62,8 @@ public class MembershipService {
         return false;
     }
 
-    public void processJoin(String joinMessageString) {
-        workers.execute(new JoinTask(this.view, joinMessageString));
+    public void processJoin(String joinMessageString, KeyValueStore keyValueStore) {
+        workers.execute(new JoinTask(this.view, joinMessageString, keyValueStore, workers));
     }
 
     public void processLeave(String leaveMessageString) {

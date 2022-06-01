@@ -53,6 +53,7 @@ public abstract class Message {
 
     public byte[] assemble() {
         this.setOriginIdField();
+        this.setBodyLenghtField();
 
         List<Byte> message = new ArrayList<>();
 
@@ -67,11 +68,6 @@ public abstract class Message {
 
         message.addAll(body);
 
-        message.add(CR);
-        message.add(LF);
-        message.add(CR);
-        message.add(LF);
-
         byte[] messageBytes = new byte[message.size()];
         for (int i = 0; i < message.size(); i++) {
             messageBytes[i] = message.get(i);
@@ -83,6 +79,12 @@ public abstract class Message {
     private void setOriginIdField() {
         if (this.originId != null) {
             this.addMessageField(new IdField(FieldType.ORIGINID, originId));
+        }
+    }
+
+    private void setBodyLenghtField() {
+        if (this.body != null) {
+            this.addMessageField(new IdField(FieldType.BODYLENGHT, Integer.toString(this.body.size())));
         }
     }
 

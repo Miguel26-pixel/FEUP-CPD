@@ -6,6 +6,7 @@ import message.header.FieldType;
 import message.header.MessageField;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class JoinMessage extends Message {
@@ -27,9 +28,7 @@ public class JoinMessage extends Message {
 
         List<String> split = new ArrayList<>(List.of(asString.split(new String(delim))));
 
-
         split.removeIf(s -> s.equals(""));
-        split.remove(split.size() - 1);
 
         String body = split.get(split.size() - 1);
         split.remove(split.size() - 1);
@@ -46,7 +45,9 @@ public class JoinMessage extends Message {
         List<String> params = new ArrayList<>(List.of(body.split(" ")));
 
         this.counter = params.get(0);
-        this.port = params.get(1);
+
+        byte[] null_char = {0};
+        this.port = params.get(1).replace(new String(null_char), "");
     }
 
     public Integer getPort() {
@@ -66,7 +67,6 @@ public class JoinMessage extends Message {
         }
 
         this.body.add((byte) ' ');
-
         for (byte b : port.getBytes()) {
             this.body.add(b);
         }

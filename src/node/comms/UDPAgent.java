@@ -52,7 +52,7 @@ public class UDPAgent extends CommunicationAgent {
             switch (Message.getMessageType(messageString)) {
                 case JOIN -> {
                     System.out.println("JOIN");
-                    this.membershipService.processJoin(messageString);
+                    this.membershipService.processJoin(messageString, keyValueStore);
                 }
                 case LEAVE -> {
                     System.out.println("LEAVE");

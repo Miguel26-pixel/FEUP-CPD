@@ -15,6 +15,7 @@ public abstract class MessageField {
             case MESSAGETYPE -> "messagetype";
             case ORIGINID -> "originid";
             case DESTID -> "destid";
+            case BODYLENGHT -> "bodylenght";
             case INVALID -> "";
         };
     }
@@ -24,6 +25,7 @@ public abstract class MessageField {
             case "messagetype" -> FieldType.MESSAGETYPE;
             case "originid" -> FieldType.ORIGINID;
             case "destid" -> FieldType.DESTID;
+            case "bodylenght" -> FieldType.BODYLENGHT;
             default -> FieldType.INVALID;
         };
     }
