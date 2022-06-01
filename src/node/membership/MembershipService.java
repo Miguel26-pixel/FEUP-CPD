@@ -7,6 +7,7 @@ import node.membership.threading.JoinTask;
 import node.membership.threading.LeaveTask;
 import node.membership.threading.MembershipTask;
 import node.membership.view.View;
+import node.store.KeyValueStore;
 import threading.ThreadPool;
 
 import java.io.IOException;
@@ -61,8 +62,8 @@ public class MembershipService {
         return false;
     }
 
-    public void processJoin(String joinMessageString) {
-        workers.execute(new JoinTask(this.view, joinMessageString));
+    public void processJoin(String joinMessageString, KeyValueStore keyValueStore) {
+        workers.execute(new JoinTask(this.view, joinMessageString, keyValueStore, workers));
     }
 
     public void processLeave(String leaveMessageString) {
