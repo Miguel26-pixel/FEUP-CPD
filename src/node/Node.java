@@ -45,11 +45,10 @@ public class Node implements Services {
 
     @Override
     public void leave() throws RemoteException {
-        this.workers.stop();
-        this.workers.waitForTasks();
-        this.membershipService.leave(this.udpAgent);
-        this.udpAgent.stopExecution();
         this.tcpAgent.stopExecution();
+        this.udpAgent.stopExecution();
+        this.membershipService.leave(this.udpAgent);
+        this.workers.waitForTasks();
     }
 
     public void run() {
