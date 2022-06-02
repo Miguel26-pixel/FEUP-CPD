@@ -15,7 +15,6 @@ public abstract class Message {
     protected abstract void buildBody();
     private final List<MessageField> messageFields;
     private final MessageType messageType;
-    private String originId;
     protected List<Byte> body;
 
     protected Message(MessageType messageType) {
@@ -29,18 +28,50 @@ public abstract class Message {
     protected Message(MessageType messageType, String originId) {
         this.messageFields = new ArrayList<>();
         this.body = new ArrayList<Byte>();
-        this.originId = originId;
         this.messageType = messageType;
 
         this.messageFields.add(new MessageTypeField(messageType));
+        this.messageFields.add(new IdField(FieldType.ORIGINID, originId));
     }
 
-    protected void setOriginId(String originId) {
-        this.originId = originId;
+    protected Message(String asString) {
+        this.messageType = null;
+        this.messageFields = new ArrayList<>();
+
+        byte[] delim = new byte[]{CR,LF};
+
+        List<String> split = new ArrayList<>(List.of(asString.split(new String(delim))));
+
+        split.removeIf(s -> s.equals(""));
+        split.remove(split.size() - 1);
+
+
+        for (int i = 0; i < split.size(); i++) {
+            String[] fieldString = split.get(i).split(" ");
+            FieldType field = MessageField.translateFieldHeader(fieldString[0]);
+
+            if (field != FieldType.INVALID) {
+                if (field == FieldType.MESSAGETYPE) {
+                    this.addMessageField(new MessageTypeField(MessageTypeField.translateType(fieldString[1])));
+                } else {
+                    this.addMessageField(new IdField(field, fieldString[1]));
+                }
+            }
+        }
+    }
+
+    protected String getFieldValue(FieldType fieldType) {
+        for (MessageField field: this.messageFields) {
+            if (field.fieldType == fieldType) {
+                return field.getValue();
+            }
+        }
+
+        return null;
     }
 
     public String getOriginId() {
-        return originId;
+        return this.getFieldValue(FieldType.ORIGINID);
     }
 
     protected void addMessageField(MessageField messageField) {
@@ -52,7 +83,6 @@ public abstract class Message {
     }
 
     public byte[] assemble() {
-        this.setOriginIdField();
         this.setBodyLenghtField();
 
         List<Byte> message = new ArrayList<>();
@@ -74,12 +104,6 @@ public abstract class Message {
         }
 
         return messageBytes;
-    }
-
-    private void setOriginIdField() {
-        if (this.originId != null) {
-            this.addMessageField(new IdField(FieldType.ORIGINID, originId));
-        }
     }
 
     private void setBodyLenghtField() {

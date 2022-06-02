@@ -58,4 +58,9 @@ public class MessageTypeField extends MessageField {
         }
         return field;
     }
+
+    @Override
+    public String getValue() {
+        return this.translateType();
+    }
 }

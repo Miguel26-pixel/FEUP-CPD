@@ -38,4 +38,6 @@ public abstract class MessageField {
         field.add((byte)' ');
         return field;
     }
+
+    public abstract String getValue();
 }
