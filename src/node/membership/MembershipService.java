@@ -15,6 +15,9 @@ import utils.UtilsTCP;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MembershipService {
@@ -23,6 +26,7 @@ public class MembershipService {
     private int membershipCounter;
     private final String identifier;
     private final AtomicBoolean isLeader;
+    private ScheduledExecutorService membershipSender;
 
     public View getView() {
         return view;
@@ -41,8 +45,15 @@ public class MembershipService {
         return this.isLeader.get();
     }
 
-    public void setLeader(boolean isLeader) {
-        this.isLeader.set(isLeader);
+    public void setLeader() {
+        this.isLeader.set(true);
+        this.membershipSender = Executors.newSingleThreadScheduledExecutor();
+        this.membershipSender.schedule(new LeaderManagement(this), 1000, TimeUnit.MILLISECONDS);
+    }
+
+    public void removeLeader() {
+        this.isLeader.set(false);
+        this.membershipSender.shutdown();
     }
 
     public boolean join(UDPAgent udpAgent, int tcpPort) {

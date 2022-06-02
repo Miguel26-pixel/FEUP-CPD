@@ -32,12 +32,12 @@ public class CoupTask extends Thread {
 
         if (couperId != null) {
             if (couperId.equals(nodeId)) {
-                this.membershipService.setLeader(true);
+                this.membershipService.setLeader();
                 return;
             }
 
             if (this.membershipService.isLeader()) {
-                this.membershipService.setLeader(false);
+                this.membershipService.removeLeader();
             }
 
             ViewEntry nextNodeInfo = this.view.getNextUpEntry(UtilsHash.hashSHA256(this.nodeId));
