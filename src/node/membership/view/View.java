@@ -93,7 +93,7 @@ public class View {
     }
 
     public View getMostRecentEntries(int subsetSize) {
-        List<Map.Entry<String, ViewEntry>> entryList = new ArrayList<>(new ArrayList<>(entries.entrySet()));
+        List<Map.Entry<String, ViewEntry>> entryList = new ArrayList<>(entries.entrySet());
 
         entryList.sort(Comparator.comparing(entry -> entry.getValue().getEpoch()));
 
@@ -105,6 +105,17 @@ public class View {
         }
 
         return recentView;
+    }
+
+    public ViewEntry getNextUpEntry(String previousKey) {
+        List<String> keyList = new ArrayList<>(upEntries.keySet());
+
+        Collections.sort(keyList);
+
+        int previousKeyIndex = keyList.indexOf(previousKey);
+        String nextKey = keyList.get((previousKeyIndex + 1) % keyList.size());
+
+        return upEntries.get(nextKey);
     }
 
     @Override
