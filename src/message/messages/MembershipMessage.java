@@ -28,7 +28,6 @@ public class MembershipMessage extends Message {
         split.removeIf(s -> s.equals(""));
         String body = split.get(split.size() - 1);
         String viewString = body.split("\\|")[0];
-        System.out.println(viewString);
         this.view = new View(viewString);
     }
 

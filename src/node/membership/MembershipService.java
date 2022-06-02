@@ -18,12 +18,14 @@ import utils.UtilsTCP;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MembershipService {
     private final View view;
     private final ThreadPool workers;
     private int membershipCounter;
     private final String identifier;
+    private final AtomicBoolean isLeader;
 
     public View getView() {
         return view;
@@ -35,6 +37,15 @@ public class MembershipService {
 
         this.view = new View();
         this.membershipCounter = 0;
+        this.isLeader = new AtomicBoolean(false);
+    }
+
+    public boolean isLeader() {
+        return this.isLeader.get();
+    }
+
+    public void setLeader(boolean isLeader) {
+        this.isLeader.set(isLeader);
     }
 
     public boolean join(UDPAgent udpAgent, int tcpPort) {

@@ -24,22 +24,24 @@ public class LeadershipTask extends Thread {
     @Override
     public void run() {
         LeadershipMessage leadershipMessage = new LeadershipMessage(leadershipMessageString);
-        String leadershipMessageOrigin = leadershipMessage.getFieldValue(FieldType.ORIGINID);
+        String wannabeLeaderId = leadershipMessage.getLeaderId();
 
-        if (leadershipMessageOrigin != null) {
-            if (leadershipMessageOrigin.equals(nodeId)) {
+        if (wannabeLeaderId != null) {
+            if (wannabeLeaderId.equals(nodeId)) {
                 System.out.println("I'M THE LEADER BITCHES");
                 //TODO: send coup message
+                return;
             }
+
+            ViewEntry nextNodeInfo = this.view.getNextUpEntry(UtilsHash.hashSHA256(this.nodeId));
+
+            LeadershipMessage redirectionMessage = new LeadershipMessage(this.nodeId, wannabeLeaderId, leadershipMessage.getView());
+
+            try {
+                Socket socket = new Socket(nextNodeInfo.getAddress(), nextNodeInfo.getPort());
+                UtilsTCP.sendTCPMessage(socket.getOutputStream(), redirectionMessage);
+            } catch (IOException ignored) {}
         }
 
-        ViewEntry nextNodeInfo = this.view.getNextUpEntry(UtilsHash.hashSHA256(this.nodeId));
-
-        LeadershipMessage redirectionMessage = new LeadershipMessage(nextNodeInfo.getAddress(), leadershipMessage.getView());
-
-        try {
-            Socket socket = new Socket(nextNodeInfo.getAddress(), nextNodeInfo.getPort());
-            UtilsTCP.sendTCPMessage(socket.getOutputStream(), redirectionMessage);
-        } catch (IOException ignored) {}
     }
 }
