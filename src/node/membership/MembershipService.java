@@ -1,16 +1,22 @@
 package node.membership;
 
 import message.messages.JoinMessage;
+import message.messages.LeadershipMessage;
 import message.messages.LeaveMessage;
 import node.comms.UDPAgent;
 import node.membership.threading.JoinTask;
+import node.membership.threading.LeadershipTask;
 import node.membership.threading.LeaveTask;
 import node.membership.threading.MembershipTask;
 import node.membership.view.View;
+import node.membership.view.ViewEntry;
 import node.store.KeyValueStore;
 import threading.ThreadPool;
+import utils.UtilsHash;
+import utils.UtilsTCP;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.Arrays;
 
 public class MembershipService {
@@ -72,5 +78,9 @@ public class MembershipService {
 
     public void processMembership(String membershipMessageString) {
         workers.execute(new MembershipTask(this.view, membershipMessageString));
+    }
+
+    public void processLeadership(String leadershipMessageString) {
+        workers.execute(new LeadershipTask(this.view, this.identifier, leadershipMessageString));
     }
 }

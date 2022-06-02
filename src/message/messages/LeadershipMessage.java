@@ -29,6 +29,10 @@ public class LeadershipMessage extends Message {
         this.view = new View(viewString);
     }
 
+    public View getView() {
+        return view;
+    }
+
     @Override
     protected void buildBody() {
         this.body.addAll(this.view.toBytes());

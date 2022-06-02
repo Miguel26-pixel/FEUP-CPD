@@ -60,7 +60,7 @@ public abstract class Message {
         }
     }
 
-    protected String getFieldValue(FieldType fieldType) {
+    public String getFieldValue(FieldType fieldType) {
         for (MessageField field: this.messageFields) {
             if (field.fieldType == fieldType) {
                 return field.getValue();
