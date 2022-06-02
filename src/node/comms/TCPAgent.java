@@ -49,6 +49,7 @@ public class TCPAgent extends CommunicationAgent {
                 }
                 case COUP -> {
                     System.out.println("COUP");
+                    membershipService.processCoup(messageString);
                 }
                 case GET -> {
                     System.out.println("GET");

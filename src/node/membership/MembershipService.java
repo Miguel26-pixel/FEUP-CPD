@@ -4,10 +4,7 @@ import message.messages.JoinMessage;
 import message.messages.LeadershipMessage;
 import message.messages.LeaveMessage;
 import node.comms.UDPAgent;
-import node.membership.threading.JoinTask;
-import node.membership.threading.LeadershipTask;
-import node.membership.threading.LeaveTask;
-import node.membership.threading.MembershipTask;
+import node.membership.threading.*;
 import node.membership.view.View;
 import node.membership.view.ViewEntry;
 import node.store.KeyValueStore;
@@ -93,5 +90,9 @@ public class MembershipService {
 
     public void processLeadership(String leadershipMessageString) {
         workers.execute(new LeadershipTask(this.view, this.identifier, leadershipMessageString));
+    }
+
+    public void processCoup(String coupMessageString) {
+        workers.execute(new CoupTask(this.view, this.identifier, this, coupMessageString));
     }
 }
