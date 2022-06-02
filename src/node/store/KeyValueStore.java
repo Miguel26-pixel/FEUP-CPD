@@ -34,6 +34,10 @@ public class KeyValueStore {
         this.myHash = myHash;
     }
 
+    public String getDirPath() {
+        return folderPath + folderName + "/";
+    }
+
     public void checkPastFiles() {
         File nodeDir = new File(folderPath + folderName);
         if (nodeDir.exists() && nodeDir.isDirectory() && nodeDir.listFiles() != null) {
@@ -57,6 +61,31 @@ public class KeyValueStore {
         return view.getUpEntries().keySet().iterator().next();
     }
 
+    public List<Socket> getNextTwoActiveNodes() {
+        List<Socket> sockets = new ArrayList<>();
+        int counter = 0;
+        String currentHash = getClosestNodeKey(myHash, view);
+        if (currentHash == null) { return sockets; }
+        while(counter < 2 && !currentHash.equals(myHash)) {
+            try {
+                Socket socket = new Socket(view.getUpEntries().get(currentHash).getAddress(), view.getUpEntries().get(currentHash).getPort());
+                sockets.add(socket);
+                counter++;
+                currentHash = getClosestNodeKey(currentHash, view);
+                if (currentHash == null) { return sockets; }
+            } catch (IOException ignored) { }
+        }
+        return sockets;
+    }
+
+    private boolean isActive(String nodeKey) {
+        try (Socket socket = new Socket(view.getUpEntries().get(nodeKey).getAddress(), view.getUpEntries().get(nodeKey).getPort())){
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
     public Map<String,String> checkFilesView(View view) {
         Map<String,String> files_to_change = new HashMap<>();
 
@@ -69,7 +98,7 @@ public class KeyValueStore {
                 String hash = file.getName().substring(("file_").length());
                 String nodeKey = getClosestNodeKey(hash,view);
                 if (nodeKey != null && !nodeKey.equals(myHash)){
-                    files_to_change.put(nodeKey,folderPath + folderName + "/" + file.getName());
+                    files_to_change.put(nodeKey, getDirPath() + file.getName());
                 }
             }
         }
@@ -126,7 +155,7 @@ public class KeyValueStore {
     public void sendFilesToNextNode() {
         while (idStore.size() > 0) {
             String key = idStore.get(0);
-            File file = new File(folderPath + folderName + "/file_" + key);
+            File file = new File(getDirPath() + "file_" + key);
             String nodeKey = getClosestNodeKey(myHash,view);
 
             if (nodeKey == null) break;
@@ -167,7 +196,7 @@ public class KeyValueStore {
             }
         }
 
-        File newFile = new File(folderPath + folderName + "/file_" + valueKey);
+        File newFile = new File(getDirPath() + "file_" + valueKey);
 
         try (FileOutputStream out = new FileOutputStream(newFile)) {
             out.write(file.getBytes());
@@ -191,7 +220,7 @@ public class KeyValueStore {
             }
         }
 
-        File file = new File(folderPath + folderName + "/file_" + key);
+        File file = new File(getDirPath() + "file_" + key);
         if (!file.exists() || !file.delete()) { return "failed"; }
 
         idStore.remove(index);
