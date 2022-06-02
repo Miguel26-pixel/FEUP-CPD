@@ -33,6 +33,7 @@ public class DeleteTask extends Thread {
         System.out.println("Delete operation has " + state);
         try {
             UtilsTCP.sendTCPMessage(socket.getOutputStream(), new DeleteMessageReply(state));
+            socket.close();
         } catch (IOException e) {
             System.out.println("TCP Exception: " + e);
         }

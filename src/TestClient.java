@@ -1,6 +1,7 @@
 import client.ClientServices;
 import client.Services;
 
+import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
@@ -73,9 +74,10 @@ public class TestClient {
                 }
                 default -> System.err.println("Invalid operation");
             }
+        } catch (NotBoundException e) {
+            System.err.println("Client exception: register with no associated binding");
         } catch (Exception e) {
             System.err.println("Client exception: " + e);
-            e.printStackTrace();
         }
     }
 }

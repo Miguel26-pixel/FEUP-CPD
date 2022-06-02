@@ -17,8 +17,10 @@ public class UtilsTCP {
     private static final byte[] delim = new byte[]{CR,LF,CR,LF};
     public static void  sendTCPMessage(OutputStream output, Message message) throws IOException {
         try {
-            output.write(message.assemble());
-            output.flush();
+            if (message != null) {
+                output.write(message.assemble());
+                output.flush();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -36,6 +36,7 @@ public class PutTask extends Thread {
 
         try {
             UtilsTCP.sendTCPMessage(socket.getOutputStream(), new PutMessageReply(newKey));
+            socket.close();
         } catch (IOException e) {
             System.out.println("TCP Exception: " + e);
         }

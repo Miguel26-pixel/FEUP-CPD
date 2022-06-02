@@ -23,6 +23,7 @@ public class RedirectTask extends Thread {
         String reply = UtilsTCP.redirectMessage(message, address, port);
         try {
             UtilsTCP.sendTCPString(socket.getOutputStream(), reply);
+            socket.close();
         } catch (IOException e) {
             System.out.println("TCP Exception: " + e);
         }
