@@ -32,10 +32,9 @@ public class KeyValueStore {
         this.workers = workers;
         this.view = view;
         this.myHash = myHash;
-        checkPastFiles();
     }
 
-    private void checkPastFiles() {
+    public void checkPastFiles() {
         File nodeDir = new File(folderPath + folderName);
         if (nodeDir.exists() && nodeDir.isDirectory() && nodeDir.listFiles() != null) {
             File[] files = nodeDir.listFiles();
@@ -45,6 +44,7 @@ public class KeyValueStore {
             for (File file : files) {
                 String keyStr = file.getName().substring(("file_").length());
                 idStore.add(keyStr);
+                System.out.println("key added: " + keyStr);
             }
         }
     }
@@ -128,6 +128,13 @@ public class KeyValueStore {
             String key = idStore.get(0);
             File file = new File(folderPath + folderName + "/file_" + key);
             String nodeKey = getClosestNodeKey(myHash,view);
+
+            if (nodeKey == null) break;
+            if (nodeKey.equals(myHash)) {
+                System.out.println("Removi");
+                idStore.remove(0);
+                continue;
+            }
 
             new SendForcePutTask(view.getUpEntries().get(nodeKey).getAddress(),
                     view.getUpEntries().get(nodeKey).getPort(),

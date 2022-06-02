@@ -77,7 +77,6 @@ public class TCPAgent extends CommunicationAgent {
     }
 
     public void sendFilesToLeave() {
-        System.out.println("FORCE PUT");
         keyValueStore.sendFilesToNextNode();
     }
 

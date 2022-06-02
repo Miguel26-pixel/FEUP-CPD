@@ -41,6 +41,7 @@ public class Node implements Services {
         this.udpAgent.resumeExecution();
         this.tcpAgent.resumeExecution();
         this.membershipService.join(this.udpAgent, this.tcpAgent.getPort());
+        this.keyValueStore.checkPastFiles();
     }
 
     @Override
