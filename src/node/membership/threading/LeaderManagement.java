@@ -10,6 +10,7 @@ import java.net.Socket;
 
 public class LeaderManagement implements Runnable {
     private final MembershipService membershipService;
+    private int lastUpdate = 0;
 
     public LeaderManagement(MembershipService membershipService) {
         this.membershipService = membershipService;

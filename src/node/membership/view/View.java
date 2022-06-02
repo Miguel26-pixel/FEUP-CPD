@@ -110,6 +110,10 @@ public class View {
     public ViewEntry getNextUpEntry(String previousKey) {
         List<String> keyList = new ArrayList<>(upEntries.keySet());
 
+        if (keyList.size() == 0) {
+            return null;
+        }
+
         Collections.sort(keyList);
 
         int previousKeyIndex = keyList.indexOf(previousKey);

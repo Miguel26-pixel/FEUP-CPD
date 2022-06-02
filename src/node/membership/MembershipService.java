@@ -39,6 +39,8 @@ public class MembershipService {
         this.view = new View();
         this.membershipCounter = 0;
         this.isLeader = new AtomicBoolean(false);
+        this.membershipSender = Executors.newSingleThreadScheduledExecutor();
+        this.removeLeader();
     }
 
     public boolean isLeader() {
@@ -47,13 +49,16 @@ public class MembershipService {
 
     public void setLeader() {
         this.isLeader.set(true);
+        this.membershipSender.shutdown();
         this.membershipSender = Executors.newSingleThreadScheduledExecutor();
-        this.membershipSender.schedule(new LeaderManagement(this), 1000, TimeUnit.MILLISECONDS);
+        this.membershipSender.scheduleAtFixedRate(new LeaderManagement(this), 0, 1000, TimeUnit.MILLISECONDS);
     }
 
     public void removeLeader() {
         this.isLeader.set(false);
         this.membershipSender.shutdown();
+        this.membershipSender = Executors.newSingleThreadScheduledExecutor();
+        this.membershipSender.scheduleAtFixedRate(new LeaderSearch(this.identifier, this), 0, 1000, TimeUnit.MILLISECONDS);
     }
 
     public boolean join(UDPAgent udpAgent, int tcpPort) {
@@ -63,6 +68,9 @@ public class MembershipService {
             } catch (IOException e) {
                 return false;
             }
+
+            long secondsSinceEpoch = System.currentTimeMillis() / 1000;
+            this.view.addEntry(this.identifier, new ViewEntry(tcpPort, this.identifier, this.membershipCounter, secondsSinceEpoch));
 
             this.membershipCounter++;
             return true;
