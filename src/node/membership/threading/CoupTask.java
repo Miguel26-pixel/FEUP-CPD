@@ -36,6 +36,10 @@ public class CoupTask extends Thread {
                 return;
             }
 
+            if (this.membershipService.isLeader()) {
+                this.membershipService.setLeader(false);
+            }
+
             ViewEntry nextNodeInfo = this.view.getNextUpEntry(UtilsHash.hashSHA256(this.nodeId));
 
             CoupMessage redirectionMessage = new CoupMessage(nodeId, couperId);
