@@ -41,6 +41,7 @@ public class TCPAgent extends CommunicationAgent {
                 case MEMBERSHIP -> {
                     System.out.println("MEMBERSHIP");
                     membershipService.processMembership(messageString);
+                    socket.close();
                 }
                 case GET -> {
                     System.out.println("GET");
@@ -54,22 +55,20 @@ public class TCPAgent extends CommunicationAgent {
                     System.out.println("DELETE");
                     keyValueStore.processDelete(messageString, socket);
                 }
+                case FORCE_PUT -> {
+                    System.out.println("FORCE PUT");
+                    keyValueStore.processForcePut(messageString);
+                }
                 default -> {
+                    socket.close();
                     System.err.println("Wrong message header");
                 }
             }
         } catch (Exception ignore) {}
     }
 
-    public void send(Message message, String address, String port) throws IOException {
-        MessageType messageType = message.getMessageType();
-
-        if (!(messageType == MessageType.JOIN || messageType == MessageType.LEAVE)) {
-            Socket socket = new Socket(address, Integer.parseInt(port));
-
-            UtilsTCP.sendTCPMessage(socket.getOutputStream(), message);
-            socket.close();
-        }
+    public void sendFilesToLeave() {
+        keyValueStore.sendFilesToNextNode();
     }
 
     public int getPort() {

@@ -6,6 +6,7 @@ public enum MessageType {
     MEMBERSHIP,
     PUT,
     PUT_REPLY,
+    FORCE_PUT,
     GET,
     GET_REPLY,
     DELETE,

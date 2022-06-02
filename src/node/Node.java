@@ -41,10 +41,12 @@ public class Node implements Services {
         this.udpAgent.resumeExecution();
         this.tcpAgent.resumeExecution();
         this.membershipService.join(this.udpAgent, this.tcpAgent.getPort());
+        this.keyValueStore.checkPastFiles();
     }
 
     @Override
     public void leave() throws RemoteException {
+        this.tcpAgent.sendFilesToLeave();
         this.tcpAgent.stopExecution();
         this.udpAgent.stopExecution();
         this.membershipService.leave(this.udpAgent);

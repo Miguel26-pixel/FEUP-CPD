@@ -36,6 +36,7 @@ public class GetTask extends Thread {
             OutputStream outputStream = socket.getOutputStream();
             GetMessageReply m = new GetMessageReply(file);
             UtilsTCP.sendTCPMessage(outputStream, m);
+            socket.close();
         } catch (IOException e) {
             System.out.println("TCP Exception: " + e);
         }

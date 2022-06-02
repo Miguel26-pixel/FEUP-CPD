@@ -21,6 +21,7 @@ public class GetFailedTask extends Thread {
         System.err.println("Successor node not found");
         try {
             UtilsTCP.sendTCPMessage(socket.getOutputStream(), messageReply);
+            socket.close();
         } catch (IOException e) {
             System.out.println("TCP Exception: " + e);
         }

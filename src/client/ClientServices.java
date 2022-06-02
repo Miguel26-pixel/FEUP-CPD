@@ -51,6 +51,7 @@ public class ClientServices {
             String reply = UtilsTCP.readTCPMessage(input);
 
             if (Message.getMessageType(reply) != MessageType.PUT_REPLY) {
+                System.out.println("Operation put failed");
                 System.err.println("Message reply incorrect type. Expected: " + MessageType.PUT_REPLY + ". Given: " + Message.getMessageType(reply));
                 return;
             }
@@ -70,6 +71,12 @@ public class ClientServices {
             GetMessage message = new GetMessage(operand);
             UtilsTCP.sendTCPMessage(output, message);
             String reply = UtilsTCP.readTCPMessage(input);
+
+            if (Message.getMessageType(reply) != MessageType.GET_REPLY) {
+                System.out.println("Operation get failed");
+                System.err.println("Message reply incorrect type. Expected: " + MessageType.GET_REPLY + ". Given: " + Message.getMessageType(reply));
+                return;
+            }
 
             if (GetMessageReply.isBodyEmpty(reply)) {
                 System.err.println("File does not exist");
@@ -105,6 +112,7 @@ public class ClientServices {
             String reply = UtilsTCP.readTCPMessage(input);
 
             if (Message.getMessageType(reply) != MessageType.DELETE_REPLY) {
+                System.out.println("Operation delete failed");
                 System.err.println("Message reply incorrect type. Expected: " + MessageType.DELETE_REPLY + ". Given: " + Message.getMessageType(reply));
                 return;
             }
