@@ -27,7 +27,7 @@ public class KeyValueStore {
 
     public KeyValueStore(String folderName, String myHash, ThreadPool workers, View view){
         this.idStore = new ArrayList<>();
-        this.folderPath = "../dynamo/";
+        this.folderPath = "dynamo/";
         this.folderName = folderName;
         this.workers = workers;
         this.view = view;
@@ -218,28 +218,6 @@ public class KeyValueStore {
 
     public String putNewPair(String file) {
         String valueKey = UtilsHash.hashSHA256(file);
-
-        File dynamoDir = new File(folderPath);
-        if (!dynamoDir.exists() || !dynamoDir.isDirectory()) {
-            boolean res = dynamoDir.mkdir();
-            if(res) {
-                System.out.println("Dynamo main folder created with success");
-            } else {
-                System.err.println("Dynamo main folder could not be created");
-                return null;
-            }
-        }
-
-        File nodeDir = new File(folderPath + folderName);
-        if (!nodeDir.exists() || !nodeDir.isDirectory()) {
-            boolean res = nodeDir.mkdir();
-            if(res) {
-                System.out.println("Node folder created with success");
-            } else {
-                System.err.println("Node folder could not be created");
-                return null;
-            }
-        }
 
         File newFile = new File(getDirPath() + "file_" + valueKey);
 
