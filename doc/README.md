@@ -11,6 +11,7 @@
 - To clean all the files created when compiling, simply use `make clean`
 
 ## Executing
+- Execute rmi register, using `rmiregister`. An alternative is to run the process in the background using `remiregister &`
 - From the src directory of the project2:
   - To invoke a service node use:
     - `java Store <IP_mcast_addr> <IP_mcast_port> <node_id> <Store_port>`
