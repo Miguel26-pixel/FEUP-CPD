@@ -1,8 +1,6 @@
 package node.membership.threading;
 
-import message.Message;
 import message.messages.PutMessage;
-import message.messages.PutMessageReply;
 import node.store.KeyValueStore;
 import utils.UtilsTCP;
 
@@ -10,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
 
 import static node.comms.CommunicationAgent.TIMEOUT;
 

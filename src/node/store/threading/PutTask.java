@@ -36,6 +36,7 @@ public class PutTask extends Thread {
             File temp = UtilsFile.stringToFile(file, keyValueStore.getDirPath() + "temp");
             ForcePutMessage message = new ForcePutMessage(temp);
             for (Socket s: socketList) {
+                System.out.println("Trying to replicate file...");
                 try {
                     UtilsTCP.sendTCPMessage(s.getOutputStream(), message);
                     s.close();

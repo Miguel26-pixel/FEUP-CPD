@@ -73,7 +73,9 @@ public class KeyValueStore {
                 counter++;
                 currentHash = getClosestNodeKey(currentHash, view);
                 if (currentHash == null) { return sockets; }
-            } catch (IOException ignored) { }
+            } catch (IOException ignored) {
+                currentHash = getClosestNodeKey(currentHash, view);
+            }
         }
         return sockets;
     }
@@ -145,11 +147,15 @@ public class KeyValueStore {
         if (nodeHash == null) {
             workers.execute(new DeleteTaskFailed(new DeleteMessageReply("Successor node not found"), socket));
         } else if (nodeHash.equals(myHash)) {
-            workers.execute(new DeleteTask(deleteMessageString, socket, folderPath, folderName, idStore));
+            workers.execute(new DeleteTask(deleteMessageString, socket, this));
         } else {
             ViewEntry entry = view.getUpEntries().get(nodeHash);
             workers.execute(new RedirectTask(socket, deleteMessageString, entry.getAddress(), entry.getPort()));
         }
+    }
+
+    public void processForceDelete(String forceDeleteMessage) {
+        workers.execute(new ForceDeleteTask(forceDeleteMessage, this));
     }
 
     public void sendFilesToNextNode() {
@@ -219,6 +225,7 @@ public class KeyValueStore {
                 break;
             }
         }
+        if (index == -1) { return "failed"; }
 
         File file = new File(getDirPath() + "file_" + key);
         if (!file.exists() || !file.delete()) { return "failed"; }

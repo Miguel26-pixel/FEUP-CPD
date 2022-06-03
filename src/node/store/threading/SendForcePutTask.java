@@ -32,7 +32,6 @@ public class SendForcePutTask {
             OutputStream output = socket.getOutputStream();
             UtilsTCP.sendTCPMessage(output, message);
             System.out.println("File sended with success");
-            System.out.println(fileKey);
             String state = keyValueStore.deleteValue(fileKey);
             System.out.println("File deleted operations has " + state);
         } catch (IOException e) {

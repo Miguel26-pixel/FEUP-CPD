@@ -59,6 +59,10 @@ public class TCPAgent extends CommunicationAgent {
                     System.out.println("FORCE PUT");
                     keyValueStore.processForcePut(messageString);
                 }
+                case FORCE_DELETE -> {
+                    System.out.println("FORCE DELETE");
+                    keyValueStore.processForceDelete(messageString);
+                }
                 default -> {
                     socket.close();
                     System.err.println("Wrong message header");

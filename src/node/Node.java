@@ -46,8 +46,8 @@ public class Node implements Services {
 
     @Override
     public void leave() throws RemoteException {
-        this.tcpAgent.sendFilesToLeave();
         this.tcpAgent.stopExecution();
+        this.tcpAgent.sendFilesToLeave();
         this.udpAgent.stopExecution();
         this.membershipService.leave(this.udpAgent);
         this.workers.waitForTasks();

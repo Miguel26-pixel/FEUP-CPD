@@ -19,12 +19,14 @@ public class JoinTask extends Thread {
     private final String joinMessageString;
     private final KeyValueStore keyValueStore;
     private final ThreadPool workers;
+    private final String myID;
 
-    public JoinTask(View view, String joinMessage, KeyValueStore keyValueStore, ThreadPool workers) {
+    public JoinTask(View view, String joinMessage, KeyValueStore keyValueStore, ThreadPool workers, String myID) {
         this.view = view;
         this.joinMessageString = joinMessage;
         this.keyValueStore = keyValueStore;
         this.workers = workers;
+        this.myID = myID;
     }
 
     @Override
@@ -46,6 +48,8 @@ public class JoinTask extends Thread {
             UtilsTCP.sendTCPMessage(output, reply);
         } catch (IOException ignored) {
         }
+
+        if (joinMessage.getOriginId().equals(myID)) { return; }
 
         Map<String,String> files_to_change = keyValueStore.checkFilesView(view);
 
