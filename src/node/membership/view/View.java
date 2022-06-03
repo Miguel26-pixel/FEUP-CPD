@@ -166,6 +166,14 @@ public class View {
         return null;
     }
 
+    public int getCounter(String key) {
+        if (this.entries.containsKey(key)) {
+            return this.entries.get(key).getCounter();
+        }
+
+        return -1;
+    }
+
     public void setDown(String nodeId, boolean updateLog) {
         String hash = UtilsHash.hashSHA256(nodeId);
 

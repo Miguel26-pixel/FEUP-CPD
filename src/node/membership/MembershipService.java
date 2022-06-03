@@ -38,6 +38,7 @@ public class MembershipService {
 
         this.view = new View();
         this.view.createLog(folderPath);
+        this.view.copyView(new View(this.view.getLog().getLog()), true);
         this.membershipCounter = 0;
         this.isLeader = new AtomicBoolean(false);
         this.membershipSender = Executors.newSingleThreadScheduledExecutor();

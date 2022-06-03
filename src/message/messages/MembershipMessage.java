@@ -2,7 +2,6 @@ package message.messages;
 
 import message.Message;
 import message.MessageType;
-import node.membership.log.Log;
 import node.membership.view.View;
 
 import java.util.ArrayList;
