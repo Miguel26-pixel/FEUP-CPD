@@ -13,5 +13,6 @@ public enum MessageType {
     GET_REPLY,
     DELETE,
     DELETE_REPLY,
+    FORCE_DELETE,
     INVALID
 }

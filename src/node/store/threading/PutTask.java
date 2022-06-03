@@ -1,17 +1,16 @@
 package node.store.threading;
 
 import message.Message;
+import message.messages.ForcePutMessage;
 import message.messages.PutMessageReply;
-import node.membership.view.View;
 import node.store.KeyValueStore;
-import utils.UtilsHash;
+import utils.UtilsFile;
 import utils.UtilsTCP;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.List;
 
 public class PutTask extends Thread {
     private final String putMessageString;
@@ -26,12 +25,26 @@ public class PutTask extends Thread {
 
     @Override
     public void run() {
-        String newKey = keyValueStore.putNewPair(Message.getMessageBody(putMessageString));
+        String file = Message.getMessageBody(putMessageString);
+        String newKey = keyValueStore.putNewPair(file);
         if (newKey == null) {
             System.err.println("Put operation failed");
             newKey = "Put operation failed";
         } else {
             System.out.println("New key: " + newKey);
+            List<Socket> socketList = keyValueStore.getNextTwoActiveNodes();
+            File temp = UtilsFile.stringToFile(file, keyValueStore.getDirPath() + "temp");
+            ForcePutMessage message = new ForcePutMessage(temp);
+            for (Socket s: socketList) {
+                System.out.println("Trying to replicate file...");
+                try {
+                    UtilsTCP.sendTCPMessage(s.getOutputStream(), message);
+                    s.close();
+                } catch (IOException e) {
+                    System.err.println("Cannot replicate file");
+                }
+            }
+            temp.delete();
         }
 
         try {

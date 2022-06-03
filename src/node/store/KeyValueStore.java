@@ -34,6 +34,10 @@ public class KeyValueStore {
         this.myHash = myHash;
     }
 
+    public String getDirPath() {
+        return folderPath + folderName + "/";
+    }
+
     public void checkPastFiles() {
         File nodeDir = new File(folderPath + folderName);
         if (nodeDir.exists() && nodeDir.isDirectory() && nodeDir.listFiles() != null) {
@@ -57,6 +61,60 @@ public class KeyValueStore {
         return view.getUpEntries().keySet().iterator().next();
     }
 
+    private boolean isActive(String nodeKey) {
+        try (Socket socket = new Socket(view.getUpEntries().get(nodeKey).getAddress(), view.getUpEntries().get(nodeKey).getPort())){
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+    private String getFirstActiveNode(String hash) {
+        String currentNode = getClosestNodeKey(hash, view);
+        if (currentNode == null) { return null; }
+        while (!currentNode.equals(myHash)) {
+            if (isActive(currentNode)) { return currentNode; }
+            currentNode = getClosestNodeKey(currentNode, view);
+            if (currentNode == null) { return null; }
+        }
+        return myHash;
+    }
+
+    public List<Socket> getNextTwoActiveNodes() {
+        List<Socket> sockets = new ArrayList<>();
+        int counter = 0;
+        String currentHash = getClosestNodeKey(myHash, view);
+        if (currentHash == null) { return sockets; }
+        while(counter < 2 && !currentHash.equals(myHash)) {
+            try {
+                Socket socket = new Socket(view.getUpEntries().get(currentHash).getAddress(), view.getUpEntries().get(currentHash).getPort());
+                sockets.add(socket);
+                counter++;
+                currentHash = getClosestNodeKey(currentHash, view);
+                if (currentHash == null) { return sockets; }
+            } catch (IOException ignored) {
+                currentHash = getClosestNodeKey(currentHash, view);
+                if (currentHash == null) { return sockets; }
+            }
+        }
+        return sockets;
+    }
+
+    public List<String> getActiveNodesToReplicate(String fileKey) {
+        List<String> nodeKeys = new ArrayList<>();
+        int counter = 0;
+        String currentHash = getClosestNodeKey(fileKey, view);
+        String firstHash = currentHash;
+        do {
+            if (currentHash == null) { break; }
+            if (!currentHash.equals(myHash) && isActive(currentHash)) {
+                nodeKeys.add(currentHash);
+                counter++;
+            }
+            currentHash = getClosestNodeKey(currentHash, view);
+        } while (counter < 3 && !firstHash.equals(currentHash));
+        return nodeKeys;
+    }
+
     public Map<String,String> checkFilesView(View view) {
         Map<String,String> files_to_change = new HashMap<>();
 
@@ -67,20 +125,36 @@ public class KeyValueStore {
 
             for (File file : files) {
                 String hash = file.getName().substring(("file_").length());
-                String nodeKey = getClosestNodeKey(hash,view);
+                String nodeKey = getFirstActiveNode(hash);
                 if (nodeKey != null && !nodeKey.equals(myHash)){
-                    files_to_change.put(nodeKey,folderPath + folderName + "/" + file.getName());
+                    files_to_change.put(nodeKey, getDirPath() + file.getName());
                 }
             }
         }
         return files_to_change;
     }
 
+    public List<String> checkFilesReplication(String nodeID) {
+        List<String> filesToReplicate = new ArrayList<>();
+        String nodeKey = UtilsHash.hashSHA256(nodeID);
+        String currentHash = myHash;
+        for (String key: idStore) {
+            for (int i = 0; i < 2; i++) {
+                currentHash = getClosestNodeKey(currentHash,view);
+                if (currentHash == null || currentHash.equals(myHash)) { break; }
+                if (currentHash.equals(nodeKey) && myHash.equals(getClosestNodeKey(key,view))) {
+                    filesToReplicate.add(getDirPath() + "file_" + key);
+                }
+            }
+        }
+        return filesToReplicate;
+    }
+
 
     public void processGet(String getMessageString, Socket socket) {
         String file = Message.getMessageBody(getMessageString);
         String fileKey = UtilsHash.hashSHA256(file);
-        String nodeHash = getClosestNodeKey(fileKey, view);
+        String nodeHash = getFirstActiveNode(fileKey);
         if (nodeHash == null) {
             workers.execute(new GetFailedTask(new GetMessageReply(null), socket));
         } else if (nodeHash.equals(myHash)) {
@@ -94,7 +168,7 @@ public class KeyValueStore {
     public void processPut(String putMessageString, Socket socket) {
         String file = Message.getMessageBody(putMessageString);
         String fileKey = UtilsHash.hashSHA256(file);
-        String nodeHash = getClosestNodeKey(fileKey, view);
+        String nodeHash = getFirstActiveNode(fileKey);
         if (nodeHash == null) {
             workers.execute(new PutFailedTask(new PutMessageReply("Successor node not found"), socket));
         } else if (nodeHash.equals(myHash)) {
@@ -112,33 +186,33 @@ public class KeyValueStore {
     public void processDelete(String deleteMessageString, Socket socket) {
         String file = Message.getMessageBody(deleteMessageString);
         String fileKey = UtilsHash.hashSHA256(file);
-        String nodeHash = getClosestNodeKey(fileKey, view);
+        String nodeHash = getFirstActiveNode(fileKey);
         if (nodeHash == null) {
             workers.execute(new DeleteTaskFailed(new DeleteMessageReply("Successor node not found"), socket));
         } else if (nodeHash.equals(myHash)) {
-            workers.execute(new DeleteTask(deleteMessageString, socket, folderPath, folderName, idStore));
+            workers.execute(new DeleteTask(deleteMessageString, socket, this));
         } else {
             ViewEntry entry = view.getUpEntries().get(nodeHash);
             workers.execute(new RedirectTask(socket, deleteMessageString, entry.getAddress(), entry.getPort()));
         }
     }
 
-    public void sendFilesToNextNode() {
+    public void processForceDelete(String forceDeleteMessage) {
+        workers.execute(new ForceDeleteTask(forceDeleteMessage, this));
+    }
+
+    public void sendFilesToNextNodes() {
         while (idStore.size() > 0) {
             String key = idStore.get(0);
-            File file = new File(folderPath + folderName + "/file_" + key);
-            String nodeKey = getClosestNodeKey(myHash,view);
-
-            if (nodeKey == null) break;
-            if (nodeKey.equals(myHash)) {
-                System.out.println("Removi");
-                idStore.remove(0);
-                continue;
+            File file = new File(getDirPath() + "file_" + key);
+            List<String> nodeKeys = getActiveNodesToReplicate(key);
+            for (String nodeKey: nodeKeys) {
+                new SendForcePutTask(view.getUpEntries().get(nodeKey).getAddress(),
+                        view.getUpEntries().get(nodeKey).getPort(),
+                        new ForcePutMessage(file)).sendForcePut();
             }
-
-            new SendForcePutTask(view.getUpEntries().get(nodeKey).getAddress(),
-                    view.getUpEntries().get(nodeKey).getPort(),
-                    new ForcePutMessage(file),this, key).sendForcePut();
+            String state = deleteValue(key);
+            System.out.println("File deleted operations has " + state);
         }
     }
 
@@ -167,7 +241,7 @@ public class KeyValueStore {
             }
         }
 
-        File newFile = new File(folderPath + folderName + "/file_" + valueKey);
+        File newFile = new File(getDirPath() + "file_" + valueKey);
 
         try (FileOutputStream out = new FileOutputStream(newFile)) {
             out.write(file.getBytes());
@@ -190,8 +264,9 @@ public class KeyValueStore {
                 break;
             }
         }
+        if (index == -1) { return "failed"; }
 
-        File file = new File(folderPath + folderName + "/file_" + key);
+        File file = new File(getDirPath() + "file_" + key);
         if (!file.exists() || !file.delete()) { return "failed"; }
 
         idStore.remove(index);

@@ -65,6 +65,10 @@ public class MembershipService {
         this.view.setDown(nodeId, true);
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
     public boolean join(UDPAgent udpAgent, int tcpPort) {
         if (this.membershipCounter % 2 == 0) {
             try {
@@ -99,8 +103,8 @@ public class MembershipService {
         return false;
     }
 
-    public void processJoin(String joinMessageString, KeyValueStore keyValueStore) {
-        workers.execute(new JoinTask(this.view, joinMessageString, keyValueStore, workers));
+    public void processJoin(String joinMessageString, KeyValueStore keyValueStore, String myId) {
+        workers.execute(new JoinTask(this.view, joinMessageString, keyValueStore, workers, myId));
     }
 
     public void processLeave(String leaveMessageString) {

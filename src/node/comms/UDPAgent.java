@@ -29,11 +29,26 @@ public class UDPAgent extends CommunicationAgent {
         this.multicastSocket.setSoTimeout(TIMEOUT);
 
         this.groupAddress = InetAddress.getByName(groupAddress);
-        SocketAddress socketAddress = new InetSocketAddress(this.groupAddress, this.groupPort);
-
-        multicastSocket.joinGroup(socketAddress, NetworkInterface.getByInetAddress(this.groupAddress));
 
         this.buffer = new byte[DATAGRAM_LENGTH];
+    }
+
+    public void udpJoinGroup() {
+        SocketAddress socketAddress = new InetSocketAddress(this.groupAddress, this.groupPort);
+        try {
+            multicastSocket.joinGroup(socketAddress, NetworkInterface.getByInetAddress(this.groupAddress));
+        } catch (IOException e) {
+            System.err.println("Could not join multicast group");
+        }
+    }
+
+    public void udpLeaveGroup() {
+        SocketAddress socketAddress = new InetSocketAddress(this.groupAddress, this.groupPort);
+        try {
+            multicastSocket.leaveGroup(socketAddress, NetworkInterface.getByInetAddress(this.groupAddress));
+        } catch (IOException e) {
+            System.err.println("Could not join multicast group");
+        }
     }
 
     @Override
@@ -52,7 +67,7 @@ public class UDPAgent extends CommunicationAgent {
             switch (Message.getMessageType(messageString)) {
                 case JOIN -> {
                     System.out.println("JOIN");
-                    this.membershipService.processJoin(messageString, keyValueStore);
+                    this.membershipService.processJoin(messageString, keyValueStore, this.membershipService.getIdentifier());
                 }
                 case LEAVE -> {
                     System.out.println("LEAVE");

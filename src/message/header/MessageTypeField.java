@@ -27,6 +27,7 @@ public class MessageTypeField extends MessageField {
             case GET_REPLY -> "get_reply";
             case DELETE -> "delete";
             case DELETE_REPLY -> "delete_reply";
+            case FORCE_DELETE -> "force_delete";
             default -> "invalid";
         };
     }
@@ -45,7 +46,7 @@ public class MessageTypeField extends MessageField {
             case "get_reply" -> MessageType.GET_REPLY;
             case "delete" -> MessageType.DELETE;
             case "delete_reply" -> MessageType.DELETE_REPLY;
-
+            case "force_delete" -> MessageType.FORCE_DELETE;
             default -> MessageType.INVALID;
         };
     }
