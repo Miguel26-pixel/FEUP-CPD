@@ -1,6 +1,7 @@
 package node.membership.threading;
 
-import message.header.FieldType;
+import message.Message;
+import message.messages.CoupMessage;
 import message.messages.LeadershipMessage;
 import node.membership.view.View;
 import node.membership.view.ViewEntry;
@@ -27,20 +28,29 @@ public class LeadershipTask extends Thread {
         String wannabeLeaderId = leadershipMessage.getLeaderId();
 
         if (wannabeLeaderId != null) {
+            Message message;
+
             if (wannabeLeaderId.equals(nodeId)) {
-                System.out.println("I'M THE LEADER BITCHES");
-                //TODO: send coup message
-                return;
+                message = new CoupMessage(this.nodeId, this.nodeId);
+            } else {
+                int comparison = this.view.compareTo(leadershipMessage.getView());
+
+                if (comparison > 0 || (comparison == 0 && this.nodeId.compareTo(wannabeLeaderId) < 0)) {
+                    return;
+                }
+
+                message = new LeadershipMessage(this.nodeId, wannabeLeaderId, leadershipMessage.getView());
             }
 
             ViewEntry nextNodeInfo = this.view.getNextUpEntry(UtilsHash.hashSHA256(this.nodeId));
 
-            LeadershipMessage redirectionMessage = new LeadershipMessage(this.nodeId, wannabeLeaderId, leadershipMessage.getView());
-
             try {
                 Socket socket = new Socket(nextNodeInfo.getAddress(), nextNodeInfo.getPort());
-                UtilsTCP.sendTCPMessage(socket.getOutputStream(), redirectionMessage);
-            } catch (IOException ignored) {}
+                socket.setSoTimeout(3000);
+                UtilsTCP.sendTCPMessage(socket.getOutputStream(), message);
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
+            }
         }
 
     }

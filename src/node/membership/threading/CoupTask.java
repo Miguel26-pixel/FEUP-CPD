@@ -32,6 +32,7 @@ public class CoupTask extends Thread {
 
         if (couperId != null) {
             if (couperId.equals(nodeId)) {
+                System.out.println("I am now the leader of this shit");
                 this.membershipService.setLeader();
                 return;
             }

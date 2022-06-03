@@ -14,6 +14,7 @@ public class CoupMessage extends Message {
         super(MessageType.COUP, originId);
 
         this.couperId = couperId;
+        this.buildBody();
     }
 
     public CoupMessage(String asString) {

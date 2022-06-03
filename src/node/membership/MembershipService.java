@@ -58,7 +58,7 @@ public class MembershipService {
         this.isLeader.set(false);
         this.membershipSender.shutdown();
         this.membershipSender = Executors.newSingleThreadScheduledExecutor();
-        this.membershipSender.scheduleAtFixedRate(new LeaderSearch(this.identifier, this), 0, 1000, TimeUnit.MILLISECONDS);
+        this.membershipSender.scheduleAtFixedRate(new LeaderSearch(this.identifier, this), 0, 10000, TimeUnit.MILLISECONDS);
     }
 
     public boolean join(UDPAgent udpAgent, int tcpPort) {

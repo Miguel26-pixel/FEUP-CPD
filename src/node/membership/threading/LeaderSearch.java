@@ -22,12 +22,17 @@ public class LeaderSearch implements Runnable {
     public void run() {
         View view = this.membershipService.getView();
         ViewEntry nextNode = view.getNextUpEntry(UtilsHash.hashSHA256(nodeId));
+        if (nextNode == null) {
+            return;
+        }
         LeadershipMessage leadershipMessage = new LeadershipMessage(nodeId, nodeId, view);
 
         try {
             Socket socket = new Socket(nextNode.getAddress(), nextNode.getPort());
 
             UtilsTCP.sendTCPMessage(socket.getOutputStream(), leadershipMessage);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            //ignored.printStackTrace();
+        }
     }
 }
