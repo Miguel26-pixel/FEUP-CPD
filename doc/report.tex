@@ -6,6 +6,7 @@
 \usepackage{algpseudocode}
 \usepackage{float}
 \usepackage{adjustbox}
+\usepackage{listings}
 \graphicspath{{graphics/}}
 
 \begin{document}
@@ -60,6 +61,7 @@
 			to easily send and read information contained in every type of message.
 			
 			\paragraph{} All message types are composed of a header and a body:
+	        	
 	        
 	        \section{Header}
 	
@@ -82,10 +84,159 @@
 
 	\chapter{Membership Service}
 			\emph{The message format is detailed described in the Chapter 2}
+			
+			\begin{lstlisting}[language=Java]
+				
+			\end{lstlisting}
 
-	        \paragraph{} 
+	        \paragraph{} The membership service is responsible for ensuring that the distributed network is well managed and that each node is aware of the existence of others. To achieve this purpose, a class representing the service, MembershipService, is integrated into the Node class so it communicates in an efficient fashion.
 	        
-	        \paragraph{}
+	        \paragraph{}Let us now break down how this class handles 
+	        
+	        \section{Tasks}
+	        
+	        	\paragraph{}Every time a MembershipService-related message is received, either through TCP or UDP (depending on the message type), the service handles it in another thread, in the form of a Task. A Task is a family of classes that extends the Thread class, responsible for handling one and only one specific type of message. 
+	        	
+	        	\paragraph{}After creation, every Task is passed to the membership service's ThreadPool, which executes it when one of its Threads is available. This is a simple and generic way of handling all kinds of messages while keeping the program very scalable, which made the integration of new features easier.
+	        	
+	        	\paragraph{}This implementation uses a custom ThreadPool implementation rather than the ThreadPoolExecutor class provided by Java. This allowed the authors to learn more about multithreaded-programming and to have a larger control over what is executing and what isn't.
+	        	
+        	\section{View of the Membership}
+        	
+        		\paragraph{}Each Node needs to have the network easily represented to it. Therefore, the MembershipService also contains a View, a class responsible for keeping record of the state of the membership.
+        		
+        		\paragraph{}The view class keeps two hash maps:
+        		
+        		\begin{itemize}
+        			\item entries - a map relating hashed node IDs to an entry with each node ID. Each entry contains the address, the store port, the membership counter and the seconds since epoch for the moment when the information was received;
+        			\item upEntries - the same as the previous map, but only for online nodes. It allows for a better performance on certain communication needs, specially for the leader (explained in the Leader section).
+        		\end{itemize}
+        	
+        		\paragraph{}When transmitted via TCP, the view keeps each entry in the following format:
+        		
+        		\begin{adjustbox}{center}
+        			\begin{lstlisting}
+hashed-ID;address;port;counter;seconds-since-epoch
+        			\end{lstlisting}
+        		\end{adjustbox}
+	        
+	        \section{Updating Everyone's Information}
+	        
+	        	\paragraph{}A distributed network requires that for everyone to know everyone (or, at least, a subset of everyone). Therefore, it is required that this information is transmitted by some node, hopefully the most knowledgeable one. This problem is a common distributed network problem, known as the leadership election problem.
+	        	
+	        	\paragraph{}Our algorithm takes advantage of the consistent-hashing approach to the database. Every 10 seconds, all nodes decide they want to become the leader. Therefore, they try to pass that message through everyone through the consistent-hashing ring, until the message comes back to themselves.
+	        	
+	        	\paragraph{}If a node receives the intent of another node becoming leader, it compares both their Views of the membership. If the wannabe-leader has a more up to date View of the membership, it's message continues along the ring. Otherwise, it is stopped, never reaching itself.
+	        	
+	        	\paragraph{}If the intent message reaches the the node who, originally, sent it, that means that all other nodes have an inferior or equal View of the membership. The node then becomes the leader, updating everyone else with its View of the membership for, at least, the next 10 seconds.
+	        	
+	        	\paragraph{}The way the comparison is made, it is guaranteed that only one node becomes the leader. The following code snippet illustrates how this process is initialized:
+	        	
+	        	\vspace{.5cm}	        	
+	        	\begin{adjustbox}{center}
+	        	\begin{lstlisting}[language=java]
+public class LeaderSearch implements Runnable {
+	private final String nodeId;
+	private final MembershipService membershipService;
+	
+	public LeaderSearch(String nodeId, MembershipService membershipService) {
+		this.nodeId = nodeId;
+		this.membershipService = membershipService;
+	}
+	
+	@Override
+	public void run() {
+		View view = this.membershipService.getView();
+		LeadershipMessage leadershipMessage = new LeadershipMessage(nodeId, nodeId, view);
+		
+		while (true) {
+			ViewEntry nextNode = view.getNextUpEntry(UtilsHash.hashSHA256(nodeId));
+			if (nextNode == null) {
+				return;
+			}
+			try {
+				Socket socket = new Socket(nextNode.getAddress(), nextNode.getPort());
+				
+				UtilsTCP.sendTCPMessage(socket.getOutputStream(), leadershipMessage);
+				System.out.println("[M]Asking to become the leader. Redirected to "
+				 + nextNode.getAddress());
+				break;
+			} catch (Exception ignored) {
+				this.membershipService.flagNodeDown(nextNode.getAddress());
+			}
+		}
+	}
+}
+
+	        	\end{lstlisting}
+        	\end{adjustbox}
+        
+        	\paragraph{}With this, each node then receives a LeadershipMessage, processed by on the aforemention Tasks:
+        	
+        	\begin{adjustbox}{center}
+        		\begin{lstlisting}[language=java]
+public class LeadershipTask extends Thread {
+	private final View view;
+	private final String nodeId;
+	private final String leadershipMessageString;
+	
+	public LeadershipTask(View view, String nodeId, String leadershipMessageString) {
+		this.view = view;
+		this.leadershipMessageString = leadershipMessageString;
+		this.nodeId = nodeId;
+	}
+	
+	@Override
+	public void run() {
+		LeadershipMessage leadershipMessage = new LeadershipMessage(leadershipMessageString);
+		String wannabeLeaderId = leadershipMessage.getLeaderId();
+		
+		if (wannabeLeaderId != null) {
+			Message message;
+			
+			if (wannabeLeaderId.equals(nodeId)) {
+				message = new CoupMessage(this.nodeId, this.nodeId);
+				System.out.println("[M]Informing everyone that " 
+				+ this.nodeId + " is the new leader.");
+			} else {
+				int comparison = this.view.compareTo(leadershipMessage.getView());
+				
+				if (comparison > 0 
+				|| (comparison == 0 && this.nodeId.compareTo(wannabeLeaderId) < 0)) {
+					System.out.println("[M]Rejecting " 
+					+ wannabeLeaderId + " proposal as the new leader.");
+					return;
+				}
+				
+				message = new LeadershipMessage(this.nodeId, 
+				wannabeLeaderId, leadershipMessage.getView());
+				
+				System.out.println("[M]Approved " 
+				+ wannabeLeaderId + " as the new leader.");
+			}
+			
+			ViewEntry nextNodeInfo = 
+			this.view.getNextUpEntry(UtilsHash.hashSHA256(this.nodeId));
+			
+			try {
+				Socket socket = new Socket(nextNodeInfo.getAddress(),
+				nextNodeInfo.getPort());
+				socket.setSoTimeout(3000);
+				UtilsTCP.sendTCPMessage(socket.getOutputStream(), message);
+				System.out.println("[M]Informing " 
+				+ nextNodeInfo.getAddress() + " about the leadership decision.");
+			} catch (Exception ignored) {
+				ignored.printStackTrace();
+			}
+			
+		}
+		
+	}
+}
+        		\end{lstlisting}
+        	\end{adjustbox}
+        	
+        	\paragraph{}Finally, it is worth noting that the search for the leader, as well the leader updates, are executed periodically with the help of the ScheduleExecutorService class. The search is executed every 10 seconds by every node, while the leader updates are given by the leader every second.
 
 			\section{Implementation}
 	
