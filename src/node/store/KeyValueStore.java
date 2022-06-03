@@ -61,6 +61,24 @@ public class KeyValueStore {
         return view.getUpEntries().keySet().iterator().next();
     }
 
+    private boolean isActive(String nodeKey) {
+        try (Socket socket = new Socket(view.getUpEntries().get(nodeKey).getAddress(), view.getUpEntries().get(nodeKey).getPort())){
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+    private String getFirstActiveNode(String hash) {
+        String currentNode = getClosestNodeKey(hash, view);
+        if (currentNode == null) { return null; }
+        while (!currentNode.equals(myHash)) {
+            if (isActive(currentNode)) { return currentNode; }
+            currentNode = getClosestNodeKey(currentNode, view);
+            if (currentNode == null) { return null; }
+        }
+        return myHash;
+    }
+
     public List<Socket> getNextTwoActiveNodes() {
         List<Socket> sockets = new ArrayList<>();
         int counter = 0;
@@ -78,14 +96,6 @@ public class KeyValueStore {
             }
         }
         return sockets;
-    }
-
-    private boolean isActive(String nodeKey) {
-        try (Socket socket = new Socket(view.getUpEntries().get(nodeKey).getAddress(), view.getUpEntries().get(nodeKey).getPort())){
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
     }
 
     public Map<String,String> checkFilesView(View view) {
@@ -127,7 +137,7 @@ public class KeyValueStore {
     public void processGet(String getMessageString, Socket socket) {
         String file = Message.getMessageBody(getMessageString);
         String fileKey = UtilsHash.hashSHA256(file);
-        String nodeHash = getClosestNodeKey(fileKey, view);
+        String nodeHash = getFirstActiveNode(fileKey);
         if (nodeHash == null) {
             workers.execute(new GetFailedTask(new GetMessageReply(null), socket));
         } else if (nodeHash.equals(myHash)) {
@@ -141,7 +151,7 @@ public class KeyValueStore {
     public void processPut(String putMessageString, Socket socket) {
         String file = Message.getMessageBody(putMessageString);
         String fileKey = UtilsHash.hashSHA256(file);
-        String nodeHash = getClosestNodeKey(fileKey, view);
+        String nodeHash = getFirstActiveNode(fileKey);
         if (nodeHash == null) {
             workers.execute(new PutFailedTask(new PutMessageReply("Successor node not found"), socket));
         } else if (nodeHash.equals(myHash)) {
@@ -159,7 +169,7 @@ public class KeyValueStore {
     public void processDelete(String deleteMessageString, Socket socket) {
         String file = Message.getMessageBody(deleteMessageString);
         String fileKey = UtilsHash.hashSHA256(file);
-        String nodeHash = getClosestNodeKey(fileKey, view);
+        String nodeHash = getFirstActiveNode(fileKey);
         if (nodeHash == null) {
             workers.execute(new DeleteTaskFailed(new DeleteMessageReply("Successor node not found"), socket));
         } else if (nodeHash.equals(myHash)) {
@@ -182,7 +192,6 @@ public class KeyValueStore {
 
             if (nodeKey == null) break;
             if (nodeKey.equals(myHash)) {
-                System.out.println("Removi");
                 idStore.remove(0);
                 continue;
             }

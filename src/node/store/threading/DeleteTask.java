@@ -32,7 +32,6 @@ public class DeleteTask extends Thread {
         System.out.println("Delete operation has " + state);
 
         List<Socket> socketList = keyValueStore.getNextTwoActiveNodes();
-        System.out.println("nao passei two active nodes");
         ForceDeleteMessage message = new ForceDeleteMessage(deleteMessage.getKey());
         for (Socket s: socketList) {
             System.out.println("Trying to replicate deletion operation of file...");
