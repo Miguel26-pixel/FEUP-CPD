@@ -51,18 +51,15 @@ public class JoinTask extends Thread {
             DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 
             UtilsTCP.sendTCPMessage(output, reply);
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) {}
 
         Map<String,String> files_to_change = keyValueStore.checkFilesView(view);
 
         for (Map.Entry<String, String> entry : files_to_change.entrySet()) {
-            if (view.getUpEntries().get(entry.getKey()).getAddress().equals(joinMessage.getOriginId())) {
-                String fileKey = entry.getValue().substring(entry.getValue().lastIndexOf("file_") + ("file_").length());
-                workers.execute(new SendPutTask(view.getUpEntries().get(entry.getKey()).getAddress(),
-                        view.getUpEntries().get(entry.getKey()).getPort(), new PutMessage(new File(entry.getValue())),
-                        keyValueStore, fileKey));
-            }
+            String fileKey = entry.getValue().substring(entry.getValue().lastIndexOf("file_") + ("file_").length());
+            new SendPutTask(view.getUpEntries().get(entry.getKey()).getAddress(),
+                    view.getUpEntries().get(entry.getKey()).getPort(), new PutMessage(new File(entry.getValue())),
+                    keyValueStore, fileKey).run();
         }
 
         List<String> files_to_replicate = keyValueStore.checkFilesReplication(joinMessage.getOriginId());

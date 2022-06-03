@@ -28,7 +28,7 @@ public class SendForcePutTask {
     public void sendForcePut() {
         try (Socket socket = new Socket(address, port)) {
             socket.setSoTimeout(TIMEOUT);
-            System.out.println("Sending file...");
+            System.out.println("Force sending file...");
             OutputStream output = socket.getOutputStream();
             UtilsTCP.sendTCPMessage(output, message);
             System.out.println("File sended with success");

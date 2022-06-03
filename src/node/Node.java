@@ -38,6 +38,7 @@ public class Node implements Services {
 
     @Override
     public void join() throws RemoteException {
+        this.udpAgent.udpJoinGroup();
         this.udpAgent.resumeExecution();
         this.tcpAgent.resumeExecution();
         this.membershipService.join(this.udpAgent, this.tcpAgent.getPort());
@@ -46,6 +47,7 @@ public class Node implements Services {
 
     @Override
     public void leave() throws RemoteException {
+        this.udpAgent.udpLeaveGroup();
         this.tcpAgent.stopExecution();
         this.tcpAgent.sendFilesToLeave();
         this.udpAgent.stopExecution();

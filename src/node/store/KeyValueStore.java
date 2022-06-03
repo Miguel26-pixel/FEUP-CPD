@@ -93,6 +93,7 @@ public class KeyValueStore {
                 if (currentHash == null) { return sockets; }
             } catch (IOException ignored) {
                 currentHash = getClosestNodeKey(currentHash, view);
+                if (currentHash == null) { return sockets; }
             }
         }
         return sockets;
@@ -108,7 +109,7 @@ public class KeyValueStore {
 
             for (File file : files) {
                 String hash = file.getName().substring(("file_").length());
-                String nodeKey = getClosestNodeKey(hash,view);
+                String nodeKey = getFirstActiveNode(hash);
                 if (nodeKey != null && !nodeKey.equals(myHash)){
                     files_to_change.put(nodeKey, getDirPath() + file.getName());
                 }
