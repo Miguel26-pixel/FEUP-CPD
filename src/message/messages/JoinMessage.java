@@ -22,25 +22,14 @@ public class JoinMessage extends Message {
     }
 
     public JoinMessage(String asString) {
-        super(MessageType.JOIN);
+        super(asString);
 
         byte[] delim = new byte[]{CR,LF};
 
         List<String> split = new ArrayList<>(List.of(asString.split(new String(delim))));
 
         split.removeIf(s -> s.equals(""));
-
         String body = split.get(split.size() - 1);
-        split.remove(split.size() - 1);
-
-        for (int i = 0; i < split.size(); i++) {
-            String[] field = split.get(i).split(" ");
-            if (MessageField.translateFieldHeader(field[0]) == FieldType.ORIGINID) {
-                String originId = field[1];
-
-                this.setOriginId(originId);
-            }
-        }
 
         List<String> params = new ArrayList<>(List.of(body.split(" ")));
 

@@ -20,4 +20,9 @@ public class IdField extends MessageField {
 
         return field;
     }
+
+    @Override
+    public String getValue() {
+        return this.id;
+    }
 }

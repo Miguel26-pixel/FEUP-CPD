@@ -69,7 +69,7 @@ public class View {
             if (entries.containsKey(hash)) {
                 ViewEntry currentEntry = entries.get(hash);
 
-                if (currentEntry.getEpoch() > viewEntry.getEpoch() || currentEntry.getCounter() > viewEntry.getCounter()) {
+                if (currentEntry.getCounter() > viewEntry.getCounter()) {
                     return false;
                 }
             }
@@ -93,7 +93,7 @@ public class View {
     }
 
     public View getMostRecentEntries(int subsetSize) {
-        List<Map.Entry<String, ViewEntry>> entryList = new ArrayList<>(new ArrayList<>(entries.entrySet()));
+        List<Map.Entry<String, ViewEntry>> entryList = new ArrayList<>(entries.entrySet());
 
         entryList.sort(Comparator.comparing(entry -> entry.getValue().getEpoch()));
 
@@ -105,6 +105,67 @@ public class View {
         }
 
         return recentView;
+    }
+
+    public ViewEntry getNextUpEntry(String previousKey) {
+        List<String> keyList = new ArrayList<>(upEntries.keySet());
+
+        if (keyList.size() == 0) {
+            return null;
+        }
+
+        Collections.sort(keyList);
+
+        int previousKeyIndex = keyList.indexOf(previousKey);
+        String nextKey = keyList.get((previousKeyIndex + 1) % keyList.size());
+
+        return upEntries.get(nextKey);
+    }
+
+    public int compareTo(View other) {
+        int score = 0;
+        for (String key: this.entries.keySet()) {
+            ViewEntry otherEntry = other.getEntry(key);
+            if (otherEntry == null) {
+                score += 1;
+                continue;
+            }
+
+            ViewEntry thisEntry = this.getEntry(key);
+            if (thisEntry.getCounter() < otherEntry.getCounter()) {
+                score -= 1;
+            } else if (thisEntry.getCounter() > otherEntry.getCounter()) {
+                score += 1;
+            }
+        }
+
+        for (String key: other.entries.keySet()) {
+            ViewEntry thisEntry = this.getEntry(key);
+            if (thisEntry == null) {
+                score -= 1;
+            }
+        }
+
+        return score;
+    }
+
+    private ViewEntry getEntry(String key) {
+        if (this.entries.containsKey(key)) {
+            return this.entries.get(key);
+        }
+
+        return null;
+    }
+
+    public void setDown(String nodeId, boolean updateLog) {
+        String hash = UtilsHash.hashSHA256(nodeId);
+
+        if (this.upEntries.containsKey(hash)) {
+            ViewEntry entry = this.getEntry(hash);
+
+            long secondsSinceEpoch = System.currentTimeMillis() / 1000;
+            this.addEntry(nodeId, new ViewEntry(entry.getPort(), entry.getAddress(), entry.getCounter() + 1, secondsSinceEpoch), updateLog);
+        }
     }
 
     @Override

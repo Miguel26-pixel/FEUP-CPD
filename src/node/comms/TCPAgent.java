@@ -43,6 +43,14 @@ public class TCPAgent extends CommunicationAgent {
                     membershipService.processMembership(messageString);
                     socket.close();
                 }
+                case LEADERSHIP -> {
+                    System.out.println("LEADERSHIP");
+                    membershipService.processLeadership(messageString);
+                }
+                case COUP -> {
+                    System.out.println("COUP");
+                    membershipService.processCoup(messageString);
+                }
                 case GET -> {
                     System.out.println("GET");
                     keyValueStore.processGet(messageString, socket);
