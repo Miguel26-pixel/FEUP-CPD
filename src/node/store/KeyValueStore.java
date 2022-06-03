@@ -46,6 +46,7 @@ public class KeyValueStore {
             if (files == null) { return; }
 
             for (File file : files) {
+                if (!file.getName().contains("file_")) { continue; }
                 String keyStr = file.getName().substring(("file_").length());
                 idStore.add(keyStr);
                 System.out.println("key added: " + keyStr);
@@ -124,6 +125,7 @@ public class KeyValueStore {
             if (files == null) { return files_to_change; }
 
             for (File file : files) {
+                if (!file.getName().contains("file_")) { continue; }
                 String hash = file.getName().substring(("file_").length());
                 String nodeKey = getFirstActiveNode(hash);
                 if (nodeKey != null && !nodeKey.equals(myHash)){
