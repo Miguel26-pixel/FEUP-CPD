@@ -83,7 +83,7 @@
 	\chapter{Membership Service}
 			\emph{The message format is detailed described in the Chapter 2}
 
-	        \paragraph{}
+	        \paragraph{} 
 	        
 	        \paragraph{}
 
@@ -105,19 +105,60 @@
 	\chapter{Key-value Store}
 			\emph{The message format is detailed described in the Chapter 2}
 	
-	        \paragraph{}
+	        \paragraph{} The key-value store is a distributed partitioned hash 
+			table in which each node stores the key-value pairs.
+			To partition the key-value pairs among the nodes, the store uses a hashing
+			technique, \emph{consistent hashing}. This technique allows to easily resize the
+			hash table without remapping the present keys in the table.
 	        
-	        \paragraph{}
-
 			\section{Implementation}
-	
-				\paragraph{}
-				
-				\paragraph{}
 
+				\paragraph{} The store has three major operations:
+				
 				\subsection{Put}
+					\paragraph{} The put operation send a value to the cluster and generate a key
+					related to the value with the goal of add a new key-value pair to the store
+
+					\paragraph{} Upon a put operation, a message of the type \emph{PutMessage}
+					is sent with the content to store in a node of the cluster. To find the
+					responsible node to store the new value, the hash (key) of the new pair is 
+					calculated and, according to the consistent hashing technique and a 
+					simple binary search, the node can easily be found. Then the message is
+					sent to the that node where the new key-value pair is stored.
+
+					\paragraph{} After the node store the new key-value pair, an acknowledge
+					message of the type \emph{PutMessageReply} will be sent back to the client
+					with the new generated key so that the client can access the stored value.
+
 				\subsection{Get}
+					\paragraph{} The get operation send a key to the cluster retrieves
+					the pair associated value.
+
+					\paragraph{} Upon a get operation, a message of the type \emph{GetMessage}
+					is sent with a key. This key is associated with a value and the pair is
+					stored in some node. The responsible node for this pair is calculated
+					according to the consistent hashing, and then, a request of the value
+					is sent to obtain the pretended value.
+
+					\paragraph{} When the pretended value is accessed, a reply message of the type
+					\emph{GetMessageReply} will be sent back to the client with the pretended 
+					value which will be saved in the client's folder at the disk.
+
 				\subsection{Delete}
+					\paragraph{} The delete operation send a key to the cluster which deletes
+					a key-value pair and retrieves an acknowledge message.
+
+					\paragraph{} Upon a delete operation, a message of the type \emph{DeleteMessage}
+					is sent with a key. This key, like in the get operation, is associated 
+					with a value and the pair is stored in some node. 
+					The responsible node for this pair is calculated
+					according to the consistent hashing, and then, a request to delete this
+					key-value pair is sent to that node.
+
+					\paragraph{} When the pretended value is accessed, an acknowledge message of 
+					the type \emph{DeleteMessageReply} will be sent back to the client with 
+					the final state of operation, in other words, if the operation was 
+					successful or failed.
 	
 	\chapter{Replication}
 	
@@ -138,13 +179,13 @@
 				
 				\subsection{Put}
 					\paragraph{} Upon a put operation, the value associated to the
-					operation is saved in the first active node according to the 
+					operation is stored in the first active node according to the 
 					consistent hashing, and then, if possible, the file is replicated to 
 					the next two active nodes in the cluster.
 
 				\subsection{Get}
 					\paragraph{} Upon a get operation, the responsible node is calculated
-					according to the consistent hashing, and then request of the value
+					according to the consistent hashing, and then, a request of the value
 					is sent to obtain the pretended value. If, for some reason, the 
 					value can't be obtained from that node, the same request 
 					is made to one of the next two nodes that follows the responsible 
@@ -152,12 +193,12 @@
 
 				\subsection{Delete}
 					\paragraph{} Upon a delete operation, the responsible node is calculated
-					according to the consistent hashing, and then request to delete a
+					according to the consistent hashing, and then, a request to delete a
 					key-value pair is sent to responsible node as well to the two next 
 					active nodes in the cluster.
 
-				\subsection{Join and Get}
-					\paragraph{} Upon a join or a get membership operation, for each key-value 
+				\subsection{Join and Leave}
+					\paragraph{} Upon a join or a leave membership operation, for each key-value 
 					pair, the nodes that will store the pair or the replicated pairs are
 					recalculated to make the necessary changes of key-value pairs between
 					the nodes to mantain the replication factor of 3 key-value pairs.
@@ -202,7 +243,7 @@
 			about communication protocols, such as TCP and UDP, as well the implementation and
 			the usage of these protocols. Allied to the communication, the synchronization 
 			problems that appear during the development of this project, force us to think 
-			\emph{out of the box} to solve an variaty of different problems. Finally, this 
+			\emph{out of the box} to solve an variety of different problems. Finally, this 
 			project gave us a little idea of how large distributed systems are implemented
 			in real world scenarios. 
 
