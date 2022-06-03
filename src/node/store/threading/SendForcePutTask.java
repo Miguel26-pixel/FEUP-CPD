@@ -14,15 +14,11 @@ public class SendForcePutTask {
     private final String address;
     private final int port;
     private final ForcePutMessage message;
-    private final KeyValueStore keyValueStore;
-    private final String fileKey;
 
-    public SendForcePutTask(String address, int port, ForcePutMessage message, KeyValueStore keyValueStore, String fileKey) {
+    public SendForcePutTask(String address, int port, ForcePutMessage message) {
         this.address = address;
         this.port = port;
         this.message = message;
-        this.keyValueStore = keyValueStore;
-        this.fileKey = fileKey;
     }
 
     public void sendForcePut() {
@@ -32,8 +28,6 @@ public class SendForcePutTask {
             OutputStream output = socket.getOutputStream();
             UtilsTCP.sendTCPMessage(output, message);
             System.out.println("File sended with success");
-            String state = keyValueStore.deleteValue(fileKey);
-            System.out.println("File deleted operations has " + state);
         } catch (IOException e) {
             System.out.println("TCP exception" + e);
         }

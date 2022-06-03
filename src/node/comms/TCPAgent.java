@@ -72,7 +72,7 @@ public class TCPAgent extends CommunicationAgent {
     }
 
     public void sendFilesToLeave() {
-        keyValueStore.sendFilesToNextNode();
+        keyValueStore.sendFilesToNextNodes();
     }
 
     public int getPort() {

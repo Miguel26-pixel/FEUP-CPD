@@ -99,6 +99,22 @@ public class KeyValueStore {
         return sockets;
     }
 
+    public List<String> getActiveNodesToReplicate(String fileKey) {
+        List<String> nodeKeys = new ArrayList<>();
+        int counter = 0;
+        String currentHash = getClosestNodeKey(fileKey, view);
+        String firstHash = currentHash;
+        do {
+            if (currentHash == null) { break; }
+            if (!currentHash.equals(myHash) && isActive(currentHash)) {
+                nodeKeys.add(currentHash);
+                counter++;
+            }
+            currentHash = getClosestNodeKey(currentHash, view);
+        } while (counter < 3 && !firstHash.equals(currentHash));
+        return nodeKeys;
+    }
+
     public Map<String,String> checkFilesView(View view) {
         Map<String,String> files_to_change = new HashMap<>();
 
@@ -185,21 +201,18 @@ public class KeyValueStore {
         workers.execute(new ForceDeleteTask(forceDeleteMessage, this));
     }
 
-    public void sendFilesToNextNode() {
+    public void sendFilesToNextNodes() {
         while (idStore.size() > 0) {
             String key = idStore.get(0);
             File file = new File(getDirPath() + "file_" + key);
-            String nodeKey = getClosestNodeKey(myHash,view);
-
-            if (nodeKey == null) break;
-            if (nodeKey.equals(myHash)) {
-                idStore.remove(0);
-                continue;
+            List<String> nodeKeys = getActiveNodesToReplicate(key);
+            for (String nodeKey: nodeKeys) {
+                new SendForcePutTask(view.getUpEntries().get(nodeKey).getAddress(),
+                        view.getUpEntries().get(nodeKey).getPort(),
+                        new ForcePutMessage(file)).sendForcePut();
             }
-
-            new SendForcePutTask(view.getUpEntries().get(nodeKey).getAddress(),
-                    view.getUpEntries().get(nodeKey).getPort(),
-                    new ForcePutMessage(file),this, key).sendForcePut();
+            String state = deleteValue(key);
+            System.out.println("File deleted operations has " + state);
         }
     }
 
