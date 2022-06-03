@@ -1,8 +1,10 @@
 package node.membership;
 
 import message.messages.JoinMessage;
+import message.messages.JoinReplyMessage;
 import message.messages.LeadershipMessage;
 import message.messages.LeaveMessage;
+import node.Node;
 import node.comms.UDPAgent;
 import node.membership.threading.*;
 import node.membership.view.View;
@@ -21,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MembershipService {
+    private final Node parent;
     private final View view;
     private final ThreadPool workers;
     private int membershipCounter;
@@ -32,15 +35,27 @@ public class MembershipService {
         return view;
     }
 
-    public MembershipService(String identifier, ThreadPool workers) {
+    public MembershipService(Node parent, String identifier, String folderPath, ThreadPool workers) {
+        this.parent = parent;
         this.identifier = identifier;
         this.workers = workers;
 
         this.view = new View();
-        this.membershipCounter = 0;
+        this.view.createLog(folderPath);
+        this.view.copyView(new View(this.view.getLog().getLog()), true);
+
+        this.membershipCounter = Integer.max(0, this.getClosestPairCeil(this.view.getCounter(UtilsHash.hashSHA256(this.identifier)) + 1));
+
         this.isLeader = new AtomicBoolean(false);
         this.membershipSender = Executors.newSingleThreadScheduledExecutor();
-        this.removeLeader();
+    }
+
+    public int getMembershipCounter() {
+        return membershipCounter;
+    }
+
+    public void setMembershipCounter(int membershipCounter) {
+        this.membershipCounter = membershipCounter;
     }
 
     public boolean isLeader() {
@@ -49,16 +64,18 @@ public class MembershipService {
 
     public void setLeader() {
         this.isLeader.set(true);
-        this.membershipSender.shutdown();
-        this.membershipSender = Executors.newSingleThreadScheduledExecutor();
-        this.membershipSender.scheduleAtFixedRate(new LeaderManagement(this), 0, 1000, TimeUnit.MILLISECONDS);
     }
 
     public void removeLeader() {
         this.isLeader.set(false);
+        this.membershipSender = Executors.newScheduledThreadPool(2);
+        this.membershipSender.scheduleAtFixedRate(new LeaderManagement(this), 1000, 1000, TimeUnit.MILLISECONDS);
+        this.membershipSender.scheduleAtFixedRate(new LeaderSearch(this.identifier, this), 1000, 10000, TimeUnit.MILLISECONDS);
+    }
+
+    public void shutdown() {
+        this.isLeader.set(false);
         this.membershipSender.shutdown();
-        this.membershipSender = Executors.newSingleThreadScheduledExecutor();
-        this.membershipSender.scheduleAtFixedRate(new LeaderSearch(this.identifier, this), 0, 10000, TimeUnit.MILLISECONDS);
     }
 
     public void flagNodeDown(String nodeId) {
@@ -78,7 +95,9 @@ public class MembershipService {
             }
 
             long secondsSinceEpoch = System.currentTimeMillis() / 1000;
-            this.view.addEntry(this.identifier, new ViewEntry(tcpPort, this.identifier, this.membershipCounter, secondsSinceEpoch));
+            this.view.addEntry(this.identifier, new ViewEntry(tcpPort, this.identifier, this.membershipCounter, secondsSinceEpoch), true);
+
+            this.removeLeader();
 
             this.membershipCounter++;
             return true;
@@ -89,12 +108,16 @@ public class MembershipService {
 
     public boolean leave(UDPAgent udpAgent) {
         if (this.membershipCounter % 2 != 0) {
+            this.shutdown();
             try {
                 LeaveMessage message = new LeaveMessage(this.membershipCounter, this.identifier);
                 udpAgent.send(message);
             } catch (IOException e) {
                 return false;
             }
+
+            long secondsSinceEpoch = System.currentTimeMillis() / 1000;
+            this.view.addEntry(this.identifier, new ViewEntry(ViewEntry.INVALID_INT, this.identifier, this.membershipCounter, secondsSinceEpoch), true);
 
             this.membershipCounter++;
             return true;
@@ -103,8 +126,20 @@ public class MembershipService {
         return false;
     }
 
+    private int getClosestPairCeil(int counter) {
+        if ((counter % 2) == 0) {
+            return counter;
+        } else {
+            return counter + 1;
+        }
+    }
+
     public void processJoin(String joinMessageString, KeyValueStore keyValueStore, String myId) {
         workers.execute(new JoinTask(this.view, joinMessageString, keyValueStore, workers, myId));
+    }
+
+    public void processJoinReply(String joinReplyMessage) {
+        workers.execute(new JoinReplyTask(this, joinReplyMessage, this.parent.getUdpAgent(), this.parent.getTcpAgent().getPort()));
     }
 
     public void processLeave(String leaveMessageString) {

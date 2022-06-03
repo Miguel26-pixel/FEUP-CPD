@@ -8,6 +8,7 @@ import java.util.*;
 public class View {
     private final Map<String, ViewEntry> entries;
     private final Map<String, ViewEntry> upEntries;
+    private Log log;
 
     public View() {
         this.entries = new TreeMap<>();
@@ -41,6 +42,14 @@ public class View {
         return upEntries;
     }
 
+    public Log getLog() {
+        return log;
+    }
+
+    public void createLog(String folderPath) {
+        this.log = new Log(folderPath);
+    }
+
     public List<Byte> toBytes() {
         List<Byte> asBytes = new ArrayList<>();
 
@@ -59,7 +68,11 @@ public class View {
 
     public void copyView(View view, boolean updateLog) {
         for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
-            this.addEntry(entry.getValue().getAddress(), entry.getValue(), updateLog);
+            this.addEntry(entry.getValue().getAddress(), entry.getValue());
+        }
+
+        if (updateLog) {
+            this.log.update(this);
         }
     }
 
@@ -87,8 +100,8 @@ public class View {
     }
 
     public void addEntry(String key, ViewEntry viewEntry, boolean updateLog) {
-        if (addEntry(key, viewEntry) && updateLog) {
-            Log.update(this);
+        if (addEntry(key, viewEntry) && updateLog && this.log != null) {
+            this.log.update(this);
         }
     }
 
@@ -155,6 +168,14 @@ public class View {
         }
 
         return null;
+    }
+
+    public int getCounter(String key) {
+        if (this.entries.containsKey(key)) {
+            return this.entries.get(key).getCounter();
+        }
+
+        return -1;
     }
 
     public void setDown(String nodeId, boolean updateLog) {

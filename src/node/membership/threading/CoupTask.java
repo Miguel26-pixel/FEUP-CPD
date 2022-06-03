@@ -33,12 +33,14 @@ public class CoupTask extends Thread {
 
         if (couperId != null) {
             if (couperId.equals(nodeId)) {
+                System.out.println("[M]Starting leader duties.");
                 this.membershipService.setLeader();
                 return;
             }
 
             if (this.membershipService.isLeader()) {
                 this.membershipService.removeLeader();
+                System.out.println("[M]Stepping down as the leader.");
             }
 
             ViewEntry nextNode = this.view.getNextUpEntry(UtilsHash.hashSHA256(this.nodeId));

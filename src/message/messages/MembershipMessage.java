@@ -2,7 +2,6 @@ package message.messages;
 
 import message.Message;
 import message.MessageType;
-import node.membership.log.Log;
 import node.membership.view.View;
 
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ public class MembershipMessage extends Message {
     protected void buildBody() {
         this.body.addAll(this.view.toBytes());
         this.body.add((byte)'|');
-        this.body.addAll(Log.toBytes());
+        this.body.addAll(this.view.getLog().toBytes());
     }
 
     public View getView() {

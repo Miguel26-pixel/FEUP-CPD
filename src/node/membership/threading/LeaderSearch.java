@@ -32,6 +32,7 @@ public class LeaderSearch implements Runnable {
                 Socket socket = new Socket(nextNode.getAddress(), nextNode.getPort());
 
                 UtilsTCP.sendTCPMessage(socket.getOutputStream(), leadershipMessage);
+                System.out.println("[M]Asking to become the leader. Redirected to " + nextNode.getAddress());
                 break;
             } catch (Exception ignored) {
                 this.membershipService.flagNodeDown(nextNode.getAddress());

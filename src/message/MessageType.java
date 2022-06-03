@@ -2,6 +2,7 @@ package message;
 
 public enum MessageType {
     JOIN,
+    JOIN_REPLY,
     LEAVE,
     MEMBERSHIP,
     LEADERSHIP,

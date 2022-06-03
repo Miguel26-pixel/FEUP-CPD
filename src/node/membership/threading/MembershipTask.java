@@ -17,5 +17,7 @@ public class MembershipTask extends Thread {
         MembershipMessage membershipMessage = new MembershipMessage(membershipMessageString);
 
         this.view.copyView(membershipMessage.getView(), true);
+
+        System.out.println("[M]Received a membership message");
     }
 }

@@ -16,6 +16,7 @@ public class MessageTypeField extends MessageField {
     private String translateType() {
         return switch (messageType) {
             case JOIN -> "join";
+            case JOIN_REPLY -> "join_reply";
             case LEAVE -> "leave";
             case MEMBERSHIP -> "membership";
             case LEADERSHIP -> "leadership";
@@ -35,6 +36,7 @@ public class MessageTypeField extends MessageField {
     public static MessageType translateType(String typeAsString) {
         return switch (typeAsString) {
             case "join" -> MessageType.JOIN;
+            case "join_reply" -> MessageType.JOIN_REPLY;
             case "leave" -> MessageType.LEAVE;
             case "membership" -> MessageType.MEMBERSHIP;
             case "leadership" -> MessageType.LEADERSHIP;
