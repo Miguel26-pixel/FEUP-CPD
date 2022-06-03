@@ -130,7 +130,6 @@ public class View {
         Collections.sort(keyList);
 
         int previousKeyIndex = keyList.indexOf(previousKey);
-        System.out.println(previousKeyIndex);
         String nextKey = keyList.get((previousKeyIndex + 1) % keyList.size());
 
         return upEntries.get(nextKey);

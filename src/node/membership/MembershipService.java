@@ -64,19 +64,17 @@ public class MembershipService {
 
     public void setLeader() {
         this.isLeader.set(true);
-        this.membershipSender.shutdown();
-        this.membershipSender = Executors.newSingleThreadScheduledExecutor();
-        this.membershipSender.scheduleAtFixedRate(new LeaderManagement(this), 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
     public void removeLeader() {
         this.isLeader.set(false);
-        this.membershipSender.shutdown();
-        this.membershipSender = Executors.newSingleThreadScheduledExecutor();
+        this.membershipSender = Executors.newScheduledThreadPool(2);
+        this.membershipSender.scheduleAtFixedRate(new LeaderManagement(this), 1000, 1000, TimeUnit.MILLISECONDS);
         this.membershipSender.scheduleAtFixedRate(new LeaderSearch(this.identifier, this), 1000, 10000, TimeUnit.MILLISECONDS);
     }
 
     public void shutdown() {
+        this.isLeader.set(false);
         this.membershipSender.shutdown();
     }
 

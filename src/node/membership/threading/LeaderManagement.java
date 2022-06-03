@@ -21,16 +21,18 @@ public class LeaderManagement implements Runnable {
 
     @Override
     public void run() {
-        View view = membershipService.getView();
-        for (ViewEntry node: view.getUpEntries().values()) {
-            try {
-                Socket socket = new Socket(node.getAddress(), node.getPort());
+        if (this.membershipService.isLeader()) {
+            View view = membershipService.getView();
+            for (ViewEntry node: view.getUpEntries().values()) {
+                try {
+                    Socket socket = new Socket(node.getAddress(), node.getPort());
 
-                UtilsTCP.sendTCPMessage(socket.getOutputStream(), new MembershipMessage(view));
-                System.out.println("[M]As the leader, updating " + node.getAddress() + " with membership information.");
-            } catch (ConnectException e) {
-                this.membershipService.flagNodeDown(node.getAddress());
-            } catch (Exception ignored) {}
+                    UtilsTCP.sendTCPMessage(socket.getOutputStream(), new MembershipMessage(view));
+                    System.out.println("[M]As the leader, updating " + node.getAddress() + " with membership information.");
+                } catch (ConnectException e) {
+                    this.membershipService.flagNodeDown(node.getAddress());
+                } catch (Exception e) {}
+            }
         }
     }
 }
