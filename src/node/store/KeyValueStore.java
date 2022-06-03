@@ -107,6 +107,22 @@ public class KeyValueStore {
         return files_to_change;
     }
 
+    public List<String> checkFilesReplication(String nodeID) {
+        List<String> filesToReplicate = new ArrayList<>();
+        String nodeKey = UtilsHash.hashSHA256(nodeID);
+        String currentHash = myHash;
+        for (String key: idStore) {
+            for (int i = 0; i < 2; i++) {
+                currentHash = getClosestNodeKey(currentHash,view);
+                if (currentHash == null || currentHash.equals(myHash)) { break; }
+                if (currentHash.equals(nodeKey) && myHash.equals(getClosestNodeKey(key,view))) {
+                    filesToReplicate.add(getDirPath() + "file_" + key);
+                }
+            }
+        }
+        return filesToReplicate;
+    }
+
 
     public void processGet(String getMessageString, Socket socket) {
         String file = Message.getMessageBody(getMessageString);
