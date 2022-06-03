@@ -122,6 +122,41 @@ public class View {
         return upEntries.get(nextKey);
     }
 
+    public int compareTo(View other) {
+        int score = 0;
+        for (String key: this.entries.keySet()) {
+            ViewEntry otherEntry = other.getEntry(key);
+            if (otherEntry == null) {
+                score += 1;
+                continue;
+            }
+
+            ViewEntry thisEntry = this.getEntry(key);
+            if (thisEntry.getCounter() < otherEntry.getCounter()) {
+                score -= 1;
+            } else if (thisEntry.getCounter() > otherEntry.getCounter()) {
+                score += 1;
+            }
+        }
+
+        for (String key: other.entries.keySet()) {
+            ViewEntry thisEntry = this.getEntry(key);
+            if (thisEntry == null) {
+                score -= 1;
+            }
+        }
+
+        return score;
+    }
+
+    private ViewEntry getEntry(String key) {
+        if (this.entries.containsKey(key)) {
+            return this.entries.get(key);
+        }
+
+        return null;
+    }
+
     @Override
     public String toString() {
         StringBuilder toString = new StringBuilder();
