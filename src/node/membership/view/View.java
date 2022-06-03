@@ -157,6 +157,17 @@ public class View {
         return null;
     }
 
+    public void setDown(String nodeId, boolean updateLog) {
+        String hash = UtilsHash.hashSHA256(nodeId);
+
+        if (this.upEntries.containsKey(hash)) {
+            ViewEntry entry = this.getEntry(hash);
+
+            long secondsSinceEpoch = System.currentTimeMillis() / 1000;
+            this.addEntry(nodeId, new ViewEntry(entry.getPort(), entry.getAddress(), entry.getCounter() + 1, secondsSinceEpoch), updateLog);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder toString = new StringBuilder();

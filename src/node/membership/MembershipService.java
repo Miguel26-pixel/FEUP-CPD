@@ -61,6 +61,10 @@ public class MembershipService {
         this.membershipSender.scheduleAtFixedRate(new LeaderSearch(this.identifier, this), 0, 10000, TimeUnit.MILLISECONDS);
     }
 
+    public void flagNodeDown(String nodeId) {
+        this.view.setDown(nodeId, true);
+    }
+
     public boolean join(UDPAgent udpAgent, int tcpPort) {
         if (this.membershipCounter % 2 == 0) {
             try {

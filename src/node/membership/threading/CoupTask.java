@@ -10,6 +10,7 @@ import utils.UtilsHash;
 import utils.UtilsTCP;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.Socket;
 
 public class CoupTask extends Thread {
@@ -41,14 +42,16 @@ public class CoupTask extends Thread {
                 this.membershipService.removeLeader();
             }
 
-            ViewEntry nextNodeInfo = this.view.getNextUpEntry(UtilsHash.hashSHA256(this.nodeId));
+            ViewEntry nextNode = this.view.getNextUpEntry(UtilsHash.hashSHA256(this.nodeId));
 
             CoupMessage redirectionMessage = new CoupMessage(nodeId, couperId);
 
             try {
-                Socket socket = new Socket(nextNodeInfo.getAddress(), nextNodeInfo.getPort());
+                Socket socket = new Socket(nextNode.getAddress(), nextNode.getPort());
                 UtilsTCP.sendTCPMessage(socket.getOutputStream(), redirectionMessage);
-            } catch (IOException ignored) {}
+            } catch (ConnectException ignored) {
+                this.membershipService.flagNodeDown(nextNode.getAddress());
+            } catch (Exception ignored) {}
         }
     }
 }

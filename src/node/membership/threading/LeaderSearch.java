@@ -21,18 +21,21 @@ public class LeaderSearch implements Runnable {
     @Override
     public void run() {
         View view = this.membershipService.getView();
-        ViewEntry nextNode = view.getNextUpEntry(UtilsHash.hashSHA256(nodeId));
-        if (nextNode == null) {
-            return;
-        }
         LeadershipMessage leadershipMessage = new LeadershipMessage(nodeId, nodeId, view);
 
-        try {
-            Socket socket = new Socket(nextNode.getAddress(), nextNode.getPort());
+        while (true) {
+            ViewEntry nextNode = view.getNextUpEntry(UtilsHash.hashSHA256(nodeId));
+            if (nextNode == null) {
+                return;
+            }
+            try {
+                Socket socket = new Socket(nextNode.getAddress(), nextNode.getPort());
 
-            UtilsTCP.sendTCPMessage(socket.getOutputStream(), leadershipMessage);
-        } catch (Exception ignored) {
-            //ignored.printStackTrace();
+                UtilsTCP.sendTCPMessage(socket.getOutputStream(), leadershipMessage);
+                break;
+            } catch (Exception ignored) {
+                this.membershipService.flagNodeDown(nextNode.getAddress());
+            }
         }
     }
 }
