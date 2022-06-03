@@ -19,11 +19,7 @@ public abstract class CommunicationAgent extends Thread {
     public void run() {
         while (this.isAlive.get()) {
             try {
-                if (this.stop.get()) {
-                    Thread.sleep(1);
-                } else {
-                    this.read();
-                }
+                this.read();
             } catch (Exception ignore) {}
         }
     }

@@ -56,6 +56,11 @@ public class UDPAgent extends CommunicationAgent {
         DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
 
         try {
+            if (this.stop.get()) {
+                Thread.sleep(1);
+                return;
+            }
+
             multicastSocket.receive(receivedPacket);
 
             InetAddress address = receivedPacket.getAddress();
@@ -66,11 +71,9 @@ public class UDPAgent extends CommunicationAgent {
 
             switch (Message.getMessageType(messageString)) {
                 case JOIN -> {
-                    System.out.println("JOIN");
                     this.membershipService.processJoin(messageString, keyValueStore, this.membershipService.getIdentifier());
                 }
                 case LEAVE -> {
-                    System.out.println("LEAVE");
                     this.membershipService.processLeave(messageString);
                 }
             }

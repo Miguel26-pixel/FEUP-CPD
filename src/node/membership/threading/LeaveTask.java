@@ -23,6 +23,8 @@ public class LeaveTask extends Thread {
 
         long secondsSinceEpoch = System.currentTimeMillis() / 1000;
         this.view.addEntry(leaveMessage.getOriginId(), new ViewEntry(ViewEntry.INVALID_INT, leaveMessage.getOriginId(), leaveMessage.getCounter(), secondsSinceEpoch), true);
+
+        System.out.println("[M]Received a leave message from " + leaveMessage.getOriginId());
     }
 
     private boolean isCounterCorrect(int counter) {

@@ -18,37 +18,46 @@ public class TCPAgent extends CommunicationAgent {
 
     private final MembershipService membershipService;
     private final KeyValueStore keyValueStore;
-    private final ServerSocket serverSocket;
+    private ServerSocket serverSocket;
+    private final int port;
+    private final InetAddress address;
 
     public TCPAgent(MembershipService membershipService, KeyValueStore keyValueStore, String ipAddr, String port) throws IOException {
         super();
         this.membershipService = membershipService;
         this.keyValueStore = keyValueStore;
-
-        this.serverSocket = new ServerSocket(Integer.parseInt(port), 0, InetAddress.getByName(ipAddr));
-        this.serverSocket.setSoTimeout(TIMEOUT);
+        this.port = Integer.parseInt(port);
+        this.address = InetAddress.getByName(ipAddr);
     }
 
     @Override
     protected void read() {
         try {
+            if (this.stop.get()) {
+                Socket socket = serverSocket.accept();
+                socket.setSoTimeout(TIMEOUT);
+
+                UtilsTCP.readTCPMessage(socket.getInputStream());
+                System.out.println("Got a message!");
+                return;
+            }
             Socket socket = serverSocket.accept();
             socket.setSoTimeout(TIMEOUT);
 
             String messageString = UtilsTCP.readTCPMessage(socket.getInputStream());
 
             switch (Message.getMessageType(messageString)) {
+                case JOIN_REPLY -> {
+                    membershipService.processJoinReply(messageString);
+                }
                 case MEMBERSHIP -> {
-                    System.out.println("MEMBERSHIP");
                     membershipService.processMembership(messageString);
                     socket.close();
                 }
                 case LEADERSHIP -> {
-                    System.out.println("LEADERSHIP");
                     membershipService.processLeadership(messageString);
                 }
                 case COUP -> {
-                    System.out.println("COUP");
                     membershipService.processCoup(messageString);
                 }
                 case GET -> {
@@ -85,5 +94,25 @@ public class TCPAgent extends CommunicationAgent {
 
     public int getPort() {
         return this.serverSocket.getLocalPort();
+    }
+
+    @Override
+    public void stopExecution() {
+        super.stopExecution();
+        try {
+            this.serverSocket.close();
+        } catch (IOException ignored) {}
+    }
+
+    @Override
+    public void resumeExecution() {
+        try {
+            this.serverSocket = new ServerSocket(this.port, 0, this.address);
+            this.serverSocket.setSoTimeout(TIMEOUT);
+            System.out.println("Created socket");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        super.resumeExecution();
     }
 }

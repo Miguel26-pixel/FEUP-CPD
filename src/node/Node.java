@@ -27,7 +27,7 @@ public class Node implements Services {
         this.workers = new ThreadPool(numberOfCores, numberOfCores);
         this.folderName = "node_" + nodeID + ":" + membershipPort + "/";
         this.folderPath = "dynamo/node_" + nodeID + ":" + membershipPort + "/";
-        this.membershipService = new MembershipService(nodeID, folderPath, this.workers);
+        this.membershipService = new MembershipService(this, nodeID, folderPath, this.workers);
         this.keyValueStore = new KeyValueStore(this.folderName,
                 UtilsHash.hashSHA256(this.nodeID), this.workers, this.membershipService.getView());
 
@@ -37,6 +37,14 @@ public class Node implements Services {
         if (!this.createDirectory()) {
             throw new IOException("Unable to ensure proper filesystem.");
         }
+    }
+
+    public UDPAgent getUdpAgent() {
+        return udpAgent;
+    }
+
+    public TCPAgent getTcpAgent() {
+        return tcpAgent;
     }
 
     @Override

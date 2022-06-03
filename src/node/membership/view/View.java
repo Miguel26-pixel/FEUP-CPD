@@ -68,7 +68,11 @@ public class View {
 
     public void copyView(View view, boolean updateLog) {
         for(Map.Entry<String, ViewEntry> entry: view.getEntries().entrySet()) {
-            this.addEntry(entry.getValue().getAddress(), entry.getValue(), updateLog);
+            this.addEntry(entry.getValue().getAddress(), entry.getValue());
+        }
+
+        if (updateLog) {
+            this.log.update(this);
         }
     }
 
@@ -126,6 +130,7 @@ public class View {
         Collections.sort(keyList);
 
         int previousKeyIndex = keyList.indexOf(previousKey);
+        System.out.println(previousKeyIndex);
         String nextKey = keyList.get((previousKeyIndex + 1) % keyList.size());
 
         return upEntries.get(nextKey);

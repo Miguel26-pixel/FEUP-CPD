@@ -22,7 +22,9 @@ public class Log {
 
         File logFile = new File(this.logPath);
         try {
-            logFile.createNewFile();
+            if (!logFile.exists()) {
+                logFile.createNewFile();
+            }
 
             FileWriter logFileWriter = new FileWriter(this.logPath);
             logFileWriter.write(recentEntries.toString());
@@ -37,7 +39,7 @@ public class Log {
         try {
             Scanner fileReader = new Scanner(logFile);
             while (fileReader.hasNext()) {
-                log.append(fileReader.nextLine());
+                log.append(fileReader.nextLine()).append("\n");
             }
         } catch (IOException ignored) {}
 

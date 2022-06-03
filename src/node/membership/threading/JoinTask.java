@@ -1,9 +1,6 @@
 package node.membership.threading;
 
-import message.messages.ForcePutMessage;
-import message.messages.JoinMessage;
-import message.messages.MembershipMessage;
-import message.messages.PutMessage;
+import message.messages.*;
 import node.membership.view.View;
 import node.membership.view.ViewEntry;
 import node.store.KeyValueStore;
@@ -37,8 +34,18 @@ public class JoinTask extends Thread {
     @Override
     public void run() {
         JoinMessage joinMessage = new JoinMessage(joinMessageString);
+        int knownCounter = this.view.getCounter(UtilsHash.hashSHA256(joinMessage.getOriginId()));
 
-        if (!this.isCounterCorrect(joinMessage.getCounter())) {
+        if (!this.isCounterCorrect(joinMessage.getCounter(), knownCounter)) {
+            try {
+                Socket socket = new Socket(joinMessage.getOriginId(), joinMessage.getPort());
+                DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+
+                UtilsTCP.sendTCPMessage(output, new JoinReplyMessage(joinMessage.getOriginId(), knownCounter));
+                System.out.println("[M]Informing " + joinMessage.getOriginId() + " that its counter should be " + knownCounter + " or above.");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return;
         }
 
@@ -69,9 +76,11 @@ public class JoinTask extends Thread {
                 UtilsTCP.sendTCPMessage(socket.getOutputStream(),message);
             } catch (IOException ignored) {}
         }
+
+        System.out.println("[M]Received a join message from " + joinMessage.getOriginId() + " with counter " + joinMessage.getCounter());
     }
 
-    private boolean isCounterCorrect(int counter) {
-        return counter % 2 == 0;
+    private boolean isCounterCorrect(int receivedCounter, int knownCounter) {
+        return (receivedCounter % 2) == 0 && receivedCounter >= knownCounter;
     }
 }

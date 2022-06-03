@@ -27,6 +27,7 @@ public class LeaderManagement implements Runnable {
                 Socket socket = new Socket(node.getAddress(), node.getPort());
 
                 UtilsTCP.sendTCPMessage(socket.getOutputStream(), new MembershipMessage(view));
+                System.out.println("[M]As the leader, updating " + node.getAddress() + " with membership information.");
             } catch (ConnectException e) {
                 this.membershipService.flagNodeDown(node.getAddress());
             } catch (Exception ignored) {}
