@@ -1,5 +1,6 @@
 \documentclass{report}
 
+\usepackage[obeyspaces]{url}
 \usepackage{graphicx}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -68,7 +69,16 @@
 				\paragraph{}
 				
 				\paragraph{}
-	
+
+			\section{RMI}
+				\paragraph{} The RMI (Remote Method Invocation) was used for both
+				membership operations, join and leave. The file with the definition 
+				of the remote interface can be found at the following path:
+
+				\begin{center}
+					\path{g05/assign2/src/client/Services.java}
+				\end{center}
+				
 	\chapter{Key-value Store}
 	
 	        \paragraph{}
@@ -83,21 +93,58 @@
 	
 	\chapter{Replication}
 	
-	        \paragraph{}
+	        \paragraph{} Replication is an important factor for distributed computing
+			as it increases the availability of a service, in this case a file,
+			throughout the distributed network.
 	        
-	        \paragraph{}
-
 			\section{Implementation}
 	
-				\paragraph{}
+				\paragraph{} Implementing replication consists of keeping a factor 
+				of 3, by another words, each key-value pair must be on 3 nodes of 
+				the cluster. This allow the client to always obtain the key-value 
+				pair, even if one of the nodes is down, because there will be another
+				node with the pretended key-value. 
+
+				\paragraph{} Therefore, for each operation, the necessary tools for 
+				keeping the replication factor were implemented:
 				
-				\paragraph{}
+				\subsection{Put}
+					\paragraph{} Upon a put operation, the value associated to the
+					operation is saved in the first active node according to the 
+					consistent hashing, and then, if possible, the file is replicated to 
+					the next two active nodes in the cluster.
+
+				\subsection{Get}
+					\paragraph{} Upon a get operation, the responsible node is calculated
+					according to the consistent hashing, and then request of the value
+					is sent to obtain the pretended value. If, for some reason, the 
+					value can't be obtained from that node, the same request 
+					is made to one of the next two nodes that follows the responsible 
+					node.
+
+				\subsection{Delete}
+					\paragraph{} Upon a delete operation, the responsible node is calculated
+					according to the consistent hashing, and then request to delete a
+					key-value pair is sent to responsible node as well to the two next 
+					active nodes in the cluster.
+
+				\subsection{Join and Get}
+					\paragraph{} Upon a join or a get membership operation, for each key-value 
+					pair, the nodes that will store the pair or the replicated pairs are
+					recalculated to make the necessary changes of key-value pairs between
+					the nodes to mantain the replication factor of 3 key-value pairs.
 
 			\section{Implications on membership and storage devices}
 	
-				\paragraph{}
+				\paragraph{} The implementation of the replication involved both membership
+				and storage devices and forced some significant changes to this devices.
 				
-				\paragraph{}
+				\paragraph{} To reach the full potential of the replication, the membership
+				should always be updated to minimize any error when the nodes are calculated
+				to perform any operation of the storage. This had some implications of
+				operation synchronization in order to keep the replication factor of
+				3 and to store the key-value pairs in the right nodes and minimize the 
+				probability of errors occurring to the maximum.
 
 	\chapter{Fault-Tolerance}
 	
