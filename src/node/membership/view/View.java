@@ -69,7 +69,7 @@ public class View {
             if (entries.containsKey(hash)) {
                 ViewEntry currentEntry = entries.get(hash);
 
-                if (currentEntry.getEpoch() > viewEntry.getEpoch() || currentEntry.getCounter() > viewEntry.getCounter()) {
+                if (currentEntry.getCounter() > viewEntry.getCounter()) {
                     return false;
                 }
             }
