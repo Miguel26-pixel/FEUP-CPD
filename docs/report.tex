@@ -39,17 +39,68 @@
 	\tableofcontents
 	
 	\chapter{Problem Description}
-			\paragraph{} A key-value store is a simple storage system that stores arbitrary data objects, the values, each of which is accessed by means of a key, very much like in a hash table. To ensure persistency, the data items and their keys must be stored in persistent storage, e.g. a hard disk drive (HDD) or a solid state disk (SSD), rather than in RAM.
+			\paragraph{} A key-value store is a simple storage system that stores
+			arbitrary data objects, the values, each of which is accessed by means
+			of a key, very much like in a hash table. To ensure persistency, the data
+			items and their keys must be stored in persistent storage, e.g. a hard
+			disk drive (HDD) or a solid state disk (SSD), rather than in RAM.
 			
-			\paragraph{}By distributed, we mean that the data items in the key-value store are partitioned among different cluster nodes.
+			\paragraph{}By distributed, we mean that the data items in the key-value
+			store are partitioned among different cluster nodes.
 			
-			\paragraph{} Our design is loosely based on Amazon's Dynamo, in that it uses consistent-hashing to partition the key-value pairs among the different nodes. This will be described later, but we recommend that you read the paper, as it may give you ideas to solve some of the challenges you will find.
+			\paragraph{} Our design is loosely based on Amazon's Dynamo, in that it
+			uses consistent-hashing to partition the key-value pairs among the 
+			different nodes. This will be described later, but we recommend that 
+			you read the paper, as it may give you ideas to solve some of the 
+			challenges you will find.
 			
-			\paragraph{}The service is expected be able to handle concurrent requests and to tolerate:
+			\paragraph{}The service is expected be able to handle concurrent requests 
+			and to tolerate:
 			        1 - node crashes,
 			        2 - message loss
-			        
 	
+	\chapter{Membership Service}
+	
+	        \paragraph{}
+	        
+	        \paragraph{}
+	
+	\chapter{Key-value Store}
+	
+	        \paragraph{}
+	        
+	        \paragraph{}
+	
+	\chapter{Replication}
+	
+	        \paragraph{}
+	        
+	        \paragraph{}
+
+	\chapter{Fault-Tolerance}
+	
+	        \paragraph{}
+	        
+	        \paragraph{}
+
+	\chapter{Thread-pools}
+	
+	        \paragraph{}
+	        
+	        \paragraph{}
+
+	\chapter{RMI}
+	
+	        \paragraph{}
+	        
+	        \paragraph{}
+
+	\chapter{Test Client}
+	
+	        \paragraph{}
+	        
+	        \paragraph{}
+
 	\chapter{Conclusions}
 	
 	        \paragraph{}This project allowed us to deeply understand some computer concepts related to store .
