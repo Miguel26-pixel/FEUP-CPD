@@ -34,7 +34,7 @@ public class MembershipMessage extends Message {
     protected void buildBody() {
         this.body.addAll(this.view.toBytes());
         this.body.add((byte)'|');
-        this.body.addAll(Log.toBytes());
+        this.body.addAll(this.view.getLog().toBytes());
     }
 
     public View getView() {

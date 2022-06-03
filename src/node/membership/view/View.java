@@ -8,6 +8,7 @@ import java.util.*;
 public class View {
     private final Map<String, ViewEntry> entries;
     private final Map<String, ViewEntry> upEntries;
+    private Log log;
 
     public View() {
         this.entries = new TreeMap<>();
@@ -39,6 +40,14 @@ public class View {
 
     public Map<String, ViewEntry> getUpEntries() {
         return upEntries;
+    }
+
+    public Log getLog() {
+        return log;
+    }
+
+    public void createLog(String folderPath) {
+        this.log = new Log(folderPath);
     }
 
     public List<Byte> toBytes() {
@@ -87,8 +96,8 @@ public class View {
     }
 
     public void addEntry(String key, ViewEntry viewEntry, boolean updateLog) {
-        if (addEntry(key, viewEntry) && updateLog) {
-            Log.update(this);
+        if (addEntry(key, viewEntry) && updateLog && this.log != null) {
+            this.log.update(this);
         }
     }
 

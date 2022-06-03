@@ -26,8 +26,8 @@ public class Node implements Services {
         int numberOfCores = Runtime.getRuntime().availableProcessors();
         this.workers = new ThreadPool(numberOfCores, numberOfCores);
         this.folderName = "node_" + nodeID + ":" + membershipPort + "/";
-        this.folderPath = "/dynamo/node_" + nodeID + ":" + membershipPort + "/";
-        this.membershipService = new MembershipService(nodeID, this.workers);
+        this.folderPath = "dynamo/node_" + nodeID + ":" + membershipPort + "/";
+        this.membershipService = new MembershipService(nodeID, folderPath, this.workers);
         this.keyValueStore = new KeyValueStore(this.folderName,
                 UtilsHash.hashSHA256(this.nodeID), this.workers, this.membershipService.getView());
 
@@ -69,7 +69,7 @@ public class Node implements Services {
     }
 
     private boolean createDirectory() {
-        File dynamoDir = new File(folderPath);
+        File dynamoDir = new File("./dynamo");
         if (!dynamoDir.exists() || !dynamoDir.isDirectory()) {
             boolean res = dynamoDir.mkdir();
             if(res) {
@@ -80,7 +80,7 @@ public class Node implements Services {
             }
         }
 
-        File nodeDir = new File(folderPath + folderName);
+        File nodeDir = new File(folderPath);
         if (!nodeDir.exists() || !nodeDir.isDirectory()) {
             boolean res = nodeDir.mkdir();
             if(res) {

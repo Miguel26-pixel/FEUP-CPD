@@ -32,11 +32,12 @@ public class MembershipService {
         return view;
     }
 
-    public MembershipService(String identifier, ThreadPool workers) {
+    public MembershipService(String identifier, String folderPath, ThreadPool workers) {
         this.identifier = identifier;
         this.workers = workers;
 
         this.view = new View();
+        this.view.createLog(folderPath);
         this.membershipCounter = 0;
         this.isLeader = new AtomicBoolean(false);
         this.membershipSender = Executors.newSingleThreadScheduledExecutor();
