@@ -54,9 +54,31 @@
 	
 	\chapter{Message Format}
 
-			\paragraph{}
+			\paragraph{} The communication is the most essential part of this project. The
+			distributed system need constant communication and data exchanges between nodes.
+			This communication does not work without a constant and reliable message format
+			to easily send and read information contained in every type of message.
+			
+			\paragraph{} All message types are composed of a header and a body:
 	        
-	        \paragraph{}
+	        \section{Header}
+	
+				\paragraph{} The header consists in a sequence of ASCII lines started and
+				terminated by special characters (CR: \emph{0xD}; LF: \emph{0xA}). Each
+				header line represents a message field and its value separated by a space.
+				There are a variaty of message fields that can be present in the header of
+				the message like the message type, indicating the operation associated to the
+				message (join, leave, put,get, delete), or indicating that it refeers to a 
+				membership message, as well the size of the contents to easily read all messages.
+			
+			\section{Body}
+	
+				\paragraph{} The body contains the data, or by another words, the
+				content of the message that is supposed to arrive at the destination point.
+				The content differs according to the different message types, it
+				can be a key to access and make operation in a stored value or a
+				file to store in a node, as also can be some node information like the address
+				and port, or the cluster view.
 
 	\chapter{Membership Service}
 			\emph{The message format is detailed described in the Chapter 2}
