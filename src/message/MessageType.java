@@ -4,6 +4,8 @@ public enum MessageType {
     JOIN,
     LEAVE,
     MEMBERSHIP,
+    LEADERSHIP,
+    COUP,
     PUT,
     PUT_REPLY,
     FORCE_PUT,

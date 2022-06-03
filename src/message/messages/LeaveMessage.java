@@ -22,7 +22,7 @@ public class LeaveMessage extends Message {
     }
 
     public LeaveMessage(String asString) {
-        super(MessageType.LEAVE);
+        super(asString);
 
         byte[] delim = new byte[]{CR,LF};
 
@@ -33,19 +33,7 @@ public class LeaveMessage extends Message {
         String body = split.get(split.size() - 1);
         split.remove(split.size() - 1);
 
-        int bodyLen = -1;
-
-        for (int i = 0; i < split.size(); i++) {
-            String[] field = split.get(i).split(" ");
-            if (MessageField.translateFieldHeader(field[0]) == FieldType.ORIGINID) {
-                String originId = field[1];
-
-                this.setOriginId(originId);
-            }
-            if (MessageField.translateFieldHeader(field[0]) == FieldType.BODYLENGHT) {
-                bodyLen = Integer.parseInt(field[1]);
-            }
-        }
+        int bodyLen = Integer.parseInt(this.getFieldValue(FieldType.BODYLENGHT));
 
         List<String> params = new ArrayList<>(List.of(body.split(" ")));
         this.counter = params.get(0).substring(0,bodyLen);

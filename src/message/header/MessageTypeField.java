@@ -18,6 +18,8 @@ public class MessageTypeField extends MessageField {
             case JOIN -> "join";
             case LEAVE -> "leave";
             case MEMBERSHIP -> "membership";
+            case LEADERSHIP -> "leadership";
+            case COUP -> "coup";
             case PUT -> "put";
             case PUT_REPLY -> "put_reply";
             case FORCE_PUT -> "force_put";
@@ -35,6 +37,8 @@ public class MessageTypeField extends MessageField {
             case "join" -> MessageType.JOIN;
             case "leave" -> MessageType.LEAVE;
             case "membership" -> MessageType.MEMBERSHIP;
+            case "leadership" -> MessageType.LEADERSHIP;
+            case "coup" -> MessageType.COUP;
             case "put" -> MessageType.PUT;
             case "put_reply" -> MessageType.PUT_REPLY;
             case "force_put" -> MessageType.FORCE_PUT;
@@ -54,5 +58,10 @@ public class MessageTypeField extends MessageField {
             field.add(b);
         }
         return field;
+    }
+
+    @Override
+    public String getValue() {
+        return this.translateType();
     }
 }
