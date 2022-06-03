@@ -1,0 +1,12 @@
+.idea/
+*.class
+dynamo.iml
+dynamo/
+clientFiles/
+src/dynamo.log
+doc/*.aux
+doc/*.log
+doc/*.pdf
+doc/*.synctex.gz
+doc/*.toc
+.vscode/
